@@ -11,6 +11,7 @@ connectDB();
 
 const vehicleRoutes = require("./src/routes/vehicleRoutes");
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/", vehicleRoutes);
 
 // normal routes later here
 
