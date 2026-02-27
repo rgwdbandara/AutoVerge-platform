@@ -1,10 +1,18 @@
-
-const { createClerkClient } = require("@clerk/backend");
-
-const clerkClient = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY,
+const User = require("../models/User");
+router.get("/me", clerkAuth, async (req, res) => {
+  const user = await User.findOne({ clerkId: req.user.sub });
+  res.json(user);
 });
+const authorizeRoles = require("../middleware/roleMiddleware");
 
+router.get(
+  "/admin-only",
+  clerkAuth,
+  authorizeRoles("admin"),
+  (req, res) => {
+    res.json({ message: "Admin access granted" });
+  }
+);
 const express = require("express");
 const router = express.Router();
 const clerkAuth = require("../middleware/authMiddleware");
@@ -16,18 +24,8 @@ router.get("/protected", clerkAuth, (req, res) => {
   });
 });
 
-router.get("/dev-token", async (req, res) => {
-  try {
-    const userId = "user_3AF958io0hBKUImkXYqf4o5310E"; 
+const { syncUser } = require("../controllers/userController");
 
-    const token = await clerkClient.sessions.createToken({
-      userId,
-    });
-
-    res.json({ token });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+router.post("/sync", clerkAuth, syncUser);
 
 module.exports = router;
