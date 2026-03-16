@@ -105,16 +105,23 @@ const Vehicle = require("../models/Vehicle");
 
 exports.createListing = async (req, res) => {
   try {
-    const sellerClerkId = req.user.sub; // from Clerk token
-
+    console.log("BODY RECEIVED:", req.body);
     const vehicle = await Vehicle.create({
-      ...req.body,
-      sellerClerkId,
+      sellerClerkId: "dev-user", // temporary until auth enabled
+      title: req.body.title || `${req.body.brand} ${req.body.model}`,
+      brand: req.body.brand,
+      model: req.body.model,
+      year: req.body.year,
+      price: req.body.price,
+      mileage: req.body.mileage,
+      fuelType: req.body.fuelType,
+      transmission: req.body.transmission,
+      description: req.body.description,
+      images: req.body.images || []
     });
-
     res.status(201).json(vehicle);
-
   } catch (error) {
+    console.error("CREATE ERROR:", error);
     res.status(500).json({ message: "Failed to create listing" });
   }
 };
