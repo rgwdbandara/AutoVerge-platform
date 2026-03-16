@@ -6,6 +6,9 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import CarDetails from "./pages/CarDetails";
 import BrowseCars from "./pages/BrowseCars";
+import SellerDashboard from "./pages/seller/SellerDashboard";
+import MyCars from "./pages/seller/MyCars";
+import AddCar from "./pages/seller/AddCar";
 
 function App() {
   return (
@@ -25,6 +28,9 @@ function App() {
                 <Route path="/create" element={<h1>Create Listing</h1>} />
                 <Route path="/dashboard" element={<h1>Dashboard</h1>} />
                 <Route path="/cars/:id" element={<CarDetails />} />
+                <Route path="/seller/dashboard" element={<SellerDashboard />} />
+                <Route path="/seller/cars" element={<MyCars />} />
+                <Route path="/seller/add-car" element={<AddCar />} />
               </Routes>
             </div>
           }
