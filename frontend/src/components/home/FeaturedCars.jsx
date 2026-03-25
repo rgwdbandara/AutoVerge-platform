@@ -13,14 +13,14 @@ function FeaturedCars() {
         const data = await api("/api/vehicles");
         setCars(data.slice(0, 6)); // show first 6
       } catch (err) {
-        console.error("Failed to load cars");
+        console.error("Failed to load cars", err);
       } finally {
         setLoading(false);
       }
     };
 
     loadCars();
-  }, []);
+  }, [api]);
 
   if (loading) {
     return <p className="py-10 text-center">Loading cars...</p>;
@@ -38,8 +38,8 @@ function FeaturedCars() {
         <div className="relative w-full overflow-hidden">
 
           <div className="flex gap-6 animate-scroll whitespace-nowrap">
-            {[...cars, ...cars].map((car, index) => (
-              <div key={index} className="min-w-[320px]">
+            {cars.map((car) => (
+              <div key={car._id} className="min-w-[320px]">
                 <CarCard car={car} />
               </div>
             ))}
