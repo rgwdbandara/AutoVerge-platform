@@ -2,32 +2,33 @@
 import SellerSidebar from "../../components/seller/SellerSidebar";
 import SellerHeader from "../../components/seller/SellerHeader";
 import CarRow from "../../components/seller/CarRow";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useApi } from "../../lib/api";
 
 
 function MyCars() {
-  const [cars] = useState([
-    {
-      id:1,
-      image:"https://cdn.motor1.com/images/mgl/Bx6p0/s1/range-rover.jpg",
-      make:"Land Rover",
-      model:"Range Rover",
-      year:2023,
-      price:150000,
-      status:"Available",
-      featured:false
-    },
-    {
-      id:2,
-      image:"https://imgd.aeplcdn.com/664x374/n/cw/ec/124839/thar-exterior-right-front-three-quarter.jpeg",
-      make:"Mahindra",
-      model:"Thar",
-      year:2023,
-      price:25000,
-      status:"Available",
-      featured:false
-    }
-  ]);
+  const api = useApi();
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        const data = await api("/api/vehicles");
+        setCars(data);
+      } catch (error) {
+        console.error("Failed to fetch cars:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCars();
+  }, [api]);
+
+  if (loading) {
+    return <p className="p-6">Loading cars...</p>;
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-100">

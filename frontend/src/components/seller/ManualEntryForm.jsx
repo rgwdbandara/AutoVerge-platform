@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useApi } from "../../lib/api";
+import { uploadToCloudinary } from "../../lib/cloudinary";
 
 function ManualEntryForm() {
   const api = useApi();
-
 
   const [form, setForm] = useState({
     make: "",
@@ -21,36 +21,80 @@ function ManualEntryForm() {
     featured: false
   });
 
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [uploading, setUploading] = useState(false);
+
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked } = e
+    .target;
     setForm({
       ...form,
       [name]: type === "checkbox" ? checked : value
     });
   };
 
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setSelectedImages(files);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("SUBMIT CLICKED", form);
+
     try {
+      setUploading(true);
+
+      const uploadedImageUrls = [];
+
+      for (const file of selectedImages) {
+        const imageUrl = await uploadToCloudinary(file);
+        uploadedImageUrls.push(imageUrl);
+      }
+
+      const payload = {
+        title: `${form.make} ${form.model}`.trim(),
+        brand: form.make,
+        model: form.model,
+        year: Number(form.year) || 0,
+        price: Number(form.price) || 0,
+        mileage: Number(form.mileage) || 0,
+        fuelType: form.fuelType,
+        transmission: form.transmission,
+        description: form.description,
+        images: uploadedImageUrls,
+      };
+
+      console.log("FINAL PAYLOAD:", payload);
+
       await api("/api/vehicles", {
         method: "POST",
-        body: JSON.stringify({
-          title: `${form.make} ${form.model}`,
-          brand: form.make,
-          model: form.model,
-          year: Number(form.year) || 0,
-          price: Number(form.price) || 0,
-          mileage: Number(form.mileage) || 0,
-          fuelType: form.fuelType,
-          transmission: form.transmission,
-          description: form.description
-        })
+        body: JSON.stringify(payload),
       });
+
       alert("Car added successfully!");
+
+      setForm({
+        make: "",
+        model: "",
+        year: "",
+        price: "",
+        mileage: "",
+        color: "",
+        fuelType: "",
+        transmission: "",
+        bodyType: "",
+        seats: "",
+        status: "Available",
+        description: "",
+        featured: false,
+      });
+
+      setSelectedImages([]);
     } catch (err) {
       console.error(err);
       alert("Failed to add car");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -178,15 +222,37 @@ function ManualEntryForm() {
           </span>
         </div>
         {/* Image Upload */}
-        <div className="p-10 mt-4 text-center border-2 border-dashed">
-          Drag & drop or click to upload images
+        <div className="mt-4">
+          <label className="block mb-2 font-medium">Images</label>
+
+          <div className="p-6 text-center border-2 border-dashed rounded">
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleImageChange}
+              className="mb-3"
+            />
+
+            <p>Drag & drop or click to upload images</p>
+            <p className="mt-1 text-sm text-gray-500">
+              JPG, PNG, WEBP up to 5MB
+            </p>
+          </div>
+
+          {selectedImages.length > 0 && (
+            <div className="mt-3 text-sm text-gray-600">
+              {selectedImages.length} image(s) selected
+            </div>
+          )}
         </div>
         {/* Submit */}
         <button
           type="submit"
-          className="px-6 py-2 text-white bg-black rounded"
+          disabled={uploading}
+          className="px-6 py-2 text-white bg-black rounded disabled:opacity-50"
         >
-          Add Car
+          {uploading ? "Uploading..." : "Add Car"}
         </button>
       </form>
 
