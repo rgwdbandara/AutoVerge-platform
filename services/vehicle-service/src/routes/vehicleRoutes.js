@@ -13,7 +13,7 @@ const {
 } = require("../controllers/vehicleController");
 
 // Create listing (seller only)
-router.post("/", createListing);
+router.post("/", clerkAuth, createListing);
 
 // public browse
 router.get("/", getAllListings);
