@@ -1,0 +1,28 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.dotted-background {
+	background-color: #16223c;
+	background-image: radial-gradient(
+		rgba(255, 255, 255, 0.28) 1px,
+		transparent 1px
+	);
+	background-size: 30px 30px;
+}
+
+@keyframes scrollLeft {
+	0% {
+		transform: translateX(0);
+	}
+	100% {
+		transform: translateX(-50%);
+	}
+}
+
+.animate-scroll {
+	display: flex;
+	width: max-content;
+	animation: scrollLeft 25s linear infinite;
+}
