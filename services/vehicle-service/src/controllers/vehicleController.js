@@ -106,8 +106,9 @@ const Vehicle = require("../models/Vehicle");
 exports.createListing = async (req, res) => {
   try {
     console.log("BODY RECEIVED:", req.body);
+
     const vehicle = await Vehicle.create({
-      sellerClerkId: "dev-user", // temporary until auth enabled
+      sellerClerkId: "dev-user",
       title: req.body.title || `${req.body.brand} ${req.body.model}`,
       brand: req.body.brand,
       model: req.body.model,
@@ -117,8 +118,9 @@ exports.createListing = async (req, res) => {
       fuelType: req.body.fuelType,
       transmission: req.body.transmission,
       description: req.body.description,
-      images: req.body.images || []
+      images: req.body.images || [],
     });
+
     res.status(201).json(vehicle);
   } catch (error) {
     console.error("CREATE ERROR:", error);
