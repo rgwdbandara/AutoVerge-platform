@@ -6,11 +6,12 @@ function CarRow({ car }) {
     <tr className="border-b hover:bg-gray-50">
       <td className="flex items-center gap-3 p-4">
         <img
-          src={car.image}
+          src={car.images?.[0] || "https://via.placeholder.com/80"}
           className="object-cover w-12 h-12 rounded"
+          alt={`${car.brand} ${car.model}`}
         />
         <span>
-          {car.make} {car.model}
+          {car.brand} {car.model}
         </span>
       </td>
       <td>{car.year}</td>
