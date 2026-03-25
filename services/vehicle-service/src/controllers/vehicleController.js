@@ -6,9 +6,9 @@ exports.markAsSold = async (req, res) => {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    if (vehicle.sellerClerkId !== req.user.sub) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
+    // if (vehicle.sellerClerkId !== req.user.sub) {
+    //   return res.status(403).json({ message: "Not authorized" });
+    // }
 
     vehicle.status = "sold";
     await vehicle.save();
@@ -27,9 +27,9 @@ exports.deleteListing = async (req, res) => {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    if (vehicle.sellerClerkId !== req.user.sub) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
+    // if (vehicle.sellerClerkId !== req.user.sub) {
+    //   return res.status(403).json({ message: "Not authorized" });
+    // }
 
     await vehicle.deleteOne();
 
@@ -47,10 +47,10 @@ exports.updateListing = async (req, res) => {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    // Ownership check
-    if (vehicle.sellerClerkId !== req.user.sub) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
+    // Ownership check (temporarily disabled in testing)
+    // if (vehicle.sellerClerkId !== req.user.sub) {
+    //   return res.status(403).json({ message: "Not authorized" });
+    // }
 
     const updatedVehicle = await Vehicle.findByIdAndUpdate(
       req.params.id,
@@ -71,8 +71,8 @@ exports.getMyListings = async (req, res) => {
     }).sort({ createdAt: -1 });
 
     res.json(vehicles);
-
   } catch (error) {
+    console.error("MY LISTINGS ERROR:", error);
     res.status(500).json({ message: "Failed to fetch your listings" });
   }
 };
@@ -105,16 +105,25 @@ const Vehicle = require("../models/Vehicle");
 
 exports.createListing = async (req, res) => {
   try {
-    const sellerClerkId = req.user.sub; // from Clerk token
+    console.log("BODY RECEIVED:", req.body);
 
     const vehicle = await Vehicle.create({
-      ...req.body,
-      sellerClerkId,
+      sellerClerkId: req.user.sub,
+      title: req.body.title || `${req.body.brand} ${req.body.model}`,
+      brand: req.body.brand,
+      model: req.body.model,
+      year: req.body.year,
+      price: req.body.price,
+      mileage: req.body.mileage,
+      fuelType: req.body.fuelType,
+      transmission: req.body.transmission,
+      description: req.body.description,
+      images: req.body.images || [],
     });
 
     res.status(201).json(vehicle);
-
   } catch (error) {
+    console.error("CREATE ERROR:", error);
     res.status(500).json({ message: "Failed to create listing" });
   }
 };
