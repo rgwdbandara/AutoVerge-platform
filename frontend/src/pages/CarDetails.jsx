@@ -13,7 +13,7 @@ function CarDetails() {
       setCar(data);
     };
     loadCar();
-  }, [id]);
+  }, [id, api]);
 
   if (!car) return <p className="p-10">Loading...</p>;
 
