@@ -9,6 +9,7 @@ import BrowseCars from "./pages/BrowseCars";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 import MyCars from "./pages/seller/MyCars";
 import AddCar from "./pages/seller/AddCar";
+import EditCar from "./pages/seller/EditCar";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/seller/dashboard" element={<SellerDashboard />} />
                 <Route path="/seller/cars" element={<MyCars />} />
                 <Route path="/seller/add-car" element={<AddCar />} />
+                <Route path="/seller/edit-car/:id" element={<EditCar />} />
               </Routes>
             </div>
           }

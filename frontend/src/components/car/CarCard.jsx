@@ -14,7 +14,7 @@ function CarCard({ car }) {
         <div className="p-4">
           <h3 className="text-lg font-bold">{car.title}</h3>
           <p className="text-lg font-semibold text-blue-600">
-            LKR {car.price?.toLocaleString()}
+            LKR {Number(car.price || 0).toLocaleString()}
           </p>
 
           <div className="flex gap-3 mt-2 text-sm text-gray-500">
