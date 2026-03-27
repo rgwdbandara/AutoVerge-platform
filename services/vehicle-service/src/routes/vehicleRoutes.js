@@ -19,7 +19,7 @@ router.post("/", createListing);
 router.get("/", getAllListings);
 
 // seller dashboard
-router.get("/my", clerkAuth, getMyListings);
+router.get("/my", getMyListings);
 
 
 // update listing
