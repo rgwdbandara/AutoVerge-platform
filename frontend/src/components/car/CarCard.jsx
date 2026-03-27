@@ -1,12 +1,17 @@
 import { Link } from "react-router-dom";
 
 function CarCard({ car }) {
+  const firstImage =
+    typeof car.images?.[0] === "string"
+      ? car.images?.[0]
+      : car.images?.[0]?.url;
+
   return (
     <Link to={`/cars/${car._id}`}>
       <div className="overflow-hidden transition bg-white shadow cursor-pointer rounded-xl hover:shadow-lg">
         {/* Image */}
         <img
-          src={car.images?.[0] || "https://via.placeholder.com/400"}
+          src={firstImage || "https://via.placeholder.com/400"}
           className="object-cover w-full h-52"
         />
 

@@ -1,24 +1,19 @@
 const stabilityCheck = (vehicleData, oldVehicle) => {
-  // new listing (no previous data)
   if (!oldVehicle) {
     return {
-      level: "Strong",
-      score: 3,
-      reason: "New listing with no changes",
+      level: "Moderate",
+      score: 2,
+      reason: "New listing submitted",
     };
   }
 
   let changes = 0;
 
-  // check price change
-  if (vehicleData.price !== oldVehicle.price) {
-    changes++;
-  }
-
-  // check images change
+  if (vehicleData.price !== oldVehicle.price) changes++;
+  if (vehicleData.mileage !== oldVehicle.mileage) changes++;
   if (
-    JSON.stringify(vehicleData.images) !==
-    JSON.stringify(oldVehicle.images)
+    JSON.stringify(vehicleData.images || []) !==
+    JSON.stringify(oldVehicle.images || [])
   ) {
     changes++;
   }

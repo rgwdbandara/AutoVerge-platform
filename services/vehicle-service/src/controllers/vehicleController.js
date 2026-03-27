@@ -60,7 +60,6 @@ exports.updateListing = async (req, res) => {
       req.params.id,
       {
         ...updatedData,
-        autoTrustScore: autoTrustResult.score,
         autoTrustGrade: autoTrustResult.grade,
         trustLevel: autoTrustResult.trustLevel,
         autoTrustCheckResults: autoTrustResult.checks,
@@ -76,8 +75,10 @@ exports.updateListing = async (req, res) => {
 };
 exports.getMyListings = async (req, res) => {
   try {
+    const sellerId = req.user?.sub || "test-seller-001";
+
     const vehicles = await Vehicle.find({
-      sellerClerkId: req.user.sub,
+      sellerClerkId: sellerId,
     }).sort({ createdAt: -1 });
 
     res.json(vehicles);
@@ -124,12 +125,17 @@ exports.createListing = async (req, res) => {
       year: req.body.year,
       price: req.body.price,
       mileage: req.body.mileage,
+      color: req.body.color,
+      bodyType: req.body.bodyType,
+      seats: req.body.seats,
       fuelType: req.body.fuelType,
       transmission: req.body.transmission,
       description: req.body.description,
       condition: req.body.condition,
       accidentHistory: req.body.accidentHistory,
       serviceHistory: req.body.serviceHistory,
+      previousOwners: req.body.previousOwners,
+      extraFeatures: req.body.extraFeatures,
       images: req.body.images || [],
     };
 
@@ -137,7 +143,6 @@ exports.createListing = async (req, res) => {
 
     const vehicle = await Vehicle.create({
       ...vehicleData,
-      autoTrustScore: autoTrustResult.score,
       autoTrustGrade: autoTrustResult.grade,
       trustLevel: autoTrustResult.trustLevel,
       autoTrustCheckResults: autoTrustResult.checks,
