@@ -2,13 +2,20 @@ const fs = require("fs");
 const path = require("path");
 
 const usageCheck = async (vehicleData) => {
-  const filePath = path.join(__dirname, "../dataset/used_cars_dataset.csv");
-
-  const file = fs.readFileSync(filePath, "utf-8");
-  const rows = file.split("\n").slice(1);
-
   const year = parseInt(vehicleData.year);
   const mileage = parseInt(vehicleData.mileage);
+
+  if (!year || !mileage) {
+    return {
+      level: "Weak",
+      score: 1,
+      reason: "Year or mileage is missing",
+    };
+  }
+
+  const filePath = path.join(__dirname, "../dataset/used_cars_dataset.csv");
+  const file = fs.readFileSync(filePath, "utf-8");
+  const rows = file.split("\n").slice(1);
 
   let totalMileage = 0;
   let count = 0;
@@ -16,8 +23,8 @@ const usageCheck = async (vehicleData) => {
   rows.forEach((row) => {
     const cols = row.split(",");
 
-    const rowYear = parseInt(cols[9]);     // manufacturing_year
-    const rowMileage = parseInt(cols[6]);  // kms_driven
+    const rowYear = parseInt(cols[9]);
+    const rowMileage = parseInt(cols[6]);
 
     if (!isNaN(rowYear) && !isNaN(rowMileage)) {
       if (Math.abs(rowYear - year) <= 1) {
@@ -29,27 +36,27 @@ const usageCheck = async (vehicleData) => {
 
   if (count === 0) {
     return {
-      level: "Moderate",
-      score: 2,
-      reason: "Insufficient data for usage comparison",
+      level: "Weak",
+      score: 1,
+      reason: "Insufficient market data for usage comparison",
     };
   }
 
   const avgMileage = totalMileage / count;
 
-  if (mileage < avgMileage * 0.6) {
+  if (mileage < avgMileage * 0.6 || mileage > avgMileage * 1.4) {
     return {
       level: "Weak",
       score: 1,
-      reason: "Mileage is significantly lower than expected",
+      reason: "Mileage appears unusual for vehicle age",
     };
   }
 
-  if (mileage > avgMileage * 1.4) {
+  if (mileage < avgMileage * 0.8 || mileage > avgMileage * 1.2) {
     return {
-      level: "Weak",
-      score: 1,
-      reason: "Mileage is significantly higher than expected",
+      level: "Moderate",
+      score: 2,
+      reason: "Mileage is slightly outside the typical range",
     };
   }
 

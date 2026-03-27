@@ -24,6 +24,9 @@ const vehicleSchema = new mongoose.Schema(
     model: String,
     year: Number,
     mileage: Number,
+    color: String,
+    bodyType: String,
+    seats: Number,
     fuelType: String,
     transmission: String,
 
@@ -31,11 +34,17 @@ const vehicleSchema = new mongoose.Schema(
     condition: String,
     accidentHistory: Boolean,
     serviceHistory: String,
+    previousOwners: Number,
+    extraFeatures: String,
 
     // 🔹 Images
-    images: [String],
+    images: [
+      {
+        url: String,
+        tag: String,
+      },
+    ],
 
-    autoTrustScore: Number,
     autoTrustGrade: String,
     trustLevel: String,
     autoTrustCheckResults: Object,
