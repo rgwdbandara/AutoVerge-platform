@@ -35,6 +35,11 @@ const vehicleSchema = new mongoose.Schema(
     // 🔹 Images
     images: [String],
 
+    autoTrustScore: Number,
+    autoTrustGrade: String,
+    trustLevel: String,
+    autoTrustCheckResults: Object,
+
     // 🔹 Listing status
     status: {
       type: String,
