@@ -13,7 +13,7 @@ const {
 } = require("../controllers/vehicleController");
 
 // Create listing (seller only)
-router.post("/", clerkAuth, createListing);
+router.post("/", createListing);
 
 // public browse
 router.get("/", getAllListings);
@@ -23,7 +23,7 @@ router.get("/my", clerkAuth, getMyListings);
 
 
 // update listing
-router.put("/:id", clerkAuth, updateListing);
+router.put("/:id", updateListing);
 
 // delete listing
 router.delete("/:id", clerkAuth, deleteListing);

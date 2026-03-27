@@ -1,3 +1,6 @@
+const Vehicle = require("../models/Vehicle");
+const evaluateAutoTrust = require("../../autotrust");
+
 exports.markAsSold = async (req, res) => {
   try {
     const vehicle = await Vehicle.findById(req.params.id);
@@ -41,26 +44,33 @@ exports.deleteListing = async (req, res) => {
 };
 exports.updateListing = async (req, res) => {
   try {
-    const vehicle = await Vehicle.findById(req.params.id);
+    const oldVehicle = await Vehicle.findById(req.params.id);
 
-    if (!vehicle) {
+    if (!oldVehicle) {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    // Ownership check (temporarily disabled in testing)
-    // if (vehicle.sellerClerkId !== req.user.sub) {
-    //   return res.status(403).json({ message: "Not authorized" });
-    // }
+    const updatedData = {
+      ...req.body,
+    };
+
+    const autoTrustResult = await evaluateAutoTrust(updatedData, oldVehicle);
 
     const updatedVehicle = await Vehicle.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      {
+        ...updatedData,
+        autoTrustScore: autoTrustResult.score,
+        autoTrustGrade: autoTrustResult.grade,
+        trustLevel: autoTrustResult.trustLevel,
+        autoTrustCheckResults: autoTrustResult.checks,
+      },
       { new: true }
     );
 
     res.json(updatedVehicle);
-
   } catch (error) {
+    console.error("UPDATE ERROR:", error);
     res.status(500).json({ message: "Failed to update listing" });
   }
 };
@@ -101,14 +111,13 @@ exports.getAllListings = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch listings" });
   }
 };
-const Vehicle = require("../models/Vehicle");
 
 exports.createListing = async (req, res) => {
   try {
     console.log("BODY RECEIVED:", req.body);
 
-    const vehicle = await Vehicle.create({
-      sellerClerkId: req.user.sub,
+    const vehicleData = {
+      sellerClerkId: req.user?.sub || "test-seller-001",
       title: req.body.title || `${req.body.brand} ${req.body.model}`,
       brand: req.body.brand,
       model: req.body.model,
@@ -118,7 +127,20 @@ exports.createListing = async (req, res) => {
       fuelType: req.body.fuelType,
       transmission: req.body.transmission,
       description: req.body.description,
+      condition: req.body.condition,
+      accidentHistory: req.body.accidentHistory,
+      serviceHistory: req.body.serviceHistory,
       images: req.body.images || [],
+    };
+
+    const autoTrustResult = await evaluateAutoTrust(vehicleData);
+
+    const vehicle = await Vehicle.create({
+      ...vehicleData,
+      autoTrustScore: autoTrustResult.score,
+      autoTrustGrade: autoTrustResult.grade,
+      trustLevel: autoTrustResult.trustLevel,
+      autoTrustCheckResults: autoTrustResult.checks,
     });
 
     res.status(201).json(vehicle);
