@@ -6,6 +6,10 @@ function CarRow({ car, onRefresh }) {
   const [open, setOpen] = useState(false);
   const api = useApi();
   const menuRef = useRef(null);
+  const firstImage =
+    typeof car.images?.[0] === "string"
+      ? car.images?.[0]
+      : car.images?.[0]?.url;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -91,7 +95,7 @@ function CarRow({ car, onRefresh }) {
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
           <img
-            src={car.images?.[0] || "https://via.placeholder.com/80"}
+            src={firstImage || "https://via.placeholder.com/80"}
             alt={`${car.brand} ${car.model}`}
             className="object-cover w-10 h-10 rounded-lg"
           />
