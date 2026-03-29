@@ -42,6 +42,7 @@ const vehicleSchema = new mongoose.Schema(
       {
         url: String,
         tag: String,
+        embedding: [Number],
       },
     ],
 
