@@ -4,7 +4,8 @@ const searchVehiclesByImage = require("../imageSearch/searchByImage");
 const prepareImageForSearch = require("../imageSearch/prepareImageForSearch");
 const extractFeaturesFromCNNService = require("../imageSearch/cnnClient");
 const generateImageEmbeddings = require("../imageSearch/generateImageEmbeddings");
-const extractFeaturesFromImageUrl = require("../imageSearch/extractFeaturesFromUrl");
+const detectViewTypeFromFile = require("../imageSearch/detectViewTypeFromFile");
+const analyzeImageMetaFromFile = require("../imageSearch/analyzeImageMetaFromFile");
 
 exports.markAsSold = async (req, res) => {
   try {
@@ -177,23 +178,40 @@ exports.searchByImage = async (req, res) => {
 
     const preparedImage = await prepareImageForSearch(req.file);
 
-    // send uploaded image to Python CNN service
     const cnnResponse = await extractFeaturesFromCNNService(req.file);
+    const metaResponse = await analyzeImageMetaFromFile(req.file);
 
-    // real similarity matching with stored vehicle listing images
-    const matches = await searchVehiclesByImage(cnnResponse.feature_vector);
+    const queryViewType = metaResponse.view_type || "unknown";
+    const queryIsExterior =
+      typeof metaResponse.is_exterior === "boolean"
+        ? metaResponse.is_exterior
+        : true;
+    const queryBodyTypeHint = "unknown";
+
+    const matches = await searchVehiclesByImage(
+      cnnResponse.feature_vector,
+      queryViewType,
+      queryIsExterior,
+      queryBodyTypeHint
+    );
 
     res.status(200).json({
-      message: "Image search processed successfully",
+      message: "Similar vehicles found successfully",
       uploadedImage: {
         originalName: preparedImage.originalName,
         mimeType: preparedImage.mimeType,
         size: preparedImage.size,
       },
+      queryAnalysis: {
+        detectedViewType: queryViewType,
+        isExterior: queryIsExterior,
+        bodyTypeHint: queryBodyTypeHint,
+      },
       cnn: {
         filename: cnnResponse.filename,
         contentType: cnnResponse.content_type,
         featureLength: cnnResponse.feature_length,
+        cropStrategy: cnnResponse.crop_strategy,
         featureVectorPreview: cnnResponse.feature_vector_preview,
       },
       totalMatches: matches.length,
