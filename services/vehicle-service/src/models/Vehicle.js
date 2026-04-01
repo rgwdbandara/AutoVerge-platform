@@ -42,6 +42,21 @@ const vehicleSchema = new mongoose.Schema(
       {
         url: String,
         tag: String,
+        viewType: {
+          type: String,
+          enum: ["front", "rear", "side", "angled", "interior", "unknown"],
+          default: "unknown",
+        },
+        isExterior: {
+          type: Boolean,
+          default: true,
+        },
+        bodyTypeHint: {
+          type: String,
+          enum: ["sedan", "hatchback", "suv", "van", "pickup", "unknown"],
+          default: "unknown",
+        },
+        embedding: [Number],
       },
     ],
 
