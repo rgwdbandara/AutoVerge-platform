@@ -3,6 +3,7 @@ const router = express.Router();
 
 const clerkAuth = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
+const { calculateEMI } = require("../controllers/emiController");
 const {
   createListing,
   getAllListings,
@@ -16,6 +17,8 @@ const {
 
 // image-based search
 router.post("/search-by-image", upload.single("image"), searchByImage);
+
+router.post("/calculate-emi", calculateEMI);
 
 // Create listing (seller only)
 router.post("/", createListing);
