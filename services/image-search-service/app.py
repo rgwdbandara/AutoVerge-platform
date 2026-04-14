@@ -15,7 +15,7 @@ CORS(app)
 # ---------------------------------------------------
 # Load pre-trained CNN model
 # ---------------------------------------------------
-MODEL_NAME = "resnet50"   # change to "resnet18" or "resnet50"
+MODEL_NAME = "resnet50"  
 
 def load_feature_extractor(model_name):
     if model_name == "resnet18":
