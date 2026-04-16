@@ -1,6 +1,7 @@
-import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useApi } from "../lib/api";
+import EMIModal from "../components/finance/EMIModal";
 
 const getGradeColor = (grade) => {
   if (grade === "A") return "bg-green-100 text-green-700";
@@ -15,11 +16,29 @@ const getTrustColor = (trust) => {
   return "bg-red-100 text-red-700";
 };
 
+const calculateQuickEMI = (price) => {
+  const P = Number(price);
+  const r = 4.5 / 12 / 100;
+  const n = 60;
+
+  if (!P) return 0;
+
+  return Math.round(
+    (P * r * Math.pow(1 + r, n)) /
+    (Math.pow(1 + r, n) - 1)
+  );
+};
+
+const formatLKR = (value) => {
+  return new Intl.NumberFormat("en-LK").format(value);
+};
+
 function CarDetails() {
   const { id } = useParams();
   const api = useApi();
   const [car, setCar] = useState(null);
   const [activeImage, setActiveImage] = useState("");
+  const [showEMI, setShowEMI] = useState(false);
   const fallbackImage = "https://via.placeholder.com/800x500";
 
   useEffect(() => {
@@ -33,6 +52,8 @@ function CarDetails() {
   }, [id, api]);
 
   if (!car) return <p className="p-10">Loading...</p>;
+
+  const emi = calculateQuickEMI(car.price);
 
   return (
     <div className="min-h-screen bg-white">
@@ -102,18 +123,33 @@ function CarDetails() {
               </div>
             </div>
 
-            {/* EMI Card */}
-            <div className="p-5 mt-6 border rounded-2xl">
-              <h2 className="text-2xl font-semibold">EMI Calculator</h2>
-              <p className="mt-3 text-gray-600">
-                Estimated Monthly Payment:
-                <span className="ml-2 font-bold text-black">LKR 45,000</span>
-                {" "}for 60 months
+            <div
+              onClick={() => setShowEMI(true)}
+              className="p-6 mt-6 transition border border-gray-200 cursor-pointer rounded-2xl bg-gray-50 hover:shadow-md"
+            >
+              <h3 className="text-xl font-semibold text-gray-900">
+                💠 EMI Calculator
+              </h3>
+
+              <p className="mt-3 text-lg text-gray-700">
+                Estimated Monthly Payment:{" "}
+                <span className="font-bold text-black">
+                  LKR {formatLKR(emi)}
+                </span>{" "}
+                for 60 months
               </p>
-              <p className="mt-1 text-sm text-gray-500">
-                *Sample calculation only
+
+              <p className="mt-2 text-sm text-gray-500">
+                *Based on 4.5% estimated interest
               </p>
             </div>
+
+            {showEMI && (
+              <EMIModal
+                price={car.price}
+                onClose={() => setShowEMI(false)}
+              />
+            )}
 
             {/* Contact Card */}
             <div className="p-5 mt-5 border rounded-2xl">
