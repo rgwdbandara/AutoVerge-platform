@@ -18,6 +18,20 @@ const vehicleSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    interestRate: {
+      type: Number,
+      default: 4.5,
+    },
+
+    loanTerm: {
+      type: Number,
+      default: 60,
+    },
+
+    downPayment: {
+      type: Number,
+      default: 0,
+    },
 
     // 🔹 Vehicle details
     brand: String,
