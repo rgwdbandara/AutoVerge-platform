@@ -7,13 +7,6 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 const app = express();
 
 app.use(cors());
-app.use(express.json());
-
-/* ---------- HEALTH CHECK ---------- */
-
-app.get("/", (req, res) => {
-  res.send("API Gateway is running 🚀");
-});
 
 /* ---------- AUTH SERVICE ---------- */
 
@@ -41,6 +34,16 @@ app.use(
   "/api/vehicles",
   createProxyMiddleware({
     target: "http://localhost:5003",
+    changeOrigin: true,
+  })
+);
+
+/* ---------- PRICE SERVICE (FIX 🔥) ---------- */
+
+app.use(
+  "/api/price",
+  createProxyMiddleware({
+    target: "http://localhost:5004",
     changeOrigin: true,
   })
 );
