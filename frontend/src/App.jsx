@@ -10,7 +10,6 @@ import SellerDashboard from "./pages/seller/SellerDashboard";
 import MyCars from "./pages/seller/MyCars";
 import AddCar from "./pages/seller/AddCar";
 import EditCar from "./pages/seller/EditCar";
-import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -39,8 +38,6 @@ function App() {
           }
         />
       </Routes>
-
-      <Footer />
 
     </BrowserRouter>
   );
