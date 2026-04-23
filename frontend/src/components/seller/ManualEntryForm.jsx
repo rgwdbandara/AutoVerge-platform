@@ -246,7 +246,6 @@ function ManualEntryForm() {
             <option value="SUV">SUV</option>
             <option value="Sedan">Sedan</option>
             <option value="Hatchback">Hatchback</option>
-            <option value="Pickup">Pickup</option>
           </select>
           <input
             name="seats"
@@ -262,9 +261,9 @@ function ManualEntryForm() {
             className="p-2 border rounded"
           >
             <option value="">Condition</option>
-            <option value="Brand New">Brand New</option>
-            <option value="Used">Used</option>
-            
+            <option value="Excellent">Excellent</option>
+            <option value="Good">Good</option>
+            <option value="Fair">Fair</option>
           </select>
           <select
             name="serviceHistory"

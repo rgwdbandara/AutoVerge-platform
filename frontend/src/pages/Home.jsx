@@ -1,13 +1,13 @@
 import Hero from "../components/Hero";
 import FeaturedCars from "../components/home/FeaturedCars";
-import HomeHighlights from "../components/home/HomeHighlights";
+import BrowseByMake from "../components/home/BrowseByMake";
 
 function Home() {
   return (
     <>
       <Hero />
       <FeaturedCars />
-      <HomeHighlights />
+      <BrowseByMake />
     </>
   );
 }
