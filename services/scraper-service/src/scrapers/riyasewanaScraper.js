@@ -3,18 +3,17 @@ const Listing = require("../models/Listing");
 
 const scrapeRiyasewana = async () => {
   try {
-    console.log("🔄 Scraping Riyasewana with Puppeteer...");
+    console.log("🔄 Scraping Riyasewana...");
 
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
 
-
-
     await page.goto("https://riyasewana.com/search/cars", {
       waitUntil: "networkidle2",
     });
+
     await page.waitForSelector(".v-list");
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise((r) => setTimeout(r, 3000));
 
     const listings = await page.evaluate(() => {
       const data = [];
@@ -27,13 +26,15 @@ const scrapeRiyasewana = async () => {
         const priceText =
           el.querySelector(".v-card-price")?.innerText.trim() || "";
 
-        const year =
+        const yearText =
           el.querySelector(".v-card-year")?.innerText.trim() || "";
 
         const meta =
           el.querySelector(".v-card-meta")?.innerText.trim() || "";
 
         const price = Number(priceText.replace(/[^0-9]/g, ""));
+
+        const year = Number(yearText.replace(/[^0-9]/g, "")); // ✅ FIXED
 
         if (price) {
           data.push({
@@ -52,17 +53,15 @@ const scrapeRiyasewana = async () => {
     console.log(`Found ${listings.length} listings`);
 
     for (const item of listings) {
-      // Extract brand and model from title
       const words = item.title.split(" ");
       const brand = words[0] || "";
       const model = words[1] || "";
 
-      // Extract mileage from meta
       let mileage = null;
       if (item.meta) {
-        const mileageMatch = item.meta.match(/[\d,]+ km/);
-        mileage = mileageMatch
-          ? Number(mileageMatch[0].replace(/[^0-9]/g, ""))
+        const match = item.meta.match(/[\d,]+ km/);
+        mileage = match
+          ? Number(match[0].replace(/[^0-9]/g, ""))
           : null;
       }
 
@@ -71,16 +70,21 @@ const scrapeRiyasewana = async () => {
         price: item.price,
         year: item.year,
       });
+
       if (!exists) {
-        await Listing.create({ ...item, brand, model, mileage });
+        await Listing.create({
+          ...item,
+          brand,
+          model,
+          mileage,
+        });
       }
     }
 
     await browser.close();
-
-    console.log("✅ Riyasewana data saved");
-  } catch (error) {
-    console.error("Scraping error ❌", error.message);
+    console.log("✅ Scraping done");
+  } catch (err) {
+    console.error("❌ Scraping error:", err.message);
   }
 };
 
