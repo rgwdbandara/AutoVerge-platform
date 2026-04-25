@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useApi } from "../../lib/api";
 
 const formatLKR = (value) => {
@@ -17,23 +17,18 @@ function PriceEstimateCard({ car }) {
 
   const [priceData, setPriceData] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  // 🔥 IMPORTANT: prevent duplicate calls
-  const hasFetched = useRef(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     if (!car) return;
 
-    // 🔥 STOP duplicate calls
-    if (hasFetched.current) return;
-    hasFetched.current = true;
-
     const fetchPriceEstimate = async () => {
       try {
         setLoading(true);
+        setErrorMsg("");
 
         const payload = {
-          brand: car.brand,
+          brand: car.brand || car.title?.split(" ")[0],
           model: car.model || extractModel(car.title),
           year: car.year,
           mileage: car.mileage,
@@ -51,14 +46,15 @@ function PriceEstimateCard({ car }) {
 
         setPriceData(result);
       } catch (error) {
-        console.error("Price estimate error:", error);
+        console.error("❌ Price estimate error:", error);
+        setErrorMsg("Could not load market price estimate.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchPriceEstimate();
-  }, [car, api]);
+  }, [car?._id]); // ✅ ONLY run once per car (fix repeat issue)
 
   return (
     <div className="p-6 mt-6 border border-gray-200 rounded-2xl bg-gray-50">
@@ -66,22 +62,41 @@ function PriceEstimateCard({ car }) {
         💰 Market Price Estimate
       </h3>
 
+      {/* LOADING */}
       {loading && (
-        <p className="mt-3 text-gray-600">Fetching market data...</p>
+        <p className="mt-3 text-gray-600">
+          🔄 Fetching market data...
+        </p>
       )}
 
+      {/* ERROR */}
+      {!loading && errorMsg && (
+        <p className="mt-3 text-red-600">{errorMsg}</p>
+      )}
+
+      {/* SUCCESS */}
       {!loading && priceData?.marketRange && (
         <div className="mt-4 space-y-2 text-gray-700">
+
           <p>
-            Min Price: <b>LKR {formatLKR(priceData.marketRange.min)}</b>
+            Min Price:{" "}
+            <span className="font-semibold">
+              LKR {formatLKR(priceData.marketRange.min)}
+            </span>
           </p>
 
           <p>
-            Max Price: <b>LKR {formatLKR(priceData.marketRange.max)}</b>
+            Max Price:{" "}
+            <span className="font-semibold">
+              LKR {formatLKR(priceData.marketRange.max)}
+            </span>
           </p>
 
           <p>
-            Median Price: <b>LKR {formatLKR(priceData.marketRange.median)}</b>
+            Median Price:{" "}
+            <span className="font-semibold">
+              LKR {formatLKR(priceData.marketRange.median)}
+            </span>
           </p>
 
           <p className="mt-3 font-bold">
@@ -99,11 +114,24 @@ function PriceEstimateCard({ car }) {
             </span>
           </p>
 
-          <p>Confidence: {priceData.confidence}</p>
-          <p>Listings Used: {priceData.listingCount}</p>
+          <p>
+            Confidence:{" "}
+            <span className="font-medium">
+              {priceData.confidence}
+            </span>
+          </p>
+
+          <p>
+            Listings Used:{" "}
+            <span className="font-medium">
+              {priceData.listingCount}
+            </span>
+          </p>
+
         </div>
       )}
 
+      {/* NO DATA */}
       {!loading && priceData && !priceData.marketRange && (
         <p className="mt-3 text-gray-600">
           {priceData.message || "Not enough data"}
