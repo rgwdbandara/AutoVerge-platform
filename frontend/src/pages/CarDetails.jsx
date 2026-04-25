@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useApi } from "../lib/api";
 import EMIModal from "../components/finance/EMIModal";
+import PriceEstimateCard from "../components/price/PriceEstimateCard";
 
 const getGradeColor = (grade) => {
   if (grade === "A") return "bg-green-100 text-green-700";
@@ -150,6 +151,8 @@ function CarDetails() {
                 onClose={() => setShowEMI(false)}
               />
             )}
+
+            <PriceEstimateCard car={car} />
 
             {/* Contact Card */}
             <div className="p-5 mt-5 border rounded-2xl">
