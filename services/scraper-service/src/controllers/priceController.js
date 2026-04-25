@@ -8,37 +8,34 @@ exports.estimatePrice = async (req, res) => {
   try {
     const { brand, model, year, mileage, sellerPrice } = req.body;
 
-    if (!brand || !model || !year || !sellerPrice) {
-      return res.status(400).json({
-        message: "brand, model, year, sellerPrice required",
-      });
-    }
+    const listings = await findSimilarListings(
+      brand,
+      model,
+      Number(year),
+      Number(mileage)
+    );
 
-    const listings = await findSimilarListings(brand, model, Number(year), Number(mileage));
+    console.log("🔥 FINAL LISTINGS:", listings.length);
 
-    if (listings.length < 3) {
+    if (listings.length === 0) {
       return res.json({
         message: "Not enough data",
         confidence: "Low",
+        marketRange: null,
       });
     }
 
-    const { minPrice, maxPrice, medianPrice } =
-      calculateMarketRange(listings);
+    const { min, max, median } = calculateMarketRange(listings);
 
     const { decision, confidence } = getDecisionAndConfidence(
       Number(sellerPrice),
-      minPrice,
-      maxPrice,
+      min,
+      max,
       listings
     );
 
     return res.json({
-      marketRange: {
-        min: minPrice,
-        max: maxPrice,
-        median: medianPrice,
-      },
+      marketRange: { min, max, median },
       listingCount: listings.length,
       sellerPrice,
       decision,
