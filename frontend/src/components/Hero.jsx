@@ -112,7 +112,21 @@ function Hero() {
   };
 
   return (
-    <section className="pb-20 text-white pt-28 bg-gradient-to-r from-blue-900 to-blue-700 dotted-background">
+  <section className="relative flex items-center justify-center min-h-screen overflow-hidden text-white">
+
+  <video
+    autoPlay
+    loop
+    muted
+    playsInline
+    className="absolute inset-0 object-cover w-full h-full"
+  >
+    <source src="public/videos/car-bg.mp4" type="video/mp4" />
+  </video>
+
+  <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-transparent to-black/30" />
+
+  <div className="relative z-10 max-w-6xl px-6 mx-auto text-center">
       <div className="max-w-6xl px-6 mx-auto text-center">
         <span className="inline-block px-4 py-1 mb-6 text-sm bg-blue-600 rounded-full shadow-md">
           AI-Powered Smart Platform
@@ -382,6 +396,7 @@ function Hero() {
           </div>
         </div>
       </div>
+    </div>
     </section>
   );
 }

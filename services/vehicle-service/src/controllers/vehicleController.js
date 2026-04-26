@@ -9,15 +9,16 @@ const analyzeImageMetaFromFile = require("../imageSearch/analyzeImageMetaFromFil
 
 exports.markAsSold = async (req, res) => {
   try {
+    const sellerClerkId = req.user.sub;
     const vehicle = await Vehicle.findById(req.params.id);
 
     if (!vehicle) {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    // if (vehicle.sellerClerkId !== req.user.sub) {
-    //   return res.status(403).json({ message: "Not authorized" });
-    // }
+    if (vehicle.sellerClerkId !== sellerClerkId) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
 
     vehicle.status = "sold";
     await vehicle.save();
@@ -30,15 +31,16 @@ exports.markAsSold = async (req, res) => {
 
 exports.deleteListing = async (req, res) => {
   try {
+    const sellerClerkId = req.user.sub;
     const vehicle = await Vehicle.findById(req.params.id);
 
     if (!vehicle) {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    // if (vehicle.sellerClerkId !== req.user.sub) {
-    //   return res.status(403).json({ message: "Not authorized" });
-    // }
+    if (vehicle.sellerClerkId !== sellerClerkId) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
 
     await vehicle.deleteOne();
 
@@ -50,10 +52,15 @@ exports.deleteListing = async (req, res) => {
 
 exports.updateListing = async (req, res) => {
   try {
+    const sellerClerkId = req.user.sub;
     const oldVehicle = await Vehicle.findById(req.params.id);
 
     if (!oldVehicle) {
       return res.status(404).json({ message: "Listing not found" });
+    }
+
+    if (oldVehicle.sellerClerkId !== sellerClerkId) {
+      return res.status(403).json({ message: "Not authorized" });
     }
 
     const enrichedImages = req.body.images
@@ -87,16 +94,110 @@ exports.updateListing = async (req, res) => {
 
 exports.getMyListings = async (req, res) => {
   try {
-    const sellerId = req.user?.sub || "test-seller-001";
+    const sellerId = req.user.sub;
+
+    if (!sellerId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    console.log("FETCHING CARS FOR USER:", sellerId);
 
     const vehicles = await Vehicle.find({
       sellerClerkId: sellerId,
     }).sort({ createdAt: -1 });
 
+    console.log("FOUND VEHICLES:", vehicles.length);
+
     res.json(vehicles);
   } catch (error) {
     console.error("MY LISTINGS ERROR:", error);
     res.status(500).json({ message: "Failed to fetch your listings" });
+  }
+};
+
+exports.getExpiredListings = async (req, res) => {
+  try {
+    const vehicles = await Vehicle.find({
+      sellerClerkId: req.user.sub,
+      expiresAt: { $lte: new Date() },
+    }).sort({ expiresAt: -1 });
+
+    res.json(vehicles);
+  } catch (error) {
+    console.error("EXPIRED LISTINGS ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch expired listings" });
+  }
+};
+
+exports.getMyPendingListings = async (req, res) => {
+  try {
+    const sellerId = req.user.sub;
+
+    const vehicles = await Vehicle.find({
+      sellerClerkId: sellerId,
+      status: "pending",
+    }).sort({ createdAt: -1 });
+
+    res.json(vehicles);
+  } catch (error) {
+    console.error("PENDING LISTINGS ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch pending listings" });
+  }
+};
+
+exports.approveListing = async (req, res) => {
+  try {
+    const role =
+      req.user?.role ||
+      req.user?.public_metadata?.role ||
+      req.user?.metadata?.role;
+
+    if (role !== "admin") {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const vehicle = await Vehicle.findByIdAndUpdate(
+      req.params.id,
+      { status: "active", isExpired: false },
+      { new: true }
+    );
+
+    if (!vehicle) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    res.json(vehicle);
+  } catch (error) {
+    console.error("APPROVE LISTING ERROR:", error);
+    res.status(500).json({ message: "Approval failed" });
+  }
+};
+
+exports.reactivateListing = async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findById(req.params.id);
+
+    if (!vehicle) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    if (vehicle.sellerClerkId !== req.user.sub) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const newExpiryDate = new Date();
+    newExpiryDate.setDate(newExpiryDate.getDate() + 30);
+
+    vehicle.expiresAt = newExpiryDate;
+    vehicle.isExpired = false;
+    vehicle.status = "active";
+
+    await vehicle.save();
+
+    res.json(vehicle);
+  } catch (error) {
+    console.error("REACTIVATE ERROR:", error);
+    res.status(500).json({ message: "Failed to reactivate listing" });
   }
 };
 
@@ -116,9 +217,10 @@ exports.getSingleListing = async (req, res) => {
 
 exports.getAllListings = async (req, res) => {
   try {
-    const vehicles = await Vehicle.find({ status: "active" }).sort({
-      createdAt: -1,
-    });
+    const vehicles = await Vehicle.find({
+      status: "active",
+      expiresAt: { $gt: new Date() },
+    }).sort({ createdAt: -1 });
 
     res.json(vehicles);
   } catch (error) {
@@ -128,12 +230,24 @@ exports.getAllListings = async (req, res) => {
 
 exports.createListing = async (req, res) => {
   try {
+    const sellerClerkId = req.user.sub;
+
+    if (!sellerClerkId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    console.log("CREATING LISTING FOR USER:", sellerClerkId);
     console.log("BODY RECEIVED:", req.body);
 
     const enrichedImages = await generateImageEmbeddings(req.body.images || []);
 
+    // Calculate expiry date (30 days from now)
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
     const vehicleData = {
-      sellerClerkId: req.user?.sub || "test-seller-001",
+      sellerClerkId,
+      status: "pending",
       title: req.body.title || `${req.body.brand} ${req.body.model}`,
       brand: req.body.brand,
       model: req.body.model,
@@ -155,6 +269,8 @@ exports.createListing = async (req, res) => {
       previousOwners: req.body.previousOwners,
       extraFeatures: req.body.extraFeatures,
       images: enrichedImages,
+      expiresAt,
+      isExpired: false,
     };
 
     const autoTrustResult = await evaluateAutoTrust(vehicleData);

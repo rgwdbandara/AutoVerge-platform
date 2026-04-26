@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApi } from "../../lib/api";
 import { uploadToCloudinary } from "../../lib/cloudinary";
 
-function ManualEntryForm() {
+function ManualEntryForm({ initialData, onSubmit, isEdit }) {
   const api = useApi();
 
   const [form, setForm] = useState({
@@ -22,8 +22,44 @@ function ManualEntryForm() {
     previousOwners: "",
     extraFeatures: "",
     description: "",
-    featured: false
+    featured: false,
+    contactName: "",
+    contactEmail: "",
+    phone: "",
+    city: "",
+    district: "",
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        make: initialData.brand || "",
+        model: initialData.model || "",
+        year: initialData.year || "",
+        price: initialData.price || "",
+        mileage: initialData.mileage || "",
+        color: initialData.color || "",
+        fuelType: initialData.fuelType || "",
+        transmission: initialData.transmission || "",
+        bodyType: initialData.bodyType || "",
+        seats: initialData.seats || "",
+        condition: initialData.condition || "",
+        serviceHistory: initialData.serviceHistory || "",
+        accidentHistory: initialData.accidentHistory ? "Yes" : "No",
+        previousOwners: initialData.previousOwners || "",
+        extraFeatures: initialData.extraFeatures || "",
+        description: initialData.description || "",
+        featured: initialData.featured || false,
+
+        contactName: initialData.contact?.name || "",
+        contactEmail: initialData.contact?.email || "",
+        phone: initialData.contact?.phone || "",
+
+        city: initialData.location?.city || "",
+        district: initialData.location?.district || "",
+      });
+    }
+  }, [initialData]);
 
   const [selectedImages, setSelectedImages] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -120,14 +156,27 @@ function ManualEntryForm() {
           : undefined,
         extraFeatures: form.extraFeatures,
         images: uploadedImages,
+        contact: {
+        name: form.contactName,
+        email: form.contactEmail,
+        phone: form.phone,
+},
+location: {
+  city: form.city,
+  district: form.district,
+},
       };
 
       console.log("FINAL PAYLOAD:", payload);
 
-      await api("/api/vehicles", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      if (isEdit && onSubmit) {
+        await onSubmit(payload);
+      } else {
+        await api("/api/vehicles", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      }
 
       alert("Car added successfully!");
 
@@ -164,7 +213,7 @@ function ManualEntryForm() {
 
   return (
 
-    <div className="p-6 bg-white rounded shadow">
+    <div className="p-6 bg-white shadow-md rounded-xl">
 
       <h3 className="mb-4 text-lg font-semibold">
         Car Details
@@ -320,6 +369,80 @@ function ManualEntryForm() {
             Feature this car
           </span>
         </div>
+
+
+
+    {/* 🔹 Contact Details */}
+<div className="mt-8">
+  <h3 className="mb-3 text-lg font-semibold">Contact Details</h3>
+
+  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+    <input
+      name="contactName"
+      value={form.contactName}
+      onChange={handleChange}
+      className="p-2 border rounded"
+      placeholder="Your Name"
+    />
+
+    <input
+      name="contactEmail"
+      value={form.contactEmail}
+      onChange={handleChange}
+      className="p-2 border rounded"
+      placeholder="Email Address"
+    />
+
+    <input
+      name="phone"
+      value={form.phone}
+      onChange={handleChange}
+      className="p-2 border rounded md:col-span-2"
+      placeholder="Phone Number (e.g. 0771234567)"
+    />
+
+  </div>
+</div>
+
+
+{/* 🔹 Location */}
+<div className="mt-8">
+  <h3 className="mb-3 text-lg font-semibold">Location</h3>
+
+  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+    <input
+      name="city"
+      value={form.city}
+      onChange={handleChange}
+      className="p-2 border rounded"
+      placeholder="City (e.g. Negombo)"
+    />
+
+    <select
+      name="district"
+      value={form.district}
+      onChange={handleChange}
+      className="p-2 border rounded"
+    >
+      <option value="">Select District</option>
+      <option value="Colombo">Colombo</option>
+      <option value="Gampaha">Gampaha</option>
+      <option value="Kalutara">Kalutara</option>
+      <option value="Kandy">Kandy</option>
+      <option value="Galle">Galle</option>
+      <option value="Kurunegala">Kurunegala</option>
+      <option value="Jaffna">Jaffna</option>
+      <option value="Anuradhapura">Anuradhapura</option>
+      <option value="Matara">Matara</option>
+      <option value="Ratnapura">Ratnapura</option>
+    </select>
+
+  </div>
+</div>    
+
+
         {/* Image Upload */}
         <div className="mt-4">
           <label className="block mb-2 font-medium">
@@ -393,12 +516,16 @@ function ManualEntryForm() {
         </div>
         {/* Submit */}
         <button
-          type="submit"
-          disabled={uploading}
-          className="px-6 py-2 text-white bg-black rounded disabled:opacity-50"
-        >
-          {uploading ? "Uploading images..." : "Add Car"}
-        </button>
+  type="submit"
+  disabled={uploading}
+  className="w-full py-3 mt-6 text-white transition bg-black rounded-xl hover:bg-gray-800 disabled:opacity-50"
+>
+  {uploading
+    ? "Uploading images..."
+    : isEdit
+    ? "Update Car"
+    : "🚀 Post Your Car"}
+</button>
       </form>
 
     </div>

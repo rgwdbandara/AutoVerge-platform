@@ -1,9 +1,10 @@
 import { useAuth } from "@clerk/clerk-react";
+import { useCallback } from "react";
 
 export const useApi = () => {
   const { getToken } = useAuth();
 
-  return async (url, options = {}) => {
+  return useCallback(async (url, options = {}) => {
     const token = await getToken();
 
     const res = await fetch(`http://localhost:5000${url}`, {
@@ -22,5 +23,5 @@ export const useApi = () => {
     }
 
     return res.json();
-  };
+  }, [getToken]);
 };

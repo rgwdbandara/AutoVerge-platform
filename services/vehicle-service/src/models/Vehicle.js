@@ -81,9 +81,31 @@ const vehicleSchema = new mongoose.Schema(
     // 🔹 Listing status
     status: {
       type: String,
-      enum: ["active", "sold", "removed"],
-      default: "active",
+      enum: ["pending", "active", "expired", "sold", "removed"],
+      default: "pending",
     },
+
+    expiresAt: {
+      type: Date,
+    },
+
+    isExpired: {
+      type: Boolean,
+      default: false,
+    },
+
+    // 🔹 Contact Info
+contact: {
+  name: String,
+  email: String,
+  phone: String,
+},
+
+// 🔹 Location
+location: {
+  city: String,
+  district: String,
+},
   },
   { timestamps: true }
 );

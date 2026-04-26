@@ -13,6 +13,11 @@ const clerkAuth = async (req, res, next) => {
     });
 
     req.user = payload;
+
+    if (!req.user?.sub) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     next();
   } catch (error) {
     return res.status(401).json({ message: "Invalid token" });

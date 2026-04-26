@@ -8,6 +8,7 @@ const {
   syncProfile,
   getMyProfile,
   updateMyProfile,
+  deleteMyProfile,
   getPublicProfile,
   verifySeller,
 } = require("../controllers/userController");
@@ -15,6 +16,7 @@ const {
 router.post("/sync-profile", clerkAuth, syncProfile);
 router.get("/me", clerkAuth, getMyProfile);
 router.put("/me", clerkAuth, updateMyProfile);
+router.delete("/me", clerkAuth, deleteMyProfile);
 
 router.get("/:id", getPublicProfile);
 
