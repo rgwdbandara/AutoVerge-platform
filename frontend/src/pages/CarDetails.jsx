@@ -46,8 +46,11 @@ function CarDetails() {
     const loadCar = async () => {
       const data = await api(`/api/vehicles/${id}`);
       console.log("CAR DETAILS DATA:", data);
+      const firstImage = data?.images?.[0];
+      const firstImageUrl =
+        typeof firstImage === "string" ? firstImage : firstImage?.url;
       setCar(data);
-      setActiveImage(data?.images?.[0]?.url || fallbackImage);
+      setActiveImage(firstImageUrl || fallbackImage);
     };
     loadCar();
   }, [id, api]);
@@ -59,43 +62,43 @@ function CarDetails() {
   return (
     <div className="min-h-screen bg-white">
       <div className="px-6 py-8 mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* Left Side - Images */}
-          <div>
+
+  <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+
+    {/* Left Side - Gallery */}
+    <div>
+      <img
+        src={activeImage || fallbackImage}
+        className="w-full h-[350px] object-cover rounded-xl"
+        alt={car.title || "Car image"}
+      />
+
+      <div className="flex gap-3 mt-4">
+        {car.images?.map((img, index) => {
+          const imageUrl = img?.url || img;
+          return (
             <img
-              src={activeImage || car.images?.[0]?.url || "https://via.placeholder.com/800x500"}
-              alt={car.title || "Car image"}
-              className="object-cover w-full h-[420px] rounded-2xl"
+              key={index}
+              src={imageUrl}
+              onClick={() => setActiveImage(imageUrl)}
+              className="object-cover w-20 h-16 transition border rounded-lg cursor-pointer hover:scale-105"
+              alt={`Thumbnail ${index + 1}`}
             />
+          );
+        })}
+      </div>
 
-            <div className="flex gap-3 mt-4">
-              {(car.images?.length ? car.images : [{ url: fallbackImage }])
-                .slice(0, 4)
-                .map((img, index) => (
-                <div key={index} className="relative">
-                  <img
-                    src={img.url}
-                    alt={`car-${index}`}
-                    className="object-cover w-24 h-20 border rounded-lg"
-                  />
-                  <span className="absolute px-2 py-1 text-xs text-white capitalize bg-black rounded bottom-1 left-1">
-                    {img.tag}
-                  </span>
-                </div>
-              ))}
-            </div>
+      <div className="grid grid-cols-2 gap-4 mt-6">
+        <button className="py-3 font-medium border rounded-xl">
+          Save
+        </button>
+        <button className="py-3 font-medium border rounded-xl">
+          Share
+        </button>
+      </div>
+    </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-6">
-              <button className="py-3 font-medium border rounded-xl">
-                Save
-              </button>
-              <button className="py-3 font-medium border rounded-xl">
-                Share
-              </button>
-            </div>
-          </div>
-
-          {/* Right Side - Summary */}
+    {/* Right Side - Summary */}
           <div>
             <span className="inline-block px-3 py-1 text-sm font-medium text-white bg-black rounded-full">
               {car.brand || "Car"}
@@ -309,24 +312,70 @@ function CarDetails() {
           )}
         </div>
 
-        {/* Seller / Location */}
-        <div className="pt-12 mt-12 border-t">
-          <h2 className="text-3xl font-bold">Seller Information</h2>
+       {/* 🔹 Seller Contact Section */}
+<div className="p-6 mt-10 bg-white shadow rounded-xl">
 
-          <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-2">
-            <div className="p-6 border rounded-2xl">
-              <h3 className="text-xl font-semibold">Seller ID</h3>
-              <p className="mt-3 text-gray-600">{car.sellerClerkId}</p>
-            </div>
+  <h2 className="mb-4 text-xl font-semibold">
+    Seller Information
+  </h2>
 
-            <div className="p-6 border rounded-2xl">
-              <h3 className="text-xl font-semibold">Availability</h3>
-              <p className="mt-3 text-gray-600">
-                Contact seller to confirm test drive and viewing times.
-              </p>
-            </div>
-          </div>
-        </div>
+  <div className="space-y-2 text-gray-700">
+
+    <p>
+      <span className="font-medium">Name:</span>{" "}
+      {car?.contact?.name || "N/A"}
+    </p>
+
+    <p>
+      <span className="font-medium">Phone:</span>{" "}
+      {car?.contact?.phone || "Not provided"}
+    </p>
+
+  </div>
+
+  {/* 🔹 Buttons */}
+  <div className="flex gap-4 mt-5">
+
+    {/* Call */}
+    <a
+      href={`tel:${car?.contact?.phone}`}
+      className="flex-1 py-3 text-center text-white transition bg-black rounded-lg hover:bg-gray-800"
+    >
+      📞 Call Now
+    </a>
+
+    {/* WhatsApp */}
+    <a
+      href={`https://wa.me/94${car?.contact?.phone?.replace(/^0/, "")}`}
+      target="_blank"
+      rel="noreferrer"
+      className="flex-1 py-3 text-center text-white transition bg-green-500 rounded-lg hover:bg-green-600"
+    >
+      💬 WhatsApp
+    </a>
+
+  </div>
+
+</div>
+
+{/* 🔹 Location */}
+<div className="p-6 mt-6 bg-white shadow rounded-xl">
+
+  <h2 className="mb-2 text-xl font-semibold">
+    Location
+  </h2>
+
+  <p className="text-gray-600">
+    📍 {car?.location?.city || "N/A"},{" "}
+    {car?.location?.district || ""}
+  </p>
+
+</div>    
+
+
+
+
+
       </div>
     </div>
   );
