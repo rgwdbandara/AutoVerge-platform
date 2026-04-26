@@ -4,11 +4,18 @@ const userProfileSchema = new mongoose.Schema(
   {
     clerkId: { type: String, required: true, unique: true },
 
+    name: String,
+    email: String,
     fullName: String,
     phone: String,
     profileImage: String,
+    coverPhoto: String,
     address: String,
     bio: String,
+    location: {
+      city: String,
+      district: String,
+    },
 
     role: {
       type: String,

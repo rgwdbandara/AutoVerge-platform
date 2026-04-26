@@ -3,6 +3,10 @@ export const uploadToCloudinary = async (file) => {
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
     const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
+    if (!cloudName || !uploadPreset) {
+      throw new Error("Cloudinary config is missing. Check VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET.");
+    }
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", uploadPreset);
@@ -16,6 +20,14 @@ export const uploadToCloudinary = async (file) => {
     );
 
     const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error?.message || "Cloudinary upload failed");
+    }
+
+    if (!data?.secure_url) {
+      throw new Error("Cloudinary did not return a secure_url");
+    }
 
     return data.secure_url;
 
