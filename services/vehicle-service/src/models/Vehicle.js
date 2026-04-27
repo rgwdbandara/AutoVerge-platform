@@ -81,7 +81,7 @@ const vehicleSchema = new mongoose.Schema(
     // 🔹 Listing status
     status: {
       type: String,
-      enum: ["pending", "active", "expired", "sold", "removed"],
+      enum: ["pending", "active", "sold", "expired", "rejected", "removed"],
       default: "pending",
     },
 

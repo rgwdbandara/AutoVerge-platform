@@ -65,6 +65,8 @@ function BrowseCars() {
       if (price)
         params.append("maxPrice", price);
 
+      params.set("status", "active");
+
       const data = await api(`/api/vehicles?${params.toString()}`);
       setCars(data);
     } catch (err) {

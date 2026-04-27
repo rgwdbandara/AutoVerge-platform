@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 // Layout
 import Navbar from "./components/Navbar";
 import DashboardLayout from "./layouts/DashboardLayout";
+import { adminRoutes } from "./routes/AdminRoutes";
 
 // Public Pages
 import Home from "./pages/Home";
@@ -56,6 +57,8 @@ function App() {
             <Route path="expired" element={<ExpiredAds />} />
             <Route path="pending" element={<PendingAds />} />
           </Route>
+
+          {adminRoutes}
 
         </Routes>
       </div>
