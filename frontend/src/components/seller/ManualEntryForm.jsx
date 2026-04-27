@@ -295,6 +295,9 @@ location: {
             <option value="SUV">SUV</option>
             <option value="Sedan">Sedan</option>
             <option value="Hatchback">Hatchback</option>
+            <option value="Convertible">Convertible</option>
+            <option value="Coupe">Coupe</option>
+            <option value="Wagon">Wagon</option>
           </select>
           <input
             name="seats"
@@ -309,10 +312,9 @@ location: {
             onChange={handleChange}
             className="p-2 border rounded"
           >
-            <option value="">Condition</option>
-            <option value="Excellent">Excellent</option>
-            <option value="Good">Good</option>
-            <option value="Fair">Fair</option>
+            <option value="">Brand New</option>
+            <option value="Excellent">Used</option>
+            
           </select>
           <select
             name="serviceHistory"

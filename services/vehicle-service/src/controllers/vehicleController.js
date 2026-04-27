@@ -7,6 +7,19 @@ const generateImageEmbeddings = require("../imageSearch/generateImageEmbeddings"
 const detectViewTypeFromFile = require("../imageSearch/detectViewTypeFromFile");
 const analyzeImageMetaFromFile = require("../imageSearch/analyzeImageMetaFromFile");
 
+const ADMIN_EMAILS = [
+  "admin@gmail.com",
+  "bwathsala24@gmail.com",
+  "bwathsala24@gamil.com",
+];
+
+const isAdminUser = (user) => {
+  const email = user?.email?.toLowerCase().trim();
+  const role = user?.role || user?.public_metadata?.role || user?.metadata?.role;
+
+  return ADMIN_EMAILS.includes(email) || role === "admin";
+};
+
 exports.markAsSold = async (req, res) => {
   try {
     const sellerClerkId = req.user.sub;
@@ -46,6 +59,27 @@ exports.deleteListing = async (req, res) => {
 
     res.json({ message: "Listing deleted successfully" });
   } catch (error) {
+    res.status(500).json({ message: "Failed to delete listing" });
+  }
+};
+
+exports.deleteListingByAdmin = async (req, res) => {
+  try {
+    if (!isAdminUser(req.user)) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const vehicle = await Vehicle.findById(req.params.id);
+
+    if (!vehicle) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    await vehicle.deleteOne();
+
+    res.json({ message: "Listing deleted successfully" });
+  } catch (error) {
+    console.error("ADMIN DELETE ERROR:", error);
     res.status(500).json({ message: "Failed to delete listing" });
   }
 };
@@ -217,14 +251,88 @@ exports.getSingleListing = async (req, res) => {
 
 exports.getAllListings = async (req, res) => {
   try {
-    const vehicles = await Vehicle.find({
-      status: "active",
-      expiresAt: { $gt: new Date() },
-    }).sort({ createdAt: -1 });
+    const vehicles = await Vehicle.find({ status: "active" }).sort({
+      createdAt: -1,
+    });
 
     res.json(vehicles);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch listings" });
+  }
+};
+
+exports.getPendingListingsForAdmin = async (req, res) => {
+  try {
+    const vehicles = await Vehicle.find({ status: "pending" }).sort({
+      createdAt: -1,
+    });
+
+    res.json(vehicles);
+  } catch (error) {
+    console.error("ADMIN PENDING LISTINGS ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch pending listings" });
+  }
+};
+
+exports.getAllListingsForAdmin = async (req, res) => {
+  try {
+    const vehicles = await Vehicle.find({}).sort({ createdAt: -1 });
+    res.json(vehicles);
+  } catch (error) {
+    console.error("ADMIN ALL LISTINGS ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch all listings" });
+  }
+};
+
+exports.getAdminStats = async (req, res) => {
+  try {
+    const [total, active, pending, rejected] = await Promise.all([
+      Vehicle.countDocuments(),
+      Vehicle.countDocuments({ status: "active" }),
+      Vehicle.countDocuments({ status: "pending" }),
+      Vehicle.countDocuments({ status: "rejected" }),
+    ]);
+
+    res.json({ total, active, pending, rejected });
+  } catch (error) {
+    console.error("ADMIN STATS ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch admin stats" });
+  }
+};
+
+exports.approveListingByAdmin = async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findById(req.params.id);
+
+    if (!vehicle) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    vehicle.status = "active";
+    await vehicle.save();
+
+    res.json({ message: "Listing approved", vehicle });
+  } catch (error) {
+    console.error("ADMIN APPROVE ERROR:", error);
+    res.status(500).json({ message: "Failed to approve listing" });
+  }
+};
+
+exports.rejectListingByAdmin = async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findById(req.params.id);
+
+    if (!vehicle) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    vehicle.status = "rejected";
+    await vehicle.save();
+
+    res.json({ message: "Listing rejected", vehicle });
+  } catch (error) {
+    console.error("ADMIN REJECT ERROR:", error);
+    res.status(500).json({ message: "Failed to reject listing" });
   }
 };
 
@@ -268,6 +376,15 @@ exports.createListing = async (req, res) => {
       serviceHistory: req.body.serviceHistory,
       previousOwners: req.body.previousOwners,
       extraFeatures: req.body.extraFeatures,
+      contact: {
+        name: req.body?.contact?.name || "",
+        email: req.body?.contact?.email || "",
+        phone: req.body?.contact?.phone || "",
+      },
+      location: {
+        city: req.body?.location?.city || "",
+        district: req.body?.location?.district || "",
+      },
       images: enrichedImages,
       expiresAt,
       isExpired: false,
