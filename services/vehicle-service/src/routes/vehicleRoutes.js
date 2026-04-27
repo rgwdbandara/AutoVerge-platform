@@ -11,13 +11,36 @@ const {
   getMyListings,
   getExpiredListings,
   getMyPendingListings,
+  getPendingListingsForAdmin,
+  getAllListingsForAdmin,
+  getAdminStats,
   reactivateListing,
   approveListing,
+  approveListingByAdmin,
+  rejectListingByAdmin,
+  deleteListingByAdmin,
   updateListing,
   deleteListing,
   markAsSold,
   searchByImage,
 } = require("../controllers/vehicleController");
+
+const ADMIN_EMAILS = [
+  "admin@gmail.com",
+  "bwathsala24@gmail.com",
+  "bwathsala24@gamil.com",
+];
+
+const isAdmin = (req, res, next) => {
+  const email = req.user?.email?.toLowerCase().trim();
+  const role = req.user?.public_metadata?.role || req.user?.metadata?.role;
+
+  if (!ADMIN_EMAILS.includes(email) && role !== "admin") {
+    return res.status(403).json({ msg: "Admin only" });
+  }
+
+  next();
+};
 
 // image-based search
 router.post("/search-by-image", upload.single("image"), searchByImage);
@@ -41,6 +64,17 @@ router.get("/my/pending", clerkAuth, getMyPendingListings);
 
 // admin approve listing
 router.put("/approve/:id", clerkAuth, approveListing);
+
+// admin pending listings / approvals
+router.get("/admin/all", clerkAuth, isAdmin, getAllListingsForAdmin);
+router.get("/admin/pending", clerkAuth, isAdmin, getPendingListingsForAdmin);
+router.get("/admin/pending-ads", clerkAuth, isAdmin, getPendingListingsForAdmin);
+router.get("/admin/stats", clerkAuth, isAdmin, getAdminStats);
+router.put("/admin/approve/:id", clerkAuth, isAdmin, approveListingByAdmin);
+router.put("/admin/reject/:id", clerkAuth, isAdmin, rejectListingByAdmin);
+router.delete("/admin/delete/:id", clerkAuth, isAdmin, deleteListingByAdmin);
+router.patch("/admin/:id/approve", clerkAuth, isAdmin, approveListingByAdmin);
+router.patch("/admin/:id/reject", clerkAuth, isAdmin, rejectListingByAdmin);
 
 // update listing (owner only)
 router.put("/:id", clerkAuth, updateListing);

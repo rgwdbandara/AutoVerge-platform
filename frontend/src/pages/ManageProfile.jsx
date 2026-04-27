@@ -1,14 +1,78 @@
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApi } from "../lib/api";
 
 function ManageProfile() {
   const { signOut } = useClerk();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const navigate = useNavigate();
   const api = useApi();
   const [deleting, setDeleting] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+  const [district, setDistrict] = useState("");
+  const [city, setCity] = useState("");
+
+  const getFallbackName = (profileName, clerkUser, userEmail) => {
+    if (profileName && profileName.trim()) return profileName;
+    if (clerkUser?.fullName && clerkUser.fullName.trim()) return clerkUser.fullName;
+    if (clerkUser?.firstName && clerkUser.firstName.trim()) return clerkUser.firstName;
+    if (clerkUser?.username && clerkUser.username.trim()) return clerkUser.username;
+    if (userEmail && userEmail.includes("@")) return userEmail.split("@")[0];
+    return "";
+  };
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const profile = await api("/api/users/me");
+        const userEmail = profile?.email || user?.primaryEmailAddress?.emailAddress || "";
+
+        setEmail(userEmail);
+        setPhone(profile?.phone || "");
+        setName(getFallbackName(profile?.name, user, userEmail));
+        setDistrict(profile?.location?.district || "");
+        setCity(profile?.location?.city || "");
+      } catch (err) {
+        console.error("Failed to load profile:", err);
+        const userEmail = user?.primaryEmailAddress?.emailAddress || "";
+        setEmail(userEmail);
+        setName(getFallbackName("", user, userEmail));
+      }
+    };
+
+    if (isLoaded && user) {
+      loadProfile();
+    }
+  }, [api, isLoaded, user]);
+
+  const handleUpdateDetails = async () => {
+    setSaving(true);
+    try {
+      await api("/api/users/me", {
+        method: "PUT",
+        body: JSON.stringify({
+          name,
+          phone,
+          location: {
+            district,
+            city,
+          },
+        }),
+      });
+
+      alert("Profile updated successfully");
+    } catch (err) {
+      console.error("Profile update error:", err);
+      alert("Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleDeleteAccount = async () => {
     const confirmed = window.confirm(
@@ -47,7 +111,7 @@ function ManageProfile() {
           <div className="flex gap-3">
             <input
               type="text"
-              value="bwathsala24@gmail.com"
+              value={email}
               disabled
               className="w-full px-4 py-3 bg-gray-100 border rounded-md"
             />
@@ -63,7 +127,9 @@ function ManageProfile() {
           <div className="flex gap-3">
             <input
               type="text"
+              value={phone}
               placeholder="Add Mobile Number"
+              onChange={(e) => setPhone(e.target.value)}
               className="w-full px-4 py-3 border rounded-md"
             />
             <button className="px-5 py-3 text-white bg-gray-500 rounded-md">
@@ -77,7 +143,8 @@ function ManageProfile() {
           <label className="block mb-1 text-sm text-gray-600">Name</label>
           <input
             type="text"
-            value="wathsala"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-3 border rounded-md"
           />
         </div>
@@ -85,9 +152,17 @@ function ManageProfile() {
         {/* Location */}
         <div>
           <label className="block mb-1 text-sm text-gray-600">Location</label>
-          <select className="w-full px-4 py-3 border rounded-md">
-            <option>Colombo</option>
-            <option>Kandy</option>
+          <select
+            value={district}
+            onChange={(e) => setDistrict(e.target.value)}
+            className="w-full px-4 py-3 border rounded-md"
+          >
+            <option value="">Select district</option>
+            <option value="Colombo">Colombo</option>
+            <option value="Kandy">Kandy</option>
+            <option value="Galle">Galle</option>
+            <option value="Kurunegala">Kurunegala</option>
+            <option value="Jaffna">Jaffna</option>
           </select>
         </div>
 
@@ -96,15 +171,28 @@ function ManageProfile() {
           <label className="block mb-1 text-sm text-gray-600">
             Sub Location
           </label>
-          <select className="w-full px-4 py-3 border rounded-md">
-            <option>Select sub location</option>
+          <select
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            className="w-full px-4 py-3 border rounded-md"
+          >
+            <option value="">Select sub location</option>
+            <option value="Colombo 01">Colombo 01</option>
+            <option value="Colombo 03">Colombo 03</option>
+            <option value="Maharagama">Maharagama</option>
+            <option value="Kandy City">Kandy City</option>
+            <option value="Peradeniya">Peradeniya</option>
           </select>
         </div>
 
       </div>
 
-      <button className="px-6 py-3 mt-6 font-semibold text-black bg-yellow-500 rounded-md">
-        Update Details
+      <button
+        onClick={handleUpdateDetails}
+        disabled={saving}
+        className="px-6 py-3 mt-6 font-semibold text-black bg-yellow-500 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {saving ? "Updating..." : "Update Details"}
       </button>
 
       {/* PASSWORD */}

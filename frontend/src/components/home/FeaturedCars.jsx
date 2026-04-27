@@ -10,7 +10,7 @@ function FeaturedCars() {
   useEffect(() => {
     const loadCars = async () => {
       try {
-        const data = await api("/api/vehicles");
+        const data = await api("/api/vehicles?status=active");
         setCars(data.slice(0, 6)); // show first 6
       } catch (err) {
         console.error("Failed to load cars", err);
