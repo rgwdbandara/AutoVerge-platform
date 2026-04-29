@@ -46,210 +46,263 @@ function CarDetails() {
     const loadCar = async () => {
       const data = await api(`/api/vehicles/${id}`);
       console.log("CAR DETAILS DATA:", data);
+      const firstImage = data?.images?.[0];
+      const firstImageUrl =
+        typeof firstImage === "string" ? firstImage : firstImage?.url;
       setCar(data);
-      setActiveImage(data?.images?.[0]?.url || fallbackImage);
+      setActiveImage(firstImageUrl || fallbackImage);
     };
     loadCar();
   }, [id, api]);
 
-  if (!car) return <p className="p-10">Loading...</p>;
+  if (!car) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="px-6 py-12 mx-auto max-w-7xl">
+          <div className="animate-pulse">
+            <div className="h-10 w-72 rounded-xl bg-slate-200" />
+            <div className="grid grid-cols-1 gap-6 mt-8 lg:grid-cols-2">
+              <div className="h-[420px] rounded-3xl bg-slate-200" />
+              <div className="h-[420px] rounded-3xl bg-slate-200" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const emi = calculateQuickEMI(car.price);
+  const sellerPhone = car?.contact?.phone || "";
+  const safePhone = sellerPhone.replace(/\D/g, "");
+  const whatsappPhone = safePhone ? `94${safePhone.replace(/^0/, "")}` : "";
+  const canCall = Boolean(safePhone);
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="px-6 py-8 mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* Left Side - Images */}
-          <div>
-            <img
-              src={activeImage || car.images?.[0]?.url || "https://via.placeholder.com/800x500"}
-              alt={car.title || "Car image"}
-              className="object-cover w-full h-[420px] rounded-2xl"
-            />
+    <div className="min-h-screen bg-slate-50">
+      <div className="px-4 py-8 mx-auto max-w-7xl md:px-6 lg:py-10">
+        <div className="overflow-hidden border shadow-sm bg-white/80 rounded-3xl border-slate-200">
+          <div className="grid grid-cols-1 gap-8 p-5 lg:grid-cols-12 md:p-7">
+            <section className="lg:col-span-7">
+              <div className="overflow-hidden border shadow-sm rounded-2xl border-slate-200">
+                <img
+                  src={activeImage || fallbackImage}
+                  className="h-[360px] w-full object-cover md:h-[460px]"
+                  alt={car.title || "Car image"}
+                />
+              </div>
 
-            <div className="flex gap-3 mt-4">
-              {(car.images?.length ? car.images : [{ url: fallbackImage }])
-                .slice(0, 4)
-                .map((img, index) => (
-                <div key={index} className="relative">
-                  <img
-                    src={img.url}
-                    alt={`car-${index}`}
-                    className="object-cover w-24 h-20 border rounded-lg"
-                  />
-                  <span className="absolute px-2 py-1 text-xs text-white capitalize bg-black rounded bottom-1 left-1">
-                    {img.tag}
-                  </span>
+              <div className="grid grid-cols-4 gap-2 mt-3 sm:grid-cols-6 md:grid-cols-7">
+                {car.images?.map((img, index) => {
+                  const imageUrl = img?.url || img;
+                  const isActive = activeImage === imageUrl;
+
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => setActiveImage(imageUrl)}
+                      className={`overflow-hidden border rounded-xl transition ${
+                        isActive
+                          ? "border-slate-900 ring-2 ring-slate-300"
+                          : "border-slate-200 hover:border-slate-400"
+                      }`}
+                      type="button"
+                    >
+                      <img
+                        src={imageUrl}
+                        className="object-cover w-full h-14 md:h-16"
+                        alt={`Thumbnail ${index + 1}`}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <button
+                  type="button"
+                  className="py-3 font-medium transition border rounded-xl border-slate-300 text-slate-700 hover:bg-slate-100"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="py-3 font-medium transition border rounded-xl border-slate-300 text-slate-700 hover:bg-slate-100"
+                >
+                  Share
+                </button>
+              </div>
+            </section>
+
+            <section className="lg:col-span-5">
+              <div className="space-y-4 lg:sticky lg:top-24">
+                <div className="p-5 bg-white border shadow-sm rounded-2xl border-slate-200">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex px-3 py-1 text-xs font-semibold tracking-wide uppercase rounded-full bg-slate-900 text-slate-100">
+                      {car.brand || "Car"}
+                    </span>
+                    <span className="text-xs font-medium text-slate-500">
+                      {car.year || "Year N/A"}
+                    </span>
+                  </div>
+
+                  <h1 className="mt-3 text-2xl font-bold leading-tight text-slate-900 md:text-3xl">
+                    {car.title}
+                  </h1>
+
+                  <p className="mt-3 text-3xl font-bold text-blue-700 md:text-4xl">
+                    LKR {car.price?.toLocaleString()}
+                  </p>
+
+                  <div className="grid grid-cols-3 gap-2 mt-5 text-center">
+                    <div className="p-3 rounded-xl bg-slate-100">
+                      <p className="text-xs text-slate-500">Mileage</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800">
+                        {car.mileage || "N/A"}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-100">
+                      <p className="text-xs text-slate-500">Fuel</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800">
+                        {car.fuelType || "N/A"}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-100">
+                      <p className="text-xs text-slate-500">Gearbox</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800">
+                        {car.transmission || "N/A"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-6">
-              <button className="py-3 font-medium border rounded-xl">
-                Save
-              </button>
-              <button className="py-3 font-medium border rounded-xl">
-                Share
-              </button>
-            </div>
-          </div>
+                <div
+                  onClick={() => setShowEMI(true)}
+                  className="p-5 transition border border-blue-100 shadow-sm cursor-pointer rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 hover:shadow-md"
+                >
+                  <h3 className="text-lg font-semibold text-slate-900">EMI Calculator</h3>
+                  <p className="mt-2 text-sm text-slate-600">Estimated Monthly Payment</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-900">LKR {formatLKR(emi)}</p>
+                  <p className="mt-1 text-xs text-slate-500">Based on 4.5% interest for 60 months</p>
+                </div>
 
-          {/* Right Side - Summary */}
-          <div>
-            <span className="inline-block px-3 py-1 text-sm font-medium text-white bg-black rounded-full">
-              {car.brand || "Car"}
-            </span>
+                {showEMI && (
+                  <EMIModal
+                    price={car.price}
+                    onClose={() => setShowEMI(false)}
+                  />
+                )}
 
-            <h1 className="mt-4 text-4xl font-bold">{car.title}</h1>
-
-            <p className="mt-2 text-3xl font-bold text-blue-600">
-              LKR {car.price?.toLocaleString()}
-            </p>
-
-            <div className="grid grid-cols-3 gap-4 mt-6 text-gray-700">
-              <div className="p-3 border rounded-xl">
-                <p className="text-sm text-gray-500">Mileage</p>
-                <p className="font-semibold">{car.mileage}</p>
+                <PriceEstimateCard car={car} />
               </div>
-
-              <div className="p-3 border rounded-xl">
-                <p className="text-sm text-gray-500">Fuel</p>
-                <p className="font-semibold">{car.fuelType}</p>
-              </div>
-
-              <div className="p-3 border rounded-xl">
-                <p className="text-sm text-gray-500">Transmission</p>
-                <p className="font-semibold">{car.transmission}</p>
-              </div>
-            </div>
-
-            <div
-              onClick={() => setShowEMI(true)}
-              className="p-6 mt-6 transition border border-gray-200 cursor-pointer rounded-2xl bg-gray-50 hover:shadow-md"
-            >
-              <h3 className="text-xl font-semibold text-gray-900">
-                💠 EMI Calculator
-              </h3>
-
-              <p className="mt-3 text-lg text-gray-700">
-                Estimated Monthly Payment:{" "}
-                <span className="font-bold text-black">
-                  LKR {formatLKR(emi)}
-                </span>{" "}
-                for 60 months
-              </p>
-
-              <p className="mt-2 text-sm text-gray-500">
-                *Based on 4.5% estimated interest
-              </p>
-            </div>
-
-            {showEMI && (
-              <EMIModal
-                price={car.price}
-                onClose={() => setShowEMI(false)}
-              />
-            )}
-
-            <PriceEstimateCard car={car} />
-
-            {/* Contact Card */}
-            <div className="p-5 mt-5 border rounded-2xl">
-              <h2 className="text-2xl font-semibold">Have Questions?</h2>
-              <p className="mt-3 text-gray-600">
-                Contact the seller for more information about this vehicle.
-              </p>
-              <button className="w-full py-3 mt-4 font-medium border rounded-xl">
-                Request Info
-              </button>
-            </div>
-
-            <button className="w-full py-4 mt-5 text-lg font-semibold text-white bg-black rounded-2xl">
-              Book Test Drive
-            </button>
+            </section>
           </div>
         </div>
 
-        {/* Description + Features */}
-        <div className="grid grid-cols-1 gap-8 pt-12 mt-12 border-t lg:grid-cols-2">
-          <div>
-            <h2 className="text-3xl font-bold">Description</h2>
-            <p className="mt-4 leading-8 text-gray-600">
+        <div className="grid grid-cols-1 gap-6 mt-8 lg:grid-cols-12">
+          <section className="p-6 bg-white border shadow-sm lg:col-span-7 rounded-2xl border-slate-200">
+            <h2 className="text-xl font-bold text-slate-900">Description</h2>
+            <p className="mt-3 leading-7 text-slate-600">
               {car.description || "No description available."}
             </p>
-          </div>
 
-          <div>
-            <h2 className="text-3xl font-bold">Features</h2>
-            <ul className="mt-4 space-y-3 text-gray-700 list-disc list-inside">
-              <li>{car.transmission || "Transmission info not available"}</li>
-              <li>{car.fuelType || "Fuel type not available"}</li>
-              <li>{car.brand || "Brand info not available"}</li>
-              <li>{car.model || "Model info not available"}</li>
+            <h3 className="mt-8 text-lg font-semibold text-slate-900">Key Highlights</h3>
+            <ul className="grid grid-cols-1 gap-2 mt-3 text-sm text-slate-700 md:grid-cols-2">
+              <li className="px-3 py-2 rounded-lg bg-slate-100">Transmission: {car.transmission || "N/A"}</li>
+              <li className="px-3 py-2 rounded-lg bg-slate-100">Fuel Type: {car.fuelType || "N/A"}</li>
+              <li className="px-3 py-2 rounded-lg bg-slate-100">Brand: {car.brand || "N/A"}</li>
+              <li className="px-3 py-2 rounded-lg bg-slate-100">Model: {car.model || "N/A"}</li>
             </ul>
-          </div>
-        </div>
+          </section>
 
-        {/* Specifications */}
-        <div className="pt-12 mt-12 border-t">
-          <h2 className="text-3xl font-bold">Specifications</h2>
+          <section className="p-6 bg-white border shadow-sm lg:col-span-5 rounded-2xl border-slate-200">
+            <h2 className="text-xl font-bold text-slate-900">Seller Information</h2>
 
-          <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-2">
-            <div className="p-4 border rounded-xl">
-              <p className="text-sm text-gray-500">Brand</p>
-              <p className="mt-1 font-semibold">{car.brand}</p>
-            </div>
-
-            <div className="p-4 border rounded-xl">
-              <p className="text-sm text-gray-500">Model</p>
-              <p className="mt-1 font-semibold">{car.model}</p>
-            </div>
-
-            <div className="p-4 border rounded-xl">
-              <p className="text-sm text-gray-500">Year</p>
-              <p className="mt-1 font-semibold">{car.year}</p>
-            </div>
-
-            <div className="p-4 border rounded-xl">
-              <p className="text-sm text-gray-500">Mileage</p>
-              <p className="mt-1 font-semibold">{car.mileage}</p>
-            </div>
-
-            <div className="p-4 border rounded-xl">
-              <p className="text-sm text-gray-500">Fuel Type</p>
-              <p className="mt-1 font-semibold">{car.fuelType}</p>
-            </div>
-
-            <div className="p-4 border rounded-xl">
-              <p className="text-sm text-gray-500">Transmission</p>
-              <p className="mt-1 font-semibold">{car.transmission}</p>
-            </div>
-
-            <div className="p-4 border rounded-xl">
-              <p className="text-sm text-gray-500">Condition</p>
-              <p className="mt-1 font-semibold">{car.condition || "N/A"}</p>
-            </div>
-
-            <div className="p-4 border rounded-xl">
-              <p className="text-sm text-gray-500">Service History</p>
-              <p className="mt-1 font-semibold">
-                {car.serviceHistory || "N/A"}
+            <div className="mt-4 space-y-2 text-sm text-slate-700">
+              <p>
+                <span className="font-semibold text-slate-900">Name:</span> {car?.contact?.name || "N/A"}
+              </p>
+              <p>
+                <span className="font-semibold text-slate-900">Phone:</span> {car?.contact?.phone || "Not provided"}
+              </p>
+              <p>
+                <span className="font-semibold text-slate-900">Location:</span> {car?.location?.city || "N/A"}
+                {car?.location?.district ? `, ${car.location.district}` : ""}
               </p>
             </div>
-          </div>
+
+            <div className="grid grid-cols-1 gap-3 mt-5 sm:grid-cols-2">
+              <a
+                href={canCall ? `tel:${safePhone}` : "#"}
+                className={`py-3 text-center rounded-xl font-medium transition ${
+                  canCall
+                    ? "bg-slate-900 text-white hover:bg-slate-800"
+                    : "bg-slate-200 text-slate-500 pointer-events-none"
+                }`}
+              >
+                Call Now
+              </a>
+
+              <a
+                href={canCall ? `https://wa.me/${whatsappPhone}` : "#"}
+                target="_blank"
+                rel="noreferrer"
+                className={`py-3 text-center rounded-xl font-medium transition ${
+                  canCall
+                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                    : "bg-slate-200 text-slate-500 pointer-events-none"
+                }`}
+              >
+                WhatsApp
+              </a>
+            </div>
+          </section>
         </div>
 
-        {/* AutoTrust Section */}
-        <div className="pt-12 mt-12 border-t">
-          <h2 className="text-3xl font-bold">Trust Evaluation</h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Based on listing quality and vehicle data
-          </p>
+        <section className="p-6 mt-6 bg-white border shadow-sm rounded-2xl border-slate-200">
+          <h2 className="text-xl font-bold text-slate-900">Specifications</h2>
+          <div className="grid grid-cols-1 gap-3 mt-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="p-4 rounded-xl bg-slate-100">
+              <p className="text-xs text-slate-500">Brand</p>
+              <p className="mt-1 font-semibold text-slate-900">{car.brand || "N/A"}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-100">
+              <p className="text-xs text-slate-500">Model</p>
+              <p className="mt-1 font-semibold text-slate-900">{car.model || "N/A"}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-100">
+              <p className="text-xs text-slate-500">Year</p>
+              <p className="mt-1 font-semibold text-slate-900">{car.year || "N/A"}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-100">
+              <p className="text-xs text-slate-500">Mileage</p>
+              <p className="mt-1 font-semibold text-slate-900">{car.mileage || "N/A"}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-100">
+              <p className="text-xs text-slate-500">Fuel Type</p>
+              <p className="mt-1 font-semibold text-slate-900">{car.fuelType || "N/A"}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-100">
+              <p className="text-xs text-slate-500">Transmission</p>
+              <p className="mt-1 font-semibold text-slate-900">{car.transmission || "N/A"}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-100">
+              <p className="text-xs text-slate-500">Condition</p>
+              <p className="mt-1 font-semibold text-slate-900">{car.condition || "N/A"}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-100">
+              <p className="text-xs text-slate-500">Service History</p>
+              <p className="mt-1 font-semibold text-slate-900">{car.serviceHistory || "N/A"}</p>
+            </div>
+          </div>
+        </section>
 
-          <div className="flex items-center gap-4 mt-6">
+        <section className="p-6 mt-6 bg-white border shadow-sm rounded-2xl border-slate-200">
+          <h2 className="text-xl font-bold text-slate-900">Trust Evaluation</h2>
+          <p className="mt-1 text-sm text-slate-500">Based on listing quality and vehicle data</p>
+
+          <div className="flex flex-wrap items-center gap-3 mt-4">
             <div
-              className={`px-6 py-3 rounded-xl font-bold text-lg ${getGradeColor(
+              className={`px-4 py-2 rounded-xl font-bold text-sm ${getGradeColor(
                 car.autoTrustGrade
               )}`}
             >
@@ -257,7 +310,7 @@ function CarDetails() {
             </div>
 
             <div
-              className={`px-5 py-3 rounded-xl font-semibold ${getTrustColor(
+              className={`px-4 py-2 rounded-xl font-semibold text-sm ${getTrustColor(
                 car.trustLevel
               )}`}
             >
@@ -265,68 +318,45 @@ function CarDetails() {
             </div>
           </div>
 
-          <p className="mt-4 text-sm text-gray-500">
-            This rating reflects how complete and reliable this listing appears.
-          </p>
-
           {car.autoTrustCheckResults && (
-            <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-2">
-              <div className="p-5 border shadow-sm rounded-2xl">
-                <h3 className="text-lg font-semibold">📋 Listing Completeness</h3>
-                <p className="mt-2 text-gray-600">
+            <div className="grid grid-cols-1 gap-3 mt-5 md:grid-cols-2 xl:grid-cols-3">
+              <div className="p-4 border rounded-xl border-slate-200">
+                <h3 className="font-semibold text-slate-900">Listing Completeness</h3>
+                <p className="mt-1 text-sm text-slate-600">
                   {car.autoTrustCheckResults.completeness?.reason || "No data"}
                 </p>
               </div>
 
-              <div className="p-5 border shadow-sm rounded-2xl">
-                <h3 className="text-lg font-semibold">📸 Visual Evidence</h3>
-                <p className="mt-2 text-gray-600">
+              <div className="p-4 border rounded-xl border-slate-200">
+                <h3 className="font-semibold text-slate-900">Visual Evidence</h3>
+                <p className="mt-1 text-sm text-slate-600">
                   {car.autoTrustCheckResults.visual?.reason || "No data"}
                 </p>
               </div>
 
-              <div className="p-5 border shadow-sm rounded-2xl">
-                <h3 className="text-lg font-semibold">📊 Usage Reality</h3>
-                <p className="mt-2 text-gray-600">
+              <div className="p-4 border rounded-xl border-slate-200">
+                <h3 className="font-semibold text-slate-900">Usage Reality</h3>
+                <p className="mt-1 text-sm text-slate-600">
                   {car.autoTrustCheckResults.usage?.reason || "No data"}
                 </p>
               </div>
 
-              <div className="p-5 border shadow-sm rounded-2xl">
-                <h3 className="text-lg font-semibold">🛠 Maintenance</h3>
-                <p className="mt-2 text-gray-600">
+              <div className="p-4 border rounded-xl border-slate-200">
+                <h3 className="font-semibold text-slate-900">Maintenance</h3>
+                <p className="mt-1 text-sm text-slate-600">
                   {car.autoTrustCheckResults.maintenance?.reason || "No data"}
                 </p>
               </div>
 
-              <div className="p-5 border shadow-sm rounded-2xl md:col-span-2">
-                <h3 className="text-lg font-semibold">🔄 Listing Stability</h3>
-                <p className="mt-2 text-gray-600">
+              <div className="p-4 border rounded-xl border-slate-200 md:col-span-2 xl:col-span-2">
+                <h3 className="font-semibold text-slate-900">Listing Stability</h3>
+                <p className="mt-1 text-sm text-slate-600">
                   {car.autoTrustCheckResults.stability?.reason || "No data"}
                 </p>
               </div>
             </div>
           )}
-        </div>
-
-        {/* Seller / Location */}
-        <div className="pt-12 mt-12 border-t">
-          <h2 className="text-3xl font-bold">Seller Information</h2>
-
-          <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-2">
-            <div className="p-6 border rounded-2xl">
-              <h3 className="text-xl font-semibold">Seller ID</h3>
-              <p className="mt-3 text-gray-600">{car.sellerClerkId}</p>
-            </div>
-
-            <div className="p-6 border rounded-2xl">
-              <h3 className="text-xl font-semibold">Availability</h3>
-              <p className="mt-3 text-gray-600">
-                Contact seller to confirm test drive and viewing times.
-              </p>
-            </div>
-          </div>
-        </div>
+        </section>
       </div>
     </div>
   );

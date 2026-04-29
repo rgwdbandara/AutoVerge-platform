@@ -1,20 +1,20 @@
 
 import { Link } from "react-router-dom";
 
-import honda from "../../assets/logos/bmw.webp";
-import bmw from "../../assets/logos/ford.webp";
-import hyundai from "../../assets/logos/honda.webp";
-import ford from "../../assets/logos/hyundai.webp";
-import tesla from "../../assets/logos/mahindra.webp";
-import toyota from "../../assets/logos/tata.webp";
+import bmw from "../../assets/logos/bmw.webp";
+import ford from "../../assets/logos/ford.webp";
+import honda from "../../assets/logos/honda.webp";
+import hyundai from "../../assets/logos/hyundai.webp";
+import mahindra from "../../assets/logos/mahindra.webp";
+import tata from "../../assets/logos/tata.webp";
 
 const makes = [
-  { name: "Toyota", image: toyota },
-  { name: "Honda", image: honda },
   { name: "BMW", image: bmw },
-  { name: "Hyundai", image: hyundai },
   { name: "Ford", image: ford },
-  { name: "Tesla", image: tesla },
+  { name: "Honda", image: honda },
+  { name: "Hyundai", image: hyundai },
+  { name: "Mahindra", image: mahindra },
+  { name: "Tata", image: tata },
 ];
 
 
