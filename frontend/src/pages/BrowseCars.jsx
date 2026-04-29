@@ -11,37 +11,59 @@ const transmissions = ["Automatic","Manual","Semi-Automatic"];
 function BrowseCars() {
   const api = useApi();
 
+  // search state
+  const [search, setSearch] = useState("");
+
   // filters state
-  const [selectedMake, setSelectedMake] = useState([]);
-  const [selectedBody, setSelectedBody] = useState([]);
-  const [selectedFuel, setSelectedFuel] = useState([]);
-  const [selectedTransmission, setSelectedTransmission] = useState([]);
-  const [price, setPrice] = useState(200000);
+  const [filters, setFilters] = useState({
+    make: "",
+    bodyType: "",
+    fuelType: "",
+    transmission: "",
+    maxPrice: "",
+  });
 
   // results state
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const toggle = (value, list, setter) => {
-    if (list.includes(value)) {
-      setter(list.filter(v => v !== value));
-    } else {
-      setter([...list, value]);
+  // Load all cars on component mount
+  useEffect(() => {
+    const loadAllCars = async () => {
+      setLoading(true);
+      try {
+        const data = await api("/api/vehicles");
+        setCars(data);
+      } catch (err) {
+        console.error("Failed to load cars:", err);
+      }
+      setLoading(false);
+    };
+    loadAllCars();
+  }, [api]);
+
+  const clearAll = async () => {
+    setSearch("");
+    setFilters({
+      make: "",
+      bodyType: "",
+      fuelType: "",
+      transmission: "",
+      maxPrice: "",
+    });
+    // Reload all cars
+    setLoading(true);
+    try {
+      const data = await api("/api/vehicles");
+      setCars(data);
+    } catch {
+      console.error("Failed to load cars");
     }
+    setLoading(false);
   };
-
-  const clearAll = () => {
-    setSelectedMake([]);
-    setSelectedBody([]);
-    setSelectedFuel([]);
-    setSelectedTransmission([]);
-    setPrice(200000);
-  };
-
 
   const tagStyle = (active) =>
-    `px-3 py-1 rounded-lg border cursor-pointer text-sm\n     ${active ? "bg-blue-100 border-blue-400" : "bg-gray-100"}`;
-
+    `px-3 py-1 rounded-lg border cursor-pointer text-sm     ${active ? "bg-blue-100 border-blue-400" : "bg-gray-100"}`;
 
   // Fetch cars with dynamic query string
   const fetchCars = async () => {
@@ -50,37 +72,44 @@ function BrowseCars() {
     try {
       const params = new URLSearchParams();
 
-      if (selectedMake.length)
-        params.append("make", selectedMake.join(","));
-
-      if (selectedBody.length)
-        params.append("bodyType", selectedBody.join(","));
-
-      if (selectedFuel.length)
-        params.append("fuelType", selectedFuel.join(","));
-
-      if (selectedTransmission.length)
-        params.append("transmission", selectedTransmission.join(","));
-
-      if (price)
-        params.append("maxPrice", price);
-
-      params.set("status", "active");
+      if (search) params.append("search", search);
+      if (filters.make) params.append("make", filters.make);
+      if (filters.bodyType) params.append("bodyType", filters.bodyType);
+      if (filters.fuelType) params.append("fuelType", filters.fuelType);
+      if (filters.transmission) params.append("transmission", filters.transmission);
+      if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
 
       const data = await api(`/api/vehicles?${params.toString()}`);
       setCars(data);
-    } catch (err) {
+    } catch {
       console.error("Search failed");
     }
 
     setLoading(false);
   };
 
-
   return (
     <div className="px-6 py-10 mx-auto max-w-7xl">
 
       <h1 className="mb-8 text-4xl font-bold text-blue-600">Browse Cars</h1>
+
+      {/* SEARCH BAR */}
+      <div className="flex gap-3 mb-6">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && fetchCars()}
+          placeholder="Search by make, model, fuel, location..."
+          className="w-full px-4 py-3 border rounded-xl"
+        />
+
+        <button
+          onClick={fetchCars}
+          className="px-6 py-3 text-white bg-black rounded-xl hover:bg-gray-900"
+        >
+          Search
+        </button>
+      </div>
 
       <div className="grid grid-cols-4 gap-8">
 
@@ -94,18 +123,18 @@ function BrowseCars() {
 
           {/* PRICE */}
           <div>
-            <p className="mb-2 font-semibold">Price Range</p>
+            <p className="mb-4 font-semibold">Price Range</p>
             <input
               type="range"
               min="10000"
-              max="200000"
-              value={price}
-              onChange={(e)=>setPrice(e.target.value)}
+              max="10000000"
+              value={filters.maxPrice || "10000000"}
+              onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
               className="w-full"
             />
-            <div className="flex justify-between mt-1 text-sm">
-              <span>$10000</span>
-              <span>${price}</span>
+            <div className="flex justify-between mt-3 text-sm text-gray-600">
+              <span>LKR 10,000</span>
+              <span>LKR {filters.maxPrice ? Number(filters.maxPrice).toLocaleString() : "10,000,000"}</span>
             </div>
           </div>
 
@@ -116,8 +145,8 @@ function BrowseCars() {
               {makes.map(m => (
                 <span
                   key={m}
-                  className={tagStyle(selectedMake.includes(m))}
-                  onClick={()=>toggle(m, selectedMake, setSelectedMake)}
+                  className={tagStyle(filters.make === m)}
+                  onClick={() => setFilters({ ...filters, make: filters.make === m ? "" : m })}
                 >
                   {m}
                 </span>
@@ -132,8 +161,8 @@ function BrowseCars() {
               {bodyTypes.map(b => (
                 <span
                   key={b}
-                  className={tagStyle(selectedBody.includes(b))}
-                  onClick={()=>toggle(b, selectedBody, setSelectedBody)}
+                  className={tagStyle(filters.bodyType === b)}
+                  onClick={() => setFilters({ ...filters, bodyType: filters.bodyType === b ? "" : b })}
                 >
                   {b}
                 </span>
@@ -148,8 +177,8 @@ function BrowseCars() {
               {fuelTypes.map(f => (
                 <span
                   key={f}
-                  className={tagStyle(selectedFuel.includes(f))}
-                  onClick={()=>toggle(f, selectedFuel, setSelectedFuel)}
+                  className={tagStyle(filters.fuelType === f)}
+                  onClick={() => setFilters({ ...filters, fuelType: filters.fuelType === f ? "" : f })}
                 >
                   {f}
                 </span>
@@ -164,8 +193,8 @@ function BrowseCars() {
               {transmissions.map(t => (
                 <span
                   key={t}
-                  className={tagStyle(selectedTransmission.includes(t))}
-                  onClick={()=>toggle(t, selectedTransmission, setSelectedTransmission)}
+                  className={tagStyle(filters.transmission === t)}
+                  onClick={() => setFilters({ ...filters, transmission: filters.transmission === t ? "" : t })}
                 >
                   {t}
                 </span>
