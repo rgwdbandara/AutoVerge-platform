@@ -20,6 +20,7 @@ import ProfileHome from "./pages/ProfileHome";
 import ManageProfile from "./pages/ManageProfile";
 import ExpiredAds from "./pages/seller/ExpiredAds";
 import PendingAds from "./pages/seller/PendingAds";
+import MyFavorites from "./pages/MyFavorites";
 
 // Sell Landing Page
 import Sell from "./pages/Sell";
@@ -54,6 +55,7 @@ function App() {
             <Route index element={<ProfileHome />} />
             <Route path="manage" element={<ManageProfile />} />
             <Route path="my-cars" element={<MyCars />} />
+            <Route path="favorites" element={<MyFavorites />} />
             <Route path="expired" element={<ExpiredAds />} />
             <Route path="pending" element={<PendingAds />} />
           </Route>

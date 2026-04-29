@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Heart } from "lucide-react";
 
 function CarCard({ car }) {
   const firstImage =
@@ -6,14 +8,55 @@ function CarCard({ car }) {
       ? car.images?.[0]
       : car.images?.[0]?.url;
 
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    setIsFavorite(favorites.includes(car._id));
+  }, [car._id]);
+
+  // Toggle favorite
+  const toggleFavorite = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    
+    if (isFavorite) {
+      // Remove from favorites
+      const updated = favorites.filter(id => id !== car._id);
+      localStorage.setItem("favorites", JSON.stringify(updated));
+      setIsFavorite(false);
+    } else {
+      // Add to favorites
+      favorites.push(car._id);
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+      setIsFavorite(true);
+    }
+  };
+
   return (
     <Link to={`/cars/${car._id}`}>
       <div className="overflow-hidden transition bg-white shadow cursor-pointer rounded-xl hover:shadow-lg">
-        {/* Image */}
-        <img
-          src={firstImage || "https://via.placeholder.com/400"}
-          className="object-cover w-full h-52"
-        />
+        {/* Image Container */}
+        <div className="relative">
+          <img
+            src={firstImage || "https://via.placeholder.com/400"}
+            className="object-cover w-full h-52"
+          />
+
+          {/* Heart Icon */}
+          <button
+            onClick={toggleFavorite}
+            className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition"
+          >
+            <Heart
+              size={20}
+              className={`transition ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-400 hover:text-red-500"}`}
+            />
+          </button>
+        </div>
 
         {/* Info */}
         <div className="p-4">

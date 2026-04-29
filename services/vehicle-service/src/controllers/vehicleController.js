@@ -101,9 +101,18 @@ exports.updateListing = async (req, res) => {
       ? await generateImageEmbeddings(req.body.images)
       : oldVehicle.images;
 
+    // Preserve existing contact info if not provided in update
+    const userEmail = req.user?.email || req.user?.primary_email_address || "";
+    const contact = {
+      name: req.body?.contact?.name || oldVehicle.contact?.name || "",
+      email: req.body?.contact?.email || oldVehicle.contact?.email || userEmail,
+      phone: req.body?.contact?.phone || oldVehicle.contact?.phone || "",
+    };
+
     const updatedData = {
       ...req.body,
       images: enrichedImages,
+      contact,
     };
 
     const autoTrustResult = await evaluateAutoTrust(updatedData, oldVehicle);
@@ -251,12 +260,57 @@ exports.getSingleListing = async (req, res) => {
 
 exports.getAllListings = async (req, res) => {
   try {
-    const vehicles = await Vehicle.find({ status: "active" }).sort({
-      createdAt: -1,
-    });
+    const {
+      search,
+      make,
+      bodyType,
+      fuelType,
+      transmission,
+      minPrice,
+      maxPrice,
+    } = req.query;
+
+    const query = {
+      status: "active",
+    };
+
+    // price filter
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    // exact filters
+    if (make) query.brand = { $regex: make, $options: "i" };
+    if (bodyType) query.bodyType = { $regex: bodyType, $options: "i" };
+    if (fuelType) query.fuelType = { $regex: fuelType, $options: "i" };
+    if (transmission) query.transmission = { $regex: transmission, $options: "i" };
+
+    // smart search
+    if (search) {
+      const words = search.trim().split(/\s+/);
+
+      query.$and = words.map((word) => ({
+        $or: [
+          { title: { $regex: word, $options: "i" } },
+          { brand: { $regex: word, $options: "i" } },
+          { model: { $regex: word, $options: "i" } },
+          { fuelType: { $regex: word, $options: "i" } },
+          { transmission: { $regex: word, $options: "i" } },
+          { bodyType: { $regex: word, $options: "i" } },
+          { description: { $regex: word, $options: "i" } },
+          { "location.city": { $regex: word, $options: "i" } },
+          { "location.district": { $regex: word, $options: "i" } },
+        ],
+      }));
+    }
+
+    const vehicles = await Vehicle.find(query).sort({ createdAt: -1 });
 
     res.json(vehicles);
   } catch (error) {
+    console.error("FILTER ERROR:", error);
     res.status(500).json({ message: "Failed to fetch listings" });
   }
 };
@@ -353,6 +407,9 @@ exports.createListing = async (req, res) => {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
+    // Use user email from auth token as fallback for contact email
+    const userEmail = req.user?.email || req.user?.primary_email_address || "";
+
     const vehicleData = {
       sellerClerkId,
       status: "pending",
@@ -378,7 +435,7 @@ exports.createListing = async (req, res) => {
       extraFeatures: req.body.extraFeatures,
       contact: {
         name: req.body?.contact?.name || "",
-        email: req.body?.contact?.email || "",
+        email: req.body?.contact?.email || userEmail,
         phone: req.body?.contact?.phone || "",
       },
       location: {

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/clerk-react";
 import { useApi } from "../../lib/api";
 import { uploadToCloudinary } from "../../lib/cloudinary";
 
 function ManualEntryForm({ initialData, onSubmit, isEdit }) {
   const api = useApi();
+  const { user } = useUser();
 
   const [form, setForm] = useState({
     make: "",
@@ -58,8 +60,15 @@ function ManualEntryForm({ initialData, onSubmit, isEdit }) {
         city: initialData.location?.city || "",
         district: initialData.location?.district || "",
       });
+    } else if (user) {
+      // Auto-populate contact info from Clerk user profile if creating new listing
+      setForm((prev) => ({
+        ...prev,
+        contactName: prev.contactName || user.firstName || user.fullName || "",
+        contactEmail: prev.contactEmail || user.primaryEmailAddress?.emailAddress || "",
+      }));
     }
-  }, [initialData]);
+  }, [initialData, user]);
 
   const [selectedImages, setSelectedImages] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -298,6 +307,7 @@ location: {
             <option value="Convertible">Convertible</option>
             <option value="Coupe">Coupe</option>
             <option value="Wagon">Wagon</option>
+            <option value="Liftback">Liftback</option>
           </select>
           <input
             name="seats"
@@ -439,6 +449,7 @@ location: {
       <option value="Anuradhapura">Anuradhapura</option>
       <option value="Matara">Matara</option>
       <option value="Ratnapura">Ratnapura</option>
+      <option value="Kegalle">Kegalle</option>
     </select>
 
   </div>
