@@ -10,6 +10,7 @@ function DashboardLayout() {
     { name: "My Account", path: "/profile" },
     { name: "Manage Profile", path: "/profile/manage" },
     { name: "My Listings", path: "/profile/my-cars" },
+    { name: "❤️ My Favorites", path: "/profile/favorites" },
     { name: "Pending Ads", path: "/profile/pending" },
     { name: "Expired Ads", path: "/profile/expired" },
     { name: "Phone Numbers", path: "/profile/phone" },

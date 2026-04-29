@@ -1,11 +1,14 @@
 import { useUser, useClerk } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import MyCars from "./seller/MyCars";
+import MyFavorites from "./MyFavorites";
 
 function Profile() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState("my-account");
 
   return (
     <div className="min-h-screen px-4 pt-20 bg-gray-100 md:px-6">
@@ -19,15 +22,21 @@ function Profile() {
 
           <div className="space-y-4 text-gray-700">
 
-            <div className="flex items-center justify-between cursor-pointer hover:text-blue-600">
-              <span className="font-medium">My Account</span>
+            <button
+              type="button"
+              onClick={() => setActiveSection("my-account")}
+              className={`flex items-center justify-between w-full cursor-pointer transition ${
+                activeSection === "my-account" ? "text-blue-600 font-medium" : "hover:text-blue-600"
+              }`}
+            >
+              <span>My Account</span>
               <span>›</span>
-            </div>
+            </button>
 
             <button
               type="button"
               onClick={() => navigate("/profile/manage")}
-              className="flex items-center justify-between w-full hover:text-blue-600"
+              className="flex items-center justify-between w-full transition hover:text-blue-600"
             >
               <span>Manage Profile</span>
               <span>›</span>
@@ -35,22 +44,30 @@ function Profile() {
 
             <button
               type="button"
+              onClick={() => setActiveSection("my-favorites")}
+              className={`flex items-center justify-between w-full cursor-pointer transition ${
+                activeSection === "my-favorites" ? "text-blue-600 font-medium" : "hover:text-blue-600"
+              }`}
+            >
+              <span>❤️ My Favorites</span>
+              <span>›</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => navigate("/profile/expired-ads")}
-              className="flex items-center justify-between w-full hover:text-blue-600"
+              className="flex items-center justify-between w-full transition hover:text-blue-600"
             >
               <span>Expired Ads</span>
               <span>›</span>
             </button>
 
-            <div className="flex items-center justify-between cursor-pointer hover:text-blue-600">
+            <div className="flex items-center justify-between transition cursor-pointer hover:text-blue-600">
               <span>Pending Ads</span>
               <span>›</span>
             </div>
 
-            <div className="flex items-center justify-between cursor-pointer hover:text-blue-600">
-              <span>Phone Numbers</span>
-              <span>›</span>
-            </div>
+           
 
           </div>
 
@@ -74,7 +91,8 @@ function Profile() {
 
           <hr className="mb-10" />
 
-          <MyCars />
+          {activeSection === "my-account" && <MyCars />}
+          {activeSection === "my-favorites" && <MyFavorites />}
         </div>
 
       </div>
