@@ -1,11 +1,11 @@
 const Vehicle = require("../models/Vehicle");
 const evaluateAutoTrust = require("../../autotrust");
 const searchVehiclesByImage = require("../imageSearch/searchByImage");
-const prepareImageForSearch = require("../imageSearch/prepareImageForSearch");
-const extractFeaturesFromCNNService = require("../imageSearch/cnnClient");
 const generateImageEmbeddings = require("../imageSearch/generateImageEmbeddings");
-const detectViewTypeFromFile = require("../imageSearch/detectViewTypeFromFile");
-const analyzeImageMetaFromFile = require("../imageSearch/analyzeImageMetaFromFile");
+const analyzeImageWithGPT = require("../services/openaiVisionService");
+const extractFeaturesFromFile = require("../imageSearch/extractFeaturesFromFile");
+
+
 
 const ADMIN_EMAILS = [
   "admin@gmail.com",
@@ -465,56 +465,38 @@ exports.createListing = async (req, res) => {
 
 exports.searchByImage = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "Image file is required" });
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: "No image uploaded" });
     }
 
-    const preparedImage = await prepareImageForSearch(req.file);
+    // 🔥 1. GPT (optional hint)
+    const detected = await analyzeImageWithGPT(file);
+    console.log("🤖 GPT:", detected);
 
-    const cnnResponse = await extractFeaturesFromCNNService(req.file);
-    const metaResponse = await analyzeImageMetaFromFile(req.file);
+    // 🔥 2. CNN features (MOST IMPORTANT)
+    const featureData = await extractFeaturesFromFile(file);
+    const featureVector = featureData.feature_vector;
 
-    const queryViewType = metaResponse.view_type || "unknown";
-    const queryIsExterior =
-      typeof metaResponse.is_exterior === "boolean"
-        ? metaResponse.is_exterior
-        : true;
-    const queryBodyTypeHint = "unknown";
+    console.log("🧠 VECTOR:", featureVector.length);
 
-    const matches = await searchVehiclesByImage(
-      cnnResponse.feature_vector,
-      queryViewType,
-      queryIsExterior,
-      queryBodyTypeHint
+    // 🔥 3. Search
+    const results = await searchVehiclesByImage(
+      featureVector,
+      "unknown",
+      true,
+      detected
     );
 
-    res.status(200).json({
-      message: "Similar vehicles found successfully",
-      uploadedImage: {
-        originalName: preparedImage.originalName,
-        mimeType: preparedImage.mimeType,
-        size: preparedImage.size,
-      },
-      queryAnalysis: {
-        detectedViewType: queryViewType,
-        isExterior: queryIsExterior,
-        bodyTypeHint: queryBodyTypeHint,
-      },
-      cnn: {
-        filename: cnnResponse.filename,
-        contentType: cnnResponse.content_type,
-        featureLength: cnnResponse.feature_length,
-        cropStrategy: cnnResponse.crop_strategy,
-        featureVectorPreview: cnnResponse.feature_vector_preview,
-      },
-      totalMatches: matches.length,
-      matches,
+    res.json({
+      success: true,
+      detected,
+      totalMatches: results.length,
+      results,
     });
-  } catch (error) {
-    console.error("IMAGE SEARCH ERROR:", error.message);
-    res.status(500).json({
-      message: "Failed to search by image",
-      error: error.message,
-    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Search failed" });
   }
 };

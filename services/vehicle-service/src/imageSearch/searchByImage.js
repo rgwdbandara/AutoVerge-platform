@@ -1,184 +1,155 @@
 const Vehicle = require("../models/Vehicle");
 const cosineSimilarity = require("./cosineSimilarity");
-const getSimilarityLabel = require("./similarityLabel");
-const analyzeMatch = require("./matchAnalyzer");
 
-const getCompatibleViewTypes = (queryViewType) => {
-  switch (queryViewType) {
-    case "front":
-      return ["front", "angled", "unknown"];
-    case "rear":
-      return ["rear", "angled", "unknown"];
-    case "side":
-      return ["side", "angled", "unknown"];
-    case "angled":
-      return ["angled", "front", "rear", "side", "unknown"];
-    case "interior":
-      return ["interior", "unknown"];
-    default:
-      return ["front", "rear", "side", "angled", "interior", "unknown"];
-  }
+const normalize = (str) =>
+  (str || "")
+    .toString()
+    .toLowerCase()
+    .replace(/[-\s]/g, "")
+    .replace(/[^a-z0-9]/g, "");
+
+const brandAliases = {
+  mercedes: "mercedesbenz",
+  mercedesbenz: "mercedesbenz",
+  benz: "mercedesbenz",
 };
 
-const isCompatibleBodyType = (queryBodyTypeHint, imageBodyTypeHint) => {
-  if (queryBodyTypeHint === "unknown" || imageBodyTypeHint === "unknown") {
-    return true;
+const normalizeBrand = (brand) => {
+  const clean = normalize(brand);
+  return brandAliases[clean] || clean;
+};
+
+const isModelRelated = (detectedModel, vehicleModel) => {
+  const detected = normalize(detectedModel);
+  const vehicle = normalize(vehicleModel);
+
+  if (!detected || !vehicle) return false;
+  if (detected === vehicle) return true;
+  if (detected.includes(vehicle) || vehicle.includes(detected)) return true;
+
+  const detectedParts = detected.split(/(?=\d)|(?<=\d)/).filter(Boolean);
+  const vehicleParts = vehicle.split(/(?=\d)|(?<=\d)/).filter(Boolean);
+
+  return (
+    detectedParts.some((part) => vehicle.includes(part)) ||
+    vehicleParts.some((part) => detected.includes(part))
+  );
+};
+
+const parseArgs = (arg2, arg3, arg4) => {
+  if (arg2 && typeof arg2 === "object" && !Array.isArray(arg2)) {
+    return {
+      detected: arg2,
+      queryViewType: arg3 ?? "unknown",
+      queryIsExterior: arg4 ?? true,
+    };
   }
 
-  const groupMap = {
-    sedan: ["sedan", "hatchback"],
-    hatchback: ["hatchback", "sedan"],
-    suv: ["suv", "pickup"],
-    pickup: ["pickup", "suv"],
-    van: ["van"],
+  return {
+    detected: arg4 ?? {},
+    queryViewType: arg2 ?? "unknown",
+    queryIsExterior: arg3 ?? true,
   };
-
-  return groupMap[queryBodyTypeHint]?.includes(imageBodyTypeHint) || false;
 };
 
 const searchVehiclesByImage = async (
   queryFeatureVector,
-  queryViewType = "unknown",
-  queryIsExterior = true,
-  queryBodyTypeHint = "unknown"
+  arg2,
+  arg3,
+  arg4
 ) => {
   if (!Array.isArray(queryFeatureVector) || queryFeatureVector.length === 0) {
-    throw new Error("Valid query feature vector is required");
+    throw new Error("No feature vector");
   }
 
-  const compatibleViewTypes = getCompatibleViewTypes(queryViewType);
+  const { detected, queryViewType, queryIsExterior } = parseArgs(
+    arg2,
+    arg3,
+    arg4
+  );
 
-  const vehicles = await Vehicle.find({
-    status: "active",
-    images: { $exists: true, $ne: [] },
-  }).sort({ createdAt: -1 });
-
-  console.log("QUERY VIEW:", queryViewType);
-  console.log("QUERY EXTERIOR:", queryIsExterior);
-  console.log("QUERY BODY TYPE:", queryBodyTypeHint);
-  console.log("ACTIVE VEHICLES FOUND:", vehicles.length);
-
+  const vehicles = await Vehicle.find({ status: "active" });
   const results = [];
 
   for (const vehicle of vehicles) {
-    let bestScore = -1;
-    let bestMatchedImage = null;
-    let bestMatchedTag = null;
-    let bestMatchedViewType = null;
-    let bestMatchedBodyTypeHint = null;
-    let bestMatchedIsExterior = true;
-
-    const filteredImages = vehicle.images.filter((image) => {
-      if (!image?.url) return false;
-      if (!Array.isArray(image.embedding) || image.embedding.length === 0) return false;
-
-      const imageViewType = image.viewType || "unknown";
-      const imageIsExterior =
-        typeof image.isExterior === "boolean" ? image.isExterior : true;
-      const imageBodyTypeHint = image.bodyTypeHint || "unknown";
-
-      const viewCompatible = compatibleViewTypes.includes(imageViewType);
-      const exteriorCompatible = queryIsExterior === imageIsExterior;
-      const bodyTypeCompatible = isCompatibleBodyType(
-        queryBodyTypeHint,
-        imageBodyTypeHint
-      );
-
-      return viewCompatible && exteriorCompatible && bodyTypeCompatible;
-    });
-
-    let finalImages = filteredImages;
-
-    // fallback: if strict metadata filtering removes everything,
-    // compare with all valid embedded images of that vehicle
-    if (finalImages.length === 0) {
-      finalImages = vehicle.images.filter((image) => {
-        if (!image?.url) return false;
-        if (!Array.isArray(image.embedding) || image.embedding.length === 0) return false;
-        return true;
-      });
-    }
-
-    console.log(
-      `Vehicle ${vehicle.title} -> strict matches: ${filteredImages.length}, fallback usable images: ${finalImages.length}`
-    );
-
-    if (finalImages.length === 0) {
+    if (!Array.isArray(vehicle.images) || vehicle.images.length === 0) {
       continue;
     }
 
-    for (const image of finalImages) {
-      try {
-        if (image.embedding.length !== queryFeatureVector.length) {
-          console.log(
-            `Skipping ${vehicle.title} due to vector length mismatch: query=${queryFeatureVector.length}, image=${image.embedding.length}`
-          );
-          continue;
-        }
+    let bestScore = -1;
+    let bestImage = null;
 
-        const similarityScore = cosineSimilarity(
-          queryFeatureVector,
-          image.embedding
-        );
+    for (const image of vehicle.images) {
+      if (!Array.isArray(image.embedding)) {
+        continue;
+      }
 
-        if (similarityScore > bestScore) {
-          bestScore = similarityScore;
-          bestMatchedImage = image.url;
-          bestMatchedTag = image.tag || null;
-          bestMatchedViewType = image.viewType || "unknown";
-          bestMatchedBodyTypeHint = image.bodyTypeHint || "unknown";
-          bestMatchedIsExterior =
-            typeof image.isExterior === "boolean" ? image.isExterior : true;
+      if (image.embedding.length !== queryFeatureVector.length) {
+        continue;
+      }
+
+      const similarity = cosineSimilarity(queryFeatureVector, image.embedding);
+      let finalScore = similarity * 0.6;
+
+      if (detected?.brand && vehicle.brand) {
+        const dbBrand = normalizeBrand(vehicle.brand);
+        const gptBrand = normalizeBrand(detected.brand);
+
+        if (dbBrand && gptBrand && (dbBrand.includes(gptBrand) || gptBrand.includes(dbBrand))) {
+          finalScore += 0.3;
         }
-      } catch (error) {
-        console.error(
-          `SIMILARITY ERROR for vehicle ${vehicle._id}:`,
-          error.message
-        );
+      }
+
+      if (detected?.type && vehicle.bodyType) {
+        const detectedType = normalize(detected.type);
+        const bodyType = normalize(vehicle.bodyType);
+
+        if (detectedType && bodyType && bodyType.includes(detectedType)) {
+          finalScore += 0.25;
+        }
+      }
+
+      if (detected?.model && vehicle.model) {
+        if (isModelRelated(detected.model, vehicle.model)) {
+          finalScore += 0.2;
+        }
+      }
+
+      if (
+        typeof image.viewType === "string" &&
+        typeof queryViewType === "string" &&
+        image.viewType.toLowerCase() === queryViewType.toLowerCase()
+      ) {
+        finalScore += 0.05;
+      }
+
+      if (
+        typeof image.isExterior === "boolean" &&
+        typeof queryIsExterior === "boolean" &&
+        image.isExterior === queryIsExterior
+      ) {
+        finalScore += 0.05;
+      }
+
+      if (finalScore > bestScore) {
+        bestScore = finalScore;
+        bestImage = image.url;
       }
     }
 
-    if (bestMatchedImage && bestScore >= 0.65) {
-      const analysis = analyzeMatch({
-        similarityScore: bestScore,
-        queryViewType,
-        matchedViewType: bestMatchedViewType,
-        queryBodyTypeHint,
-        matchedBodyTypeHint: bestMatchedBodyTypeHint,
-        queryIsExterior,
-        matchedIsExterior: bestMatchedIsExterior,
-      });
-
+    if (bestImage) {
       results.push({
         _id: vehicle._id,
         title: vehicle.title,
         brand: vehicle.brand,
         model: vehicle.model,
-        year: vehicle.year,
-        price: vehicle.price,
-        bodyType: vehicle.bodyType,
-        trustLevel: vehicle.trustLevel,
-        autoTrustGrade: vehicle.autoTrustGrade,
-        matchedImage: bestMatchedImage,
-        matchedTag: bestMatchedTag,
-        matchedViewType: bestMatchedViewType,
-        matchedBodyTypeHint: bestMatchedBodyTypeHint,
         similarityScore: Number(bestScore.toFixed(4)),
-        similarityLabel: getSimilarityLabel(bestScore),
-        confidenceLevel: analysis.confidenceLevel,
-        explanation: analysis.explanation,
-        matchInsights: analysis.matchInsights,
+        matchedImage: bestImage,
       });
-    } else {
-      console.log(
-        `Vehicle ${vehicle.title} rejected. bestMatchedImage=${!!bestMatchedImage}, bestScore=${bestScore}`
-      );
     }
   }
 
   results.sort((a, b) => b.similarityScore - a.similarityScore);
-
-  console.log("FINAL MATCH COUNT:", results.length);
 
   return results.slice(0, 10);
 };
