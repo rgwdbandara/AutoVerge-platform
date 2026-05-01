@@ -98,35 +98,11 @@ function Hero() {
     }
   };
 
-  const results = searchResponse?.matches || [];
-
-  const getConfidenceBadgeClasses = (confidenceLevel) => {
-    switch (confidenceLevel) {
-      case "Very High":
-        return "bg-emerald-100 text-emerald-700";
-      case "High":
-        return "bg-green-100 text-green-700";
-      case "Medium":
-        return "bg-amber-100 text-amber-700";
-      case "Low":
-        return "bg-red-100 text-red-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
-
-  const getSimilarityBadgeClasses = (similarityLabel) => {
-    switch (similarityLabel) {
-      case "Highly Similar":
-        return "bg-blue-100 text-blue-700";
-      case "Similar":
-        return "bg-indigo-100 text-indigo-700";
-      case "Partial Match":
-        return "bg-yellow-100 text-yellow-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
+  const results = (searchResponse?.results || []).slice(0, 3);
+  const detectedAnalysis = searchResponse?.detected;
+  const analysisDescription =
+    detectedAnalysis?.description ||
+    "The uploaded vehicle image was analyzed and the closest available matches are shown below.";
 
   return (
     <section className="relative overflow-hidden text-white min-h-[92vh] flex items-center">
@@ -293,7 +269,25 @@ function Hero() {
           </div>
         </div>
 
-        {results.length > 0 && (
+        {searchResponse && (
+          <div className="mt-12 text-left">
+            <div className="p-5 mb-8 border shadow-2xl bg-white/12 rounded-3xl border-white/15 backdrop-blur-xl">
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center flex-shrink-0 text-white rounded-full w-11 h-11 bg-white/10 ring-1 ring-white/15">
+                  <Sparkles size={18} />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-200">
+                    Uploaded Image Analysis
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/90 md:text-base">
+                    {analysisDescription}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {results.length > 0 && (
           <div className="mt-12 text-left">
             <div className="flex items-center justify-between gap-4 mb-6">
                   <div>
@@ -323,47 +317,37 @@ function Hero() {
                 </div>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {results.map((car) => (
+              {results.map((car, index) => (
                 <div
-                  key={car._id}
-                  onClick={() => handleCardClick(car._id)}
+                  key={car._id || car.id || `${car.title}-${car.brand}-${car.model}`}
+                  onClick={() => car._id && handleCardClick(car._id)}
                   className="overflow-hidden transition-all duration-300 bg-white shadow-xl cursor-pointer rounded-3xl hover:-translate-y-1 hover:shadow-2xl"
                 >
                       <div className="relative">
                         <img
-                          src={car.matchedImage}
+                          src={car.matchedImage || car.image}
                           alt={car.title}
                           className="object-cover w-full h-56"
                         />
 
-                        <div className="absolute flex flex-wrap gap-2 top-4 left-4">
-                          <span
-                            className={`px-3 py-1 text-xs font-semibold rounded-full ${getConfidenceBadgeClasses(
-                              car.confidenceLevel
-                            )}`}
-                          >
-                            {car.confidenceLevel || "Match"}
-                          </span>
-
-                          <span
-                            className={`px-3 py-1 text-xs font-semibold rounded-full ${getSimilarityBadgeClasses(
-                              car.similarityLabel
-                            )}`}
-                          >
-                            {car.similarityLabel}
-                          </span>
-                        </div>
+                        {index < 3 && (
+                          <div className="absolute flex items-center justify-center font-bold text-white bg-black rounded-full shadow-lg top-3 left-3 w-9 h-9 ring-2 ring-white/20">
+                            {index + 1}
+                          </div>
+                        )}
                       </div>
 
                       <div className="p-5">
                         <div className="flex items-start justify-between gap-3">
-                          <div>
+                          <div className="w-full">
                             <h3 className="text-lg font-bold text-gray-900">
                               {car.title}
                             </h3>
                             <p className="mt-1 text-sm text-gray-500">
                               {car.brand} {car.model} • {car.year}
                             </p>
+
+                            <div className="h-3" />
                           </div>
                         </div>
 
@@ -397,31 +381,14 @@ function Hero() {
                           </div>
                         </div>
 
-                        {car.explanation && (
-                          <div className="p-4 mt-5 border border-blue-100 bg-blue-50 rounded-2xl">
-                            <p className="text-sm leading-6 text-gray-700">
-                              {car.explanation}
-                            </p>
-                          </div>
-                        )}
-
                         <div className="flex flex-wrap gap-2 mt-5">
-                          {car.matchedViewType && (
-                            <span className="px-3 py-1 text-xs text-blue-700 bg-blue-100 rounded-full">
-                              View: {car.matchedViewType}
-                            </span>
-                          )}
-
-                          {car.matchedBodyTypeHint && (
-                            <span className="px-3 py-1 text-xs text-purple-700 bg-purple-100 rounded-full">
-                              Hint: {car.matchedBodyTypeHint}
-                            </span>
-                          )}
                         </div>
                       </div>
                 </div>
               ))}
             </div>
+          </div>
+            )}
           </div>
         )}
 
