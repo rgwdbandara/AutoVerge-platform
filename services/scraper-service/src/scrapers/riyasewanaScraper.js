@@ -1,5 +1,6 @@
 const puppeteer = require("puppeteer");
 const Listing = require("../models/Listing");
+const ImportedListing = require("../models/ImportedListing");
 
 const scrapeRiyasewana = async () => {
   try {
@@ -32,6 +33,9 @@ const scrapeRiyasewana = async () => {
         const meta =
           el.querySelector(".v-card-meta")?.innerText.trim() || "";
 
+        const imgEl = el.querySelector("img");
+        const image = imgEl ? imgEl.src : null;
+
         const price = Number(priceText.replace(/[^0-9]/g, ""));
 
         const year = Number(yearText.replace(/[^0-9]/g, "")); // ✅ FIXED
@@ -43,6 +47,7 @@ const scrapeRiyasewana = async () => {
             year,
             meta,
             source: "riyasewana",
+            image,
           });
         }
       });
@@ -72,13 +77,38 @@ const scrapeRiyasewana = async () => {
       });
 
       if (!exists) {
-        await Listing.create({
-          ...item,
-          brand,
-          model,
-          mileage,
-        });
-      }
+  const newData = {
+    ...item,
+    brand,
+    model,
+    mileage,
+  };
+
+  // 🔹 price estimation
+  await Listing.create(newData);
+
+  // 🔹 import system
+  const importExists = await ImportedListing.findOne({
+    sourceUrl: item.title + "_" + item.year + "_" + item.price + "_" + Date.now()
+  });
+
+  if (!importExists) {
+   await ImportedListing.create({
+  source: "riyasewana",
+  sourceUrl: item.title + "_" + Date.now(),
+  title: item.title,
+  brand,
+  model,
+  year: item.year,
+  price: item.price,
+  mileage,
+  images: item.image
+    ? [{ url: item.image, tag: "front" }]
+    : [],
+  description: "",
+});
+  }
+}
     }
 
     await browser.close();
