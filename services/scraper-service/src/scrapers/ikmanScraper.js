@@ -1,5 +1,6 @@
 const puppeteer = require("puppeteer");
 const Listing = require("../models/Listing");
+const ImportedListing = require("../models/ImportedListing");
 
 const scrapeIkman = async () => {
   let browser;
@@ -60,6 +61,9 @@ const scrapeIkman = async () => {
 
           const url = link.href;
 
+          const imageEl = link.querySelector("img");
+          const image = imageEl ? imageEl.src : null;
+
           if (titleLine && price) {
             data.push({
               title: titleLine,
@@ -67,6 +71,7 @@ const scrapeIkman = async () => {
               year,
               mileage,
               url,
+              image,
             });
           }
         });
@@ -97,13 +102,39 @@ const scrapeIkman = async () => {
       });
 
       if (!exists) {
-        await Listing.create({
-          ...item,
-          brand,
-          model,
-          source: "ikman",
-        });
-      }
+  const newData = {
+    ...item,
+    brand,
+    model,
+    source: "ikman",
+  };
+
+  // 🔹 save for price estimation
+  await Listing.create(newData);
+
+  // 🔹 save for import system
+  const importExists = await ImportedListing.findOne({
+  source: "ikman",
+  sourceUrl: item.url,
+});
+
+  if (!importExists) {
+    await ImportedListing.create({
+  source: "ikman",
+  sourceUrl: item.url + "_" + Date.now(),
+  title: item.title,
+  brand,
+  model,
+  year: item.year,
+  price: item.price,
+  mileage: item.mileage,
+  images: item.image
+    ? [{ url: item.image, tag: "front" }]
+    : [],
+  description: "",
+});
+  }
+}
     }
 
     console.log("✅ Ikman data saved");

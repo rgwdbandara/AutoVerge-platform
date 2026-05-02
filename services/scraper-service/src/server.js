@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const startCronJobs = require("./utils/cronJob");
 
 const app = express();
 
@@ -28,3 +29,6 @@ const PORT = process.env.PORT || 5005;
 app.listen(PORT, () => {
   console.log(`Scraper Service running on port ${PORT}`);
 });
+
+// Start cron jobs
+startCronJobs();
