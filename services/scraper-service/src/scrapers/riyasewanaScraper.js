@@ -2,8 +2,6 @@ const puppeteer = require("puppeteer");
 const Listing = require("../models/Listing");
 const ImportedListing = require("../models/ImportedListing");
 
-const PLACEHOLDER_IMAGE = "https://via.placeholder.com/400x300?text=No+Image";
-
 const scrapeRiyasewana = async () => {
   try {
     console.log("🔄 Scraping Riyasewana...");
@@ -17,21 +15,6 @@ const scrapeRiyasewana = async () => {
 
     await page.waitForSelector(".v-list");
     await new Promise((r) => setTimeout(r, 3000));
-
-    // 📸 Wait for images to load
-    try {
-      await page.waitForSelector("img", { timeout: 5000 }).catch(() => {
-        console.warn("⚠️  No images found on page");
-      });
-    } catch (err) {
-      console.warn("⚠️  Image wait timeout", err.message);
-    }
-
-    // Scroll to load lazy images
-    await page.evaluate(() => {
-      window.scrollBy(0, window.innerHeight * 2);
-    });
-    await new Promise((r) => setTimeout(r, 2000));
 
     const listings = await page.evaluate(() => {
       const data = [];
@@ -50,18 +33,8 @@ const scrapeRiyasewana = async () => {
         const meta =
           el.querySelector(".v-card-meta")?.innerText.trim() || "";
 
-        // Extract image with robust selectors and lazy-loading support
-        let image = null;
         const imgEl = el.querySelector("img");
-        if (imgEl) {
-          // Try src, data-src (lazy loading), or fallback
-          image = imgEl.src || imgEl.dataset.src || imgEl.getAttribute("src");
-        }
-
-        // Debug: log if image is missing
-        if (!image && title) {
-          console.log(`📷 Missing image for: ${title}`);
-        }
+        const image = imgEl ? imgEl.src : null;
 
         const price = Number(priceText.replace(/[^0-9]/g, ""));
 
@@ -83,7 +56,6 @@ const scrapeRiyasewana = async () => {
     });
 
     console.log(`Found ${listings.length} listings`);
-    console.log(`📸 Sample images from Riyasewana:`, listings.slice(0, 3).map(l => ({ title: l.title, image: l.image })));
 
     for (const item of listings) {
       const words = item.title.split(" ");
@@ -130,12 +102,9 @@ const scrapeRiyasewana = async () => {
   year: item.year,
   price: item.price,
   mileage,
-  images: [
-    {
-      url: item.image || PLACEHOLDER_IMAGE,
-      tag: "front",
-    },
-  ],
+  images: item.image
+    ? [{ url: item.image, tag: "front" }]
+    : [],
   description: "",
 });
   }

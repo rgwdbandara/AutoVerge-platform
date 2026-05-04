@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
-import SourceBadge from "./SourceBadge";
 
 function CarCard({ car }) {
   const firstImage =
@@ -9,10 +8,13 @@ function CarCard({ car }) {
       ? car.images?.[0]
       : car.images?.[0]?.url;
 
-  const [isFavorite, setIsFavorite] = useState(() => {
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-    return favorites.includes(car._id);
-  });
+    setIsFavorite(favorites.includes(car._id));
+  }, [car._id]);
 
   // Toggle favorite
   const toggleFavorite = (e) => {
@@ -43,10 +45,6 @@ function CarCard({ car }) {
             src={firstImage || "https://via.placeholder.com/400"}
             className="object-cover w-full h-52"
           />
-
-          <div className="absolute top-3 left-3 z-10">
-            <SourceBadge source={car.source} />
-          </div>
 
           {/* Heart Icon */}
           <button

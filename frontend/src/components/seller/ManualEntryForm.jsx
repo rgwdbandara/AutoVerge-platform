@@ -1,19 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useApi } from "../../lib/api";
 import { uploadToCloudinary } from "../../lib/cloudinary";
-import { useSearchParams } from "react-router-dom";
-import axios from "axios";
-
-
-
-
 
 function ManualEntryForm({ initialData, onSubmit, isEdit }) {
   const api = useApi();
   const { user } = useUser();
-  const [searchParams] = useSearchParams();
-  const importId = searchParams.get("importId");
 
   const [form, setForm] = useState({
     make: "",
@@ -40,80 +32,43 @@ function ManualEntryForm({ initialData, onSubmit, isEdit }) {
     district: "",
   });
 
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        make: initialData.brand || "",
+        model: initialData.model || "",
+        year: initialData.year || "",
+        price: initialData.price || "",
+        mileage: initialData.mileage || "",
+        color: initialData.color || "",
+        fuelType: initialData.fuelType || "",
+        transmission: initialData.transmission || "",
+        bodyType: initialData.bodyType || "",
+        seats: initialData.seats || "",
+        condition: initialData.condition || "",
+        serviceHistory: initialData.serviceHistory || "",
+        accidentHistory: initialData.accidentHistory ? "Yes" : "No",
+        previousOwners: initialData.previousOwners || "",
+        extraFeatures: initialData.extraFeatures || "",
+        description: initialData.description || "",
+        featured: initialData.featured || false,
 
-  const fetchImportedData = useCallback(async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:5005/api/imported/${importId}`
-      );
+        contactName: initialData.contact?.name || "",
+        contactEmail: initialData.contact?.email || "",
+        phone: initialData.contact?.phone || "",
 
-      const data = res.data;
-
+        city: initialData.location?.city || "",
+        district: initialData.location?.district || "",
+      });
+    } else if (user) {
+      // Auto-populate contact info from Clerk user profile if creating new listing
       setForm((prev) => ({
         ...prev,
-
-        make: data.brand || "",
-        model: data.model || "",
-        year: data.year || "",
-        price: data.price || "",
-        mileage: data.mileage || "",
-
-        fuelType: data.fuelType || "",
-        transmission: data.transmission || "",
-        description: data.description || "",
-
-        // defaults (user can edit)
-        condition: "Good",
-        serviceHistory: "Partial Service History",
-        accidentHistory: "No",
+        contactName: prev.contactName || user.firstName || user.fullName || "",
+        contactEmail: prev.contactEmail || user.primaryEmailAddress?.emailAddress || "",
       }));
-    } catch (err) {
-      console.error("Import fetch error:", err);
     }
-  }, [importId]);
-
-  useEffect(() => {
-  if (initialData) {
-    setForm({
-      make: initialData.brand || "",
-      model: initialData.model || "",
-      year: initialData.year || "",
-      price: initialData.price || "",
-      mileage: initialData.mileage || "",
-      color: initialData.color || "",
-      fuelType: initialData.fuelType || "",
-      transmission: initialData.transmission || "",
-      bodyType: initialData.bodyType || "",
-      seats: initialData.seats || "",
-      condition: initialData.condition || "",
-      serviceHistory: initialData.serviceHistory || "",
-      accidentHistory: initialData.accidentHistory ? "Yes" : "No",
-      previousOwners: initialData.previousOwners || "",
-      extraFeatures: initialData.extraFeatures || "",
-      description: initialData.description || "",
-      featured: initialData.featured || false,
-
-      contactName: initialData.contact?.name || "",
-      contactEmail: initialData.contact?.email || "",
-      phone: initialData.contact?.phone || "",
-
-      city: initialData.location?.city || "",
-      district: initialData.location?.district || "",
-    });
-  } else if (importId) {
-    // 🔥 NEW: import flow
-    fetchImportedData();
-  } else if (user) {
-    setForm((prev) => ({
-      ...prev,
-      contactName: prev.contactName || user.firstName || user.fullName || "",
-      contactEmail:
-        prev.contactEmail ||
-        user.primaryEmailAddress?.emailAddress ||
-        "",
-    }));
-  }
-}, [initialData, user, importId, fetchImportedData]);
+  }, [initialData, user]);
 
   const [selectedImages, setSelectedImages] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -188,12 +143,6 @@ function ManualEntryForm({ initialData, onSubmit, isEdit }) {
           tag: image.tag,
         });
       }
-
-      if (importId) {
-  await axios.post(
-    `http://localhost:5005/api/imported/ignore/${importId}`
-  );
-}
 
       const payload = {
         title: `${form.make} ${form.model}`.trim(),

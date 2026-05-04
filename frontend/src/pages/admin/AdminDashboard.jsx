@@ -8,7 +8,6 @@ import {
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import { useApi } from "../../lib/api";
-import { ArrowRight, CircleAlert, CarFront, CircleCheckBig, Clock3 } from "lucide-react";
 
 const COLORS = ["#22c55e", "#facc15", "#ef4444"];
 
@@ -64,50 +63,36 @@ function AdminDashboard() {
   const chartTotal = chartData.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-[32px] font-semibold tracking-tight text-slate-900">
-          Dashboard
-        </h1>
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-[18px] border border-slate-200 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
-          <div className="mb-2 flex items-center gap-2 text-slate-500">
-            <CarFront className="h-4 w-4" />
-            <p>Total Cars</p>
-          </div>
-          <h1 className="text-[32px] font-bold text-slate-900">{stats.total}</h1>
+        <div className="p-5 bg-white shadow rounded-xl">
+          <p className="text-gray-500">Total Cars</p>
+          <h1 className="text-2xl font-bold">{stats.total}</h1>
         </div>
 
-        <div className="rounded-[18px] border border-slate-200 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
-          <div className="mb-2 flex items-center gap-2 text-slate-500">
-            <CircleCheckBig className="h-4 w-4" />
-            <p>Active</p>
-          </div>
-          <h1 className="text-[32px] font-bold text-[#16a34a]">{stats.active}</h1>
+        <div className="p-5 bg-white shadow rounded-xl">
+          <p className="text-gray-500">Active</p>
+          <h1 className="text-2xl font-bold text-green-600">{stats.active}</h1>
         </div>
 
-        <div className="rounded-[18px] border border-slate-200 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
-          <div className="mb-2 flex items-center gap-2 text-slate-500">
-            <Clock3 className="h-4 w-4" />
-            <p>Pending</p>
-          </div>
-          <h1 className="text-[32px] font-bold text-[#f59e0b]">{stats.pending}</h1>
+        <div className="p-5 bg-white shadow rounded-xl">
+          <p className="text-gray-500">Pending</p>
+          <h1 className="text-2xl font-bold text-yellow-500">{stats.pending}</h1>
         </div>
 
-        <div className="rounded-[18px] border border-slate-200 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
-          <div className="mb-2 flex items-center gap-2 text-slate-500">
-            <CircleAlert className="h-4 w-4" />
-            <p>Rejected</p>
-          </div>
-          <h1 className="text-[32px] font-bold text-[#ef4444]">{stats.rejected}</h1>
+        <div className="p-5 bg-white shadow rounded-xl">
+          <p className="text-gray-500">Rejected</p>
+          <h1 className="text-2xl font-bold text-red-500">{stats.rejected}</h1>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <div className="rounded-[18px] border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">Ad Distribution</h2>
+        <div className="p-6 bg-white shadow rounded-xl">
+          <h2 className="mb-4 font-semibold">Ad Distribution</h2>
 
           {chartTotal > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
@@ -128,23 +113,23 @@ function AdminDashboard() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex h-[250px] items-center justify-center text-slate-400">
+            <div className="flex items-center justify-center h-[250px] text-gray-400">
               No data available yet
             </div>
           )}
         </div>
 
-        <div className="rounded-[18px] border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">Pending Ads (Quick Review)</h2>
+        <div className="p-6 bg-white shadow rounded-xl">
+          <h2 className="mb-4 font-semibold">Pending Ads (Quick Review)</h2>
 
           {pendingList.length === 0 ? (
-            <div className="py-10 text-center text-slate-400">No pending ads</div>
+            <div className="py-10 text-center text-gray-400">No pending ads</div>
           ) : (
             pendingList.slice(0, 5).map((car) => (
               <div
                 key={car._id}
                 onClick={() => navigate(`/admin/car/${car._id}`)}
-                className="mb-3 flex cursor-pointer items-center justify-between rounded-[14px] border border-slate-200 p-3 transition hover:border-slate-300 hover:bg-slate-50"
+                className="mb-3 flex cursor-pointer items-center justify-between rounded-lg border p-3 transition hover:bg-gray-50"
               >
                 <div className="flex items-center gap-3">
                   <img
@@ -153,18 +138,17 @@ function AdminDashboard() {
                     className="h-12 w-12 rounded object-cover"
                   />
                   <div>
-                    <p className="font-medium text-slate-900">
+                    <p className="font-medium">
                       {car.title || `${car.make || car.brand || ""} ${car.model || ""}`.trim()}
                     </p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-gray-500">
                       {car.year || "-"} • LKR {car.price?.toLocaleString?.() || car.price || 0}
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-gray-400">
                       {car.userName || "Seller"} • {car.status || "pending"}
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="h-4 w-4 text-slate-400" />
               </div>
             ))
           )}

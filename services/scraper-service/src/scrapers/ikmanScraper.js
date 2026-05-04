@@ -2,8 +2,6 @@ const puppeteer = require("puppeteer");
 const Listing = require("../models/Listing");
 const ImportedListing = require("../models/ImportedListing");
 
-const PLACEHOLDER_IMAGE = "https://via.placeholder.com/400x300?text=No+Image";
-
 const scrapeIkman = async () => {
   let browser;
 
@@ -35,21 +33,6 @@ const scrapeIkman = async () => {
       // ⏳ wait for page load
       await new Promise((resolve) => setTimeout(resolve, 6000));
 
-      // 📸 Wait for images to load and trigger lazy loading by scrolling
-      try {
-        await page.waitForSelector("img", { timeout: 5000 }).catch(() => {
-          console.warn("⚠️  No images found on page");
-        });
-      } catch (err) {
-        console.warn("⚠️  Image wait timeout", err.message);
-      }
-
-      // Scroll to load lazy images
-      await page.evaluate(() => {
-        window.scrollBy(0, window.innerHeight * 2);
-      });
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
       const listings = await page.evaluate(() => {
         const links = Array.from(
           document.querySelectorAll("a[href*='/en/ad/']")
@@ -78,18 +61,8 @@ const scrapeIkman = async () => {
 
           const url = link.href;
 
-          // Extract image with fallback for lazy-loaded or missing images
-          let image = null;
           const imageEl = link.querySelector("img");
-          if (imageEl) {
-            // Try src, data-src (lazy loading), or fallback
-            image = imageEl.src || imageEl.dataset.src || imageEl.getAttribute("src");
-          }
-
-          // Debug: log if image is missing
-          if (!image && titleLine) {
-            console.log(`📷 Missing image for: ${titleLine}`);
-          }
+          const image = imageEl ? imageEl.src : null;
 
           if (titleLine && price) {
             data.push({
@@ -107,7 +80,6 @@ const scrapeIkman = async () => {
       });
 
       console.log(`Page ${i} listings 👉`, listings.length);
-      console.log(`📸 Sample images from page ${i}:`, listings.slice(0, 3).map(l => ({ title: l.title, image: l.image })));
 
       // 🔥 merge all pages
       allListings = [...allListings, ...listings];
@@ -156,12 +128,9 @@ const scrapeIkman = async () => {
   year: item.year,
   price: item.price,
   mileage: item.mileage,
-  images: [
-    {
-      url: item.image || PLACEHOLDER_IMAGE,
-      tag: "front",
-    },
-  ],
+  images: item.image
+    ? [{ url: item.image, tag: "front" }]
+    : [],
   description: "",
 });
   }
