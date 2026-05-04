@@ -6,9 +6,9 @@ const scrapeIkman = require("../scrapers/ikmanScraper");
 const startCronJobs = () => {
   console.log("⏰ Cron Job Started...");
 
-  // 🔥 every 2 days at 2AM
-  cron.schedule("0 2 */2 * *", async () => {
-    console.log("🌙 Running scraper (every 2 days at 2AM)...");
+  // 🔥 every 10 minutes run
+  cron.schedule("0 2 * * *", async () => {
+    console.log("🌙 Running daily scraper (2AM job)...");
 
     try {
       await scrapeRiyasewana();
