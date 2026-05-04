@@ -1,90 +1,94 @@
 import { useEffect, useState } from "react";
-import { useApi } from "../../lib/api";
+import axios from "axios";
 
-function PendingAds() {
-  const api = useApi();
-  const [cars, setCars] = useState([]);
-  const [loading, setLoading] = useState(true);
+function PendingAdsSection() {
+  const [listings, setListings] = useState([]);
 
-  const fetchPendingCars = async () => {
+  const fetchImported = async () => {
     try {
-      const data = await api("/api/vehicles/my/pending");
-      setCars(data);
+      const res = await axios.get("http://localhost:5005/api/imported");
+      setListings(res.data);
     } catch (err) {
-      console.error("Failed to fetch pending cars:", err);
-    } finally {
-      setLoading(false);
+      console.error(err);
     }
   };
 
   useEffect(() => {
-    fetchPendingCars();
+    fetchImported();
   }, []);
 
-  if (loading) {
-    return <p className="py-10 text-center">Loading pending ads...</p>;
-  }
+  const handleApprove = (id) => {
+    // 👉 redirect to add-car (auto-fill)
+    // eslint-disable-next-line react-hooks/immutability
+    window.location.href = `/seller/add-car?importId=${id}`;
+  };
+
+  const handleIgnore = async (id) => {
+    try {
+      await axios.post(
+        `http://localhost:5005/api/imported/ignore/${id}`
+      );
+      fetchImported();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
-    <div>
-      <h2 className="mb-6 text-2xl font-semibold">Pending Ads</h2>
+    <div className="p-4 bg-white rounded-xl">
+      <h3 className="mb-4 text-lg font-semibold">
+        Pending Ads (Imported)
+      </h3>
 
-      <div className="overflow-hidden border rounded-xl">
-        <table className="w-full">
-          <thead className="text-white bg-slate-900">
-            <tr>
-              <th className="p-4 text-left">No</th>
-              <th className="p-4 text-left">Image</th>
-              <th className="p-4 text-left">Vehicle Name</th>
-              <th className="p-4 text-left">Published Date</th>
-              <th className="p-4 text-left">Options</th>
-            </tr>
-          </thead>
+      <div className="space-y-3">
 
-          <tbody>
-            {cars.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="p-8 text-center text-gray-500">
-                  No pending ads.
-                </td>
-              </tr>
-            ) : (
-              cars.map((car, index) => {
-                const imageSrc = car.images?.[0]?.url || car.images?.[0] || "/no-car.png";
-                return (
-                  <tr key={car._id} className="border-b">
-                    <td className="p-4">{index + 1}</td>
+        {listings.map((item) => (
+          <div
+            key={item._id}
+            className="flex items-center justify-between p-3 border rounded-lg"
+          >
+            <div className="flex items-center gap-3">
 
-                    <td className="p-4">
-                      <img
-                        src={imageSrc}
-                        alt={car.title || `${car.brand} ${car.model}`}
-                        className="object-cover w-20 h-14 rounded"
-                      />
-                    </td>
+              <img
+                src={item.images?.[0]?.url || "https://via.placeholder.com/80"}
+                className="object-cover w-16 h-16 rounded"
+              />
 
-                    <td className="p-4 font-medium">
-                      {car.title || `${car.brand} ${car.model}`}
-                    </td>
+              <div>
+                <p className="font-medium">{item.title}</p>
+                <p className="text-sm text-gray-500">
+                  {item.year} • LKR {item.price?.toLocaleString()}
+                </p>
 
-                    <td className="p-4">
-                      {new Date(car.createdAt).toLocaleDateString()}
-                    </td>
+                <span className="text-xs text-blue-500">
+                  Source: {item.source}
+                </span>
+              </div>
+            </div>
 
-                    <td className="p-4">
-                      <span className="px-3 py-1 text-xs text-yellow-700 bg-yellow-100 rounded-full">
-                        Waiting for approval
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+            <div className="flex gap-2">
+
+              <button
+                onClick={() => handleApprove(item._id)}
+                className="px-3 py-1 text-white bg-green-500 rounded"
+              >
+                Approve
+              </button>
+
+              <button
+                onClick={() => handleIgnore(item._id)}
+                className="px-3 py-1 text-white bg-red-500 rounded"
+              >
+                Ignore
+              </button>
+
+            </div>
+          </div>
+        ))}
+
       </div>
     </div>
   );
 }
 
-export default PendingAds;
+export default PendingAdsSection;

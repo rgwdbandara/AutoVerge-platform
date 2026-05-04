@@ -10,7 +10,6 @@ import Home from "./pages/Home";
 import BrowseCars from "./pages/BrowseCars";
 import CarDetails from "./pages/CarDetails";
 import AuthPage from "./pages/AuthPage";
-
 // Seller Pages
 import SellerDashboard from "./pages/seller/SellerDashboard";
 import MyCars from "./pages/seller/MyCars";
@@ -22,12 +21,14 @@ import ExpiredAds from "./pages/seller/ExpiredAds";
 import PendingAds from "./pages/seller/PendingAds";
 import MyFavorites from "./pages/MyFavorites";
 
+
 // Sell Landing Page
 import Sell from "./pages/Sell";
 
 function App() {
   return (
     <BrowserRouter>
+    
       <Navbar />
 
       <div className="pt-20">
@@ -49,6 +50,7 @@ function App() {
           <Route path="/seller/dashboard" element={<SellerDashboard />} />
           <Route path="/seller/add-car" element={<AddCar />} />
           <Route path="/seller/edit-car/:id" element={<EditCar />} />
+          
 
           {/* Profile Routes - Nested with DashboardLayout */}
           <Route path="/profile" element={<DashboardLayout />}>
@@ -58,6 +60,7 @@ function App() {
             <Route path="favorites" element={<MyFavorites />} />
             <Route path="expired" element={<ExpiredAds />} />
             <Route path="pending" element={<PendingAds />} />
+            
           </Route>
 
           {adminRoutes}

@@ -1,25 +1,88 @@
-import SellerSidebar from "../../components/seller/SellerSidebar";
-import SellerHeader from "../../components/seller/SellerHeader";
-import StatCard from "../../components/seller/StatCard";
+import { useState } from "react";
+import ImportedListings from "../admin/ImportedListings";
 
 function SellerDashboard() {
+
+  const [activeTab, setActiveTab] = useState("dashboard");
+
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex">
 
-      <SellerSidebar />
+      {/* SIDEBAR */}
+      <div className="w-64 p-4 bg-white shadow rounded-xl">
 
-      <div className="flex-1">
+        <h2 className="mb-4 text-lg font-semibold">
+          Admin Panel
+        </h2>
 
-        <SellerHeader />
+        <ul className="space-y-2">
 
-        <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-4">
+          <li
+            onClick={() => setActiveTab("dashboard")}
+            className={`p-2 rounded cursor-pointer ${
+              activeTab === "dashboard" ? "bg-blue-100" : ""
+            }`}
+          >
+            Dashboard
+          </li>
 
-          <StatCard title="Total Cars" value="10" />
-          <StatCard title="Available Cars" value="7" />
-          <StatCard title="Sold Cars" value="2" />
-          <StatCard title="Featured Cars" value="1" />
+          <li
+            onClick={() => setActiveTab("pending")}
+            className="p-2 rounded cursor-pointer hover:bg-gray-100"
+          >
+            Pending Ads
+          </li>
 
-        </div>
+          <li
+            onClick={() => setActiveTab("cars")}
+            className="p-2 rounded cursor-pointer hover:bg-gray-100"
+          >
+            Cars
+          </li>
+
+          {/* 🔥 NEW TAB */}
+          <li
+            onClick={() => setActiveTab("imported")}
+            className={`p-2 rounded cursor-pointer ${
+              activeTab === "imported" ? "bg-blue-100" : ""
+            }`}
+          >
+            Imported Listings
+          </li>
+
+          <li className="p-2 text-red-500 border border-red-300 rounded cursor-pointer">
+            Logout
+          </li>
+
+        </ul>
+      </div>
+
+      {/* CONTENT */}
+      <div className="flex-1 p-6">
+
+        {activeTab === "dashboard" && (
+          <div>
+            <h2 className="text-2xl font-bold">Dashboard</h2>
+            {/* existing dashboard UI */}
+          </div>
+        )}
+
+        {activeTab === "pending" && (
+          <div>
+            <h2 className="text-xl font-semibold">Pending Ads</h2>
+          </div>
+        )}
+
+        {activeTab === "cars" && (
+          <div>
+            <h2 className="text-xl font-semibold">Cars</h2>
+          </div>
+        )}
+
+        {/* 🔥 IMPORTED LISTINGS SHOW HERE */}
+        {activeTab === "imported" && (
+          <ImportedListings />
+        )}
 
       </div>
     </div>
