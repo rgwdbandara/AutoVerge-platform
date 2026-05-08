@@ -39,44 +39,44 @@ function MyAccount() {
     <div>
 
       {/* TITLE */}
-      <h2 className="mb-6 text-2xl font-semibold">
+      <h2 className="mb-6 text-xl font-semibold text-slate-900 dark:text-white sm:text-2xl">
         My Account
       </h2>
 
       {/* STATS */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
-        <div className="p-5 border border-blue-200 bg-blue-50 rounded-xl">
-          <p className="text-sm text-gray-600">Total Ads</p>
-          <h3 className="mt-2 text-3xl font-bold text-blue-600">{totalAds}</h3>
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-5 transition-colors duration-300 dark:border-blue-400/20 dark:bg-blue-500/10">
+          <p className="text-sm text-slate-600 dark:text-slate-300">Total Ads</p>
+          <h3 className="mt-2 text-3xl font-bold text-blue-600 dark:text-blue-300">{totalAds}</h3>
         </div>
 
-        <div className="p-5 border border-green-200 bg-green-50 rounded-xl">
-          <p className="text-sm text-gray-600">Active Ads</p>
-          <h3 className="mt-2 text-3xl font-bold text-green-600">{activeAds}</h3>
+        <div className="rounded-xl border border-green-200 bg-green-50 p-5 transition-colors duration-300 dark:border-green-400/20 dark:bg-green-500/10">
+          <p className="text-sm text-slate-600 dark:text-slate-300">Active Ads</p>
+          <h3 className="mt-2 text-3xl font-bold text-green-600 dark:text-green-300">{activeAds}</h3>
         </div>
 
-        <div className="p-5 border border-orange-200 bg-orange-50 rounded-xl">
-          <p className="text-sm text-gray-600">Expired Ads</p>
-          <h3 className="mt-2 text-3xl font-bold text-orange-600">{expiredAds}</h3>
+        <div className="rounded-xl border border-orange-200 bg-orange-50 p-5 transition-colors duration-300 dark:border-orange-400/20 dark:bg-orange-500/10">
+          <p className="text-sm text-slate-600 dark:text-slate-300">Expired Ads</p>
+          <h3 className="mt-2 text-3xl font-bold text-orange-600 dark:text-orange-300">{expiredAds}</h3>
         </div>
 
       </div>
 
       {/* EMPTY STATE */}
-      <div className="p-10 text-center bg-white shadow rounded-xl">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 text-center shadow transition-colors duration-300 dark:border-white/10 dark:bg-slate-900 sm:p-10">
 
-        <h3 className="mb-2 text-lg font-semibold">
+        <h3 className="mb-2 text-base font-semibold text-slate-900 dark:text-white sm:text-lg">
           You don't have any ads yet.
         </h3>
 
-        <p className="mb-5 text-gray-500">
+        <p className="mb-5 text-slate-500 dark:text-slate-400">
           Start selling your vehicle today 🚗
         </p>
 
         <button
           onClick={() => navigate("/seller/add-car")}
-          className="px-6 py-3 text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"
+          className="rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400"
         >
           Post Your Ad
         </button>
@@ -84,25 +84,25 @@ function MyAccount() {
       </div>
 
       {/* QUICK ACTIONS */}
-      <div className="grid grid-cols-3 gap-4 mt-8">
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
         <button
           onClick={() => navigate("/seller/add-car")}
-          className="p-4 bg-gray-100 rounded-lg hover:bg-gray-200"
+          className="rounded-lg bg-slate-100 p-4 transition hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
         >
           ➕ Add Vehicle
         </button>
 
         <button
           onClick={() => navigate("/profile/my-cars")}
-          className="p-4 bg-gray-100 rounded-lg hover:bg-gray-200"
+          className="rounded-lg bg-slate-100 p-4 transition hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
         >
           📋 My Listings
         </button>
 
         <button
           onClick={() => navigate("/profile/manage")}
-          className="p-4 bg-gray-100 rounded-lg hover:bg-gray-200"
+          className="rounded-lg bg-slate-100 p-4 transition hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
         >
           ⚙ Manage Profile
         </button>

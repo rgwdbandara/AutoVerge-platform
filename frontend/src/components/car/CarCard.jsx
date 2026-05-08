@@ -35,7 +35,7 @@ function CarCard({ car }) {
 
   return (
     <Link to={`/cars/${car._id}`}>
-      <div className="overflow-hidden transition bg-white shadow cursor-pointer rounded-xl hover:shadow-lg">
+      <div className="overflow-hidden rounded-xl bg-white shadow transition hover:shadow-lg dark:bg-slate-900">
         {/* Image Container */}
         <div className="relative">
           <img
@@ -46,29 +46,29 @@ function CarCard({ car }) {
           {/* Heart Icon */}
           <button
             onClick={toggleFavorite}
-            className="absolute p-2 transition bg-white rounded-full shadow-md top-3 right-3 hover:shadow-lg"
+            className="absolute right-3 top-3 rounded-full bg-white p-2 shadow-md transition hover:shadow-lg dark:bg-slate-950"
           >
             <Heart
               size={20}
-              className={`transition ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-400 hover:text-red-500"}`}
+              className={`transition ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-400 hover:text-red-500 dark:text-slate-400"}`}
             />
           </button>
         </div>
 
         {/* Info */}
         <div className="p-4">
-          <h3 className="text-lg font-bold">{car.title}</h3>
-          <p className="text-lg font-semibold text-blue-600">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">{car.title}</h3>
+          <p className="text-lg font-semibold text-blue-600 dark:text-sky-400">
             LKR {Number(car.price || 0).toLocaleString()}
           </p>
 
-          <div className="flex gap-3 mt-2 text-sm text-gray-500">
+          <div className="mt-2 flex gap-3 text-sm text-gray-500 dark:text-slate-400">
             <span>{car.year}</span>
             <span>{car.transmission}</span>
             <span>{car.fuelType}</span>
           </div>
 
-          <button className="w-full py-2 mt-4 text-white bg-black rounded-lg hover:bg-gray-800">
+          <button className="mt-4 w-full rounded-lg bg-slate-900 py-2 text-white hover:bg-slate-800 dark:bg-white dark:text-black dark:hover:bg-slate-100">
             View Car
           </button>
         </div>

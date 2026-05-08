@@ -44,17 +44,17 @@ function EditCar() {
   };
 
   if (loading) {
-    return <p className="p-10 text-center">Loading...</p>;
+    return <p className="p-10 text-center text-slate-600 dark:text-slate-300">Loading...</p>;
   }
 
   if (!car) {
-    return <p className="p-10 text-center">Car not found</p>;
+    return <p className="p-10 text-center text-slate-600 dark:text-slate-300">Car not found</p>;
   }
 
   return (
-    <div className="min-h-screen px-6 pt-20 bg-gray-100">
+    <div className="min-h-screen bg-slate-50 px-4 pt-20 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-white sm:px-6">
 
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
 
         {/* 🔥 ONLY FORM */}
         <ManualEntryForm

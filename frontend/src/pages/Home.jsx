@@ -6,7 +6,12 @@ import BrowseByMake from "../components/home/BrowseByMake";
 import WhyUs from "../components/home/WhyUs";
 import BodyType from "../components/home/BodyType";
 import FAQ from "../components/home/FAQ";
-import CTA from "../components/home/CTA";
+
+import HowItWorks from "../components/home/HowItWorks";
+import AIMatchingDemo from "../components/home/AIMatchingDemo";
+import Footer from "../components/Footer";
+import AutoVergeChatbot from "../components/chatbot/AutoVergeChatbot";
+
 
 function Home() {
   return (
@@ -22,9 +27,15 @@ function Home() {
 
       <BodyType />
 
+      <HowItWorks />
+
+      <AIMatchingDemo />
+
       <FAQ />
 
-      <CTA />
+      <AutoVergeChatbot />
+
+      <Footer />
     </>
   );
 }

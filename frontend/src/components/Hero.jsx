@@ -3,8 +3,45 @@ import { useNavigate } from "react-router-dom";
 import { ImagePlus, Loader2, Search, Sparkles, X } from "lucide-react";
 import ImageSearchResultCard from "./seller/ImageSearchResultCard";
 
+
+import hero1 from "../assets/hero/hero1.jpg";
+import hero2 from "../assets/hero/hero2.jpg";
+import hero3 from "../assets/hero/hero3.jpg";
+import hero4 from "../assets/hero/hero4.jpg";
+import hero5 from "../assets/hero/hero5.jpg";
+import hero6 from "../assets/hero/hero6.jpg";
+import hero7 from "../assets/hero/hero7.jpg";
+
+const slides = [hero1, hero2, hero3, hero4, hero5, hero6, hero7];
+
 function Hero() {
   const navigate = useNavigate();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") return "light";
+    const saved = localStorage.getItem("autoverge_theme");
+    if (saved === "dark" || saved === "light") return saved;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, []);
+
+  useEffect(() => {
+    const handleThemeChange = () => {
+      const isDark = document.documentElement.classList.contains("dark");
+      setTheme(isDark ? "dark" : "light");
+    };
+    const observer = new MutationObserver(handleThemeChange);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
   const fileInputRef = useRef(null);
 
   const [searchText, setSearchText] = useState("");
@@ -14,6 +51,8 @@ function Hero() {
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
   const [searchResponse, setSearchResponse] = useState(null);
+  const [featuredCars, setFeaturedCars] = useState([]);
+  const [featuredCarIndex, setFeaturedCarIndex] = useState(0);
 
   useEffect(() => {
     const message = "Type a make, model, or upload a car image...";
@@ -30,6 +69,33 @@ function Hero() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch featured cars
+  useEffect(() => {
+    const fetchFeaturedCars = async () => {
+      try {
+        const response = await fetch("http://localhost:5003/api/vehicles?limit=6");
+        const data = await response.json();
+        if (data.vehicles) {
+          setFeaturedCars(data.vehicles);
+        }
+      } catch (err) {
+        console.error("Failed to fetch featured cars:", err);
+      }
+    };
+    fetchFeaturedCars();
+  }, []);
+
+  // Featured cars carousel rotation
+  useEffect(() => {
+    if (featuredCars.length === 0) return;
+    
+    const interval = setInterval(() => {
+      setFeaturedCarIndex((prev) => (prev + 1) % featuredCars.length);
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [featuredCars.length]);
 
   const handleImageButtonClick = () => {
     fileInputRef.current?.click();
@@ -75,13 +141,10 @@ function Hero() {
       const formData = new FormData();
       formData.append("image", selectedImage);
 
-      const response = await fetch(
-        "http://localhost:5003/api/vehicles/search-by-image",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch("http://localhost:5003/api/vehicles/search-by-image", {
+        method: "POST",
+        body: formData,
+      });
 
       const data = await response.json();
 
@@ -100,47 +163,70 @@ function Hero() {
   };
 
   const results = (searchResponse?.results || []).slice(0, 3);
+  const showNoVehicleMessage = Boolean(searchResponse && searchResponse.isVehicle === false);
+  const showNoResultsMessage = Boolean(
+    searchResponse && searchResponse.isVehicle !== false && results.length === 0 && !isSearching
+  );
   const detectedAnalysis = searchResponse?.detected;
   const analysisDescription =
     detectedAnalysis?.description ||
     "The uploaded vehicle image was analyzed and the closest available matches are shown below.";
 
   return (
-    <section className="relative overflow-hidden text-white min-h-[92vh] flex items-center">
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute inset-0 object-cover w-full h-full scale-105"
-      >
-        <source src="public/videos/car-bg.mp4" type="video/mp4" />
-      </video>
+    <section className="relative w-full min-h-screen overflow-hidden">
+      {/* Background image - always renders */}
+      <img
+        src={slides[currentSlide]}
+        alt="Hero Background"
+        className="absolute inset-0 object-cover w-full h-full transition-all duration-1000"
+      />
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.25),transparent_35%),linear-gradient(180deg,rgba(2,6,23,0.55),rgba(2,6,23,0.72))]" />
+      {/* Overlay - adjusts based on theme */}
+      <div
+        className={`absolute inset-0 transition-colors duration-300 ${
+          theme === "dark"
+            ? "bg-gradient-to-r from-slate-950/85 via-slate-950/55 to-slate-950/20"
+            : "bg-gradient-to-r  via-white/40 to-white/10"
+        }`}
+      />
+
+      {/* Accent gradients */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.2),transparent_40%)]" />
 
       <div className="relative z-10 w-full px-4 py-10 mx-auto max-w-7xl md:px-6 lg:py-14">
         <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-medium border rounded-full bg-white/10 border-white/20 backdrop-blur-md">
-              <Sparkles size={16} className="text-blue-300" />
+            <div className={`inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-medium border rounded-full backdrop-blur-md transition-colors duration-300 ${
+              theme === "dark"
+                ? "bg-white/20 border-white/20 text-white"
+                : "bg-black/20 border-black/20 text-white"
+            }`}>
+              <Sparkles size={16} className="text-amber-300" />
               AI-Powered Smart Platform
             </div>
 
-            <h1 className="text-4xl font-black leading-tight md:text-6xl lg:text-7xl">
+            <h1 className={`text-4xl font-black leading-tight md:text-6xl lg:text-7xl transition-colors duration-300 ${
+              theme === "dark" ? "text-white" : "text-white"
+            }`}>
               Find Your Perfect Car with
-              <span className="block mt-2 text-transparent bg-gradient-to-r from-blue-300 via-sky-400 to-cyan-300 bg-clip-text">
+              <span className="block mt-2 text-transparent bg-gradient-to-r from-amber-300 via-yellow-300 to-orange-300 bg-clip-text">
                 AutoVerge AI
               </span>
             </h1>
 
-            <div className="mt-5 text-base h-7 md:text-lg text-white/90">
-              <span className="pr-1 border-r-2 border-white/70 animate-pulse">
+            <div className={`mt-5 text-base h-7 md:text-lg transition-colors duration-300 ${
+              theme === "dark" ? "text-white/90" : "text-white/80"
+            }`}>
+              <span className={`pr-1 border-r-2 animate-pulse ${
+                theme === "dark" ? "border-white/70" : "border-white/50"
+              }`}>
                 {typedText}
               </span>
             </div>
 
-            <p className="max-w-2xl mt-4 text-base leading-7 text-white/80 md:text-lg">
+            <p className={`max-w-2xl mt-4 text-base leading-7 md:text-lg transition-colors duration-300 ${
+              theme === "dark" ? "text-white/80" : "text-white/70"
+            }`}>
               Explore your ideal car with AI-powered matching, quick results,
               and a clean search experience built for speed.
             </p>
@@ -198,7 +284,7 @@ function Hero() {
               </p>
 
               {selectedImage && (
-                <div className="flex items-center gap-3 p-4 mt-5 border shadow-lg w-fit bg-white/95 rounded-2xl border-white/30 text-slate-900 backdrop-blur-md">
+                <div className="flex items-center gap-3 p-4 mt-5 border shadow-lg w-fit bg-white/95 rounded-2xl border-white/20 text-slate-900 backdrop-blur-md">
                   <img
                     src={previewUrl}
                     alt="Selected preview"
@@ -238,9 +324,62 @@ function Hero() {
                 </div>
               )}
 
-              {searchResponse && !isSearching && (
+              {searchResponse && searchResponse.isVehicle !== false && !isSearching && (
                 <div className="mt-5 text-sm text-white/80">
                   Found <span className="font-semibold text-white">{searchResponse.totalMatches || 0}</span> similar result(s)
+                </div>
+              )}
+
+              {/* Featured Cars Carousel */}
+              {!searchResponse && featuredCars.length > 0 && (
+                <div className="mt-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-xs tracking-wider uppercase text-white/60">Featured</p>
+                      <h3 className="text-lg font-bold text-white">Popular Vehicles</h3>
+                    </div>
+                  </div>
+                  
+                  <div className="relative overflow-hidden">
+                    <div className="flex transition-transform duration-500" style={{ transform: `translateX(-${featuredCarIndex * 100}%)` }}>
+                      {featuredCars.map((car) => (
+                        <div key={car._id} className="min-w-full px-2">
+                          <div 
+                            onClick={() => car._id && handleCardClick(car._id)}
+                            className="overflow-hidden transition border cursor-pointer bg-white/10 backdrop-blur-xl border-white/20 rounded-2xl hover:border-white/40"
+                          >
+                            <div className="relative h-48 overflow-hidden bg-white/5">
+                              {car.images && car.images[0] && (
+                                <img 
+                                  src={car.images[0]} 
+                                  alt={car.title}
+                                  className="object-cover w-full h-full"
+                                />
+                              )}
+                            </div>
+                            <div className="p-4">
+                              <h4 className="mb-1 text-sm font-bold text-white">{car.title}</h4>
+                              <p className="mb-3 text-xs text-white/60">{car.year} • {car.mileage || "N/A"} km</p>
+                              <p className="text-base font-bold text-blue-400">LKR {car.price?.toLocaleString() || "N/A"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Carousel indicators */}
+                  <div className="flex justify-center gap-2 mt-4">
+                    {featuredCars.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setFeaturedCarIndex(index)}
+                        className={`w-2 h-2 rounded-full transition ${
+                          index === featuredCarIndex ? "bg-blue-400 w-6" : "bg-white/30 hover:bg-white/50"
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -288,8 +427,25 @@ function Hero() {
               </div>
             </div>
 
-            {results.length > 0 && (
-          <div className="mt-12 text-left">
+            {showNoVehicleMessage && (
+              <div className="mt-10">
+                <div className="px-6 py-10 bg-white shadow-2xl rounded-3xl">
+                  <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-blue-700 bg-blue-100 rounded-full">
+                    <Search size={28} />
+                  </div>
+
+                  <p className="text-xl font-bold text-gray-800">
+                    Image doesn't contain a vehicle
+                  </p>
+                  <p className="max-w-md mx-auto mt-3 text-sm leading-6 text-gray-500">
+                    Please upload an image of a car for AI matching to work.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {results.length > 0 && searchResponse?.isVehicle !== false && (
+              <div className="mt-12 text-left">
             <div className="flex items-center justify-between gap-4 mb-6">
                   <div>
                     <div className="flex items-center gap-2 mb-2 text-green-300">
@@ -308,7 +464,7 @@ function Hero() {
                     <div className="hidden px-4 py-3 text-sm bg-white shadow-lg md:block rounded-2xl">
                       <p className="font-semibold text-gray-900">Query Analysis</p>
                       <p className="mt-1 text-gray-600">
-                        View:{" "}
+                        View: {" "}
                         <span className="font-medium capitalize">
                           {searchResponse.queryAnalysis.detectedViewType || "Unknown"}
                         </span>
@@ -332,7 +488,7 @@ function Hero() {
           </div>
         )}
 
-            {searchResponse && results.length === 0 && !error && !isSearching && (
+            {showNoResultsMessage && (
               <div className="mt-10">
                 <div className="px-6 py-10 bg-white shadow-2xl rounded-3xl">
                   <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-blue-700 bg-blue-100 rounded-full">
@@ -343,8 +499,7 @@ function Hero() {
                     No similar cars found
                   </p>
                   <p className="max-w-md mx-auto mt-3 text-sm leading-6 text-gray-500">
-                    Try uploading a clearer image, a larger visible vehicle part,
-                    or a different angle for better AI matching results.
+                    Try uploading a clearer image, a larger visible vehicle part, or a different angle for better AI matching results.
                   </p>
                 </div>
               </div>

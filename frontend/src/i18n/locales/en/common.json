@@ -1,0 +1,173 @@
+{
+  "navbar": {
+    "home": "Home",
+    "browseCars": "Browse Cars",
+    "sellYourVehicle": "Sell Your Vehicle",
+    "adminDashboard": "Admin Dashboard",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "language": "Language"
+  },
+  "hero": {
+    "badge": "AI-Powered Smart Platform",
+    "titleLine1": "Find Your Perfect Car with",
+    "titleLine2": "AutoVerge AI",
+    "typingText": "Type a make, model, or upload a car image...",
+    "description": "Explore your ideal car with AI-powered matching, quick results, and a clean search experience built for speed.",
+    "searchPlaceholder": "Enter make, model, or use our Image Search...",
+    "imageButton": "Image",
+    "searchButton": "Search",
+    "uploadHint": "Upload a car photo or even a visible part of a vehicle.",
+    "imageReady": "Image ready for search",
+    "missingImage": "Please upload a car image first.",
+    "searching": "AI is analyzing your image and finding similar cars...",
+    "foundResults": "Found {{count}} similar result(s)",
+    "smartSearchTitle": "Typed search + image search in one place",
+    "smartSearchDescription": "Search by make, model, location, or upload a photo and let AI match visually similar cars.",
+    "fast": "Fast",
+    "quickResults": "Quick Results",
+    "ai": "AI",
+    "visualMatch": "Visual Match",
+    "analysisTitle": "Uploaded Image Analysis",
+    "resultsTitle": "Image Search Results",
+    "similarCarsFound": "Similar Cars Found",
+    "resultsDescription": "These results are based on visual similarity from your uploaded image.",
+    "queryAnalysis": "Query Analysis",
+    "view": "View",
+    "noVehicleTitle": "Please upload a clear vehicle image to search for similar cars.",
+    "noVehicleDescription": "The uploaded image does not appear to contain a car or vehicle.",
+    "noResultsTitle": "Please upload a clear vehicle image to search for similar cars.",
+    "noResultsDescription": "Try uploading a clearer image, a larger visible vehicle part, or a different angle for better visual similarity analysis."
+  },
+  "buttons": {
+    "search": "Search",
+    "viewFullDetails": "View Full Details"
+  },
+  "browse": {
+    "title": "Browse Cars",
+    "searchPlaceholder": "Search by make, model, or keywords...",
+    "filters": "Filters",
+    "clearAll": "Clear All",
+    "priceRange": "Price Range",
+    "make": "Make",
+    "bodyType": "Body Type",
+    "fuelType": "Fuel Type",
+    "transmission": "Transmission",
+    "applyFilters": "Apply Filters",
+    "searchingCars": "Searching cars...",
+    "noCarsFound": "No cars found. Try a different search or filter."
+  },
+  "features": {
+    "frontGrille": "front grille",
+    "headlights": "headlights",
+    "frontBumper": "front bumper",
+    "sideProfile": "side profile",
+    "wheelArch": "wheel arch",
+    "bodyLine": "body line",
+    "rearShape": "rear shape",
+    "tailLights": "tail lights",
+    "rearBumper": "rear bumper",
+    "bodyShape": "body shape",
+    "visibleExteriorFeatures": "visible exterior features",
+    "vehicleProportions": "vehicle proportions",
+    "interiorCabin": "interior cabin",
+    "dashboard": "dashboard",
+    "seats": "seats"
+  },
+  "addCar": {
+    "manualEntry": "Manual Entry",
+    "aiUpload": "AI Upload"
+  },
+  "aiUpload": {
+    "title": "AI-Powered Car Details Extraction",
+    "description": "Upload a car image and the Manual Entry form will auto-fill detected details.",
+    "dropzone": "Drag & drop or click to upload car image",
+    "selected": "Selected: {{name}}",
+    "analyzing": "Running visual similarity analysis...",
+    "success": "Details extracted and applied to Manual Entry form.",
+    "noVehicle": "Please upload a clear vehicle image to search for similar cars.",
+    "howItWorks": "How it works",
+    "step1": "Upload car image",
+    "step2": "Visual feature analysis runs on the image",
+    "step3": "Brand, model, and body type are detected when available",
+    "step4": "Manual Entry form auto-fills automatically",
+    "step5": "Review and complete remaining fields"
+  },
+  "searchResultCard": {
+    "whyRecommended": "Why recommended",
+    "grade": "Grade",
+    "viewFullDetails": "View Full Details",
+    "bestMatch": "Best Match",
+    "highlySimilar": "Highly Similar",
+    "similar": "Similar",
+    "partialMatch": "Partial Match",
+    "lowMatch": "Low Match"
+  },
+  "sell": {
+    "hero": {
+      "badge": "Sell vehicles smarter with AutoVerge",
+      "title": "Sell Your Vehicle Fast in Sri Lanka",
+      "description": "Create a trusted vehicle listing with real details, clear images, and reach serious buyers faster.",
+      "cta": "Post Your Vehicle"
+    },
+    "beforePost": {
+      "title": "Before you post",
+      "item1": "Enter accurate vehicle details",
+      "item2": "Upload clear vehicle images",
+      "item3": "Use a realistic LKR selling price",
+      "item4": "Add correct mileage, year, and fuel type",
+      "item5": "Do not post fake or duplicate listings",
+      "item6": "Make sure seller information is correct"
+    },
+    "howItWorks": {
+      "title": "How selling works",
+      "step1Title": "Add Details",
+      "step1Desc": "Fill vehicle information and upload photos.",
+      "step2Title": "Publish Listing",
+      "step2Desc": "Your car appears in the AutoVerge marketplace.",
+      "step3Title": "Reach Buyers",
+      "step3Desc": "Interested buyers can view your vehicle details."
+    },
+    "faq": {
+      "title": "FAQ",
+      "q1": "Is posting a vehicle on AutoVerge free?",
+      "a1": "Yes. You can post your vehicle for free and reach buyers across Sri Lanka.",
+      "q2": "What details should I include?",
+      "a2": "Add correct brand, model, year, mileage, price, fuel type, transmission, description, and clear photos.",
+      "q3": "Can I upload multiple vehicle images?",
+      "a3": "Yes. Uploading multiple clear images helps buyers trust your listing.",
+      "q4": "What happens after I post my vehicle?",
+      "a4": "Your vehicle will appear in the marketplace, and buyers can view its details.",
+      "q5": "Can I edit or delete my listing later?",
+      "a5": "Yes. You can manage your listings from the seller dashboard."
+    },
+    "support": {
+      "title": "Still have questions?",
+      "description": "Our AutoVerge support team can help you with vehicle listing steps.",
+      "cta": "Contact Support Team"
+    },
+    "finalCta": {
+      "title": "Ready to Sell Your Car?",
+      "description": "Get started today and connect with serious buyers in Sri Lanka.",
+      "cta": "Post Free Ad ->"
+    }
+  },
+  "homeFaq": {
+    "title": "Frequently Asked Questions",
+    "q1": "What is the AutoTrust Grading System in AutoVerge?",
+    "a1": "AutoTrust is our vehicle evaluation system that rates cars based on condition, reliability, and trust factors to help buyers make safe decisions.",
+    "q2": "How does the AI Price Estimation work?",
+    "a2": "Our system analyzes market trends, vehicle condition, and historical data to suggest a fair price for both buyers and sellers.",
+    "q3": "Can I search for a car using an image?",
+    "a3": "Yes! AutoVerge allows image-based search where you can upload a car image and find similar vehicles instantly.",
+    "q4": "Is AutoVerge safe to buy and sell vehicles?",
+    "a4": "Yes, all listings go through moderation and verification processes to reduce scams and ensure trust.",
+    "q5": "What tools are available for sellers?",
+    "a5": "Sellers can list vehicles, track performance, manage ads, and get price suggestions using AI.",
+    "q6": "What tools are available for buyers?",
+    "a6": "Buyers can compare vehicles, estimate EMI, check AutoTrust grading, and use image-based search to find similar cars quickly."
+  },
+  "common": {
+    "loading": "Loading..."
+  }
+}

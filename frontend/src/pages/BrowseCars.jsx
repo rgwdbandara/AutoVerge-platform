@@ -91,12 +91,12 @@ function BrowseCars() {
   };
 
   return (
-    <div className="px-6 py-10 mx-auto max-w-7xl">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
 
-      <h1 className="mb-8 text-4xl font-bold text-blue-600">{t("browse.title")}</h1>
+      <h1 className="mb-6 text-3xl font-bold text-blue-600 sm:mb-8 sm:text-4xl">{t("browse.title")}</h1>
 
       {/* SEARCH BAR */}
-      <div className="flex gap-3 mb-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -107,16 +107,16 @@ function BrowseCars() {
 
         <button
           onClick={fetchCars}
-          className="px-6 py-3 text-white bg-black rounded-xl hover:bg-gray-900"
+          className="w-full rounded-xl bg-black px-6 py-3 text-white hover:bg-gray-900 sm:w-auto"
         >
           {t("buttons.search")}
         </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-8">
 
         {/* FILTERS */}
-        <div className="col-span-1 p-5 space-y-6 bg-white shadow rounded-xl">
+        <div className="space-y-6 rounded-xl bg-white p-4 shadow sm:p-5 lg:col-span-1">
 
           <div className="flex items-center justify-between">
             <h2 className="font-bold">{t("browse.filters")}</h2>
@@ -213,7 +213,7 @@ function BrowseCars() {
         </div>
 
         {/* RESULTS */}
-        <div className="col-span-3">
+        <div className="lg:col-span-3">
 
           {loading && (
             <p className="py-10 text-center">{t("browse.searchingCars")}</p>
@@ -225,7 +225,7 @@ function BrowseCars() {
             </p>
           )}
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
             {cars.map(car => (
               <CarCard key={car._id} car={car} />
             ))}

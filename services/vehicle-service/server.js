@@ -34,10 +34,12 @@ connectDB();
 
 const vehicleRoutes = require("./src/routes/vehicleRoutes");
 const adminSettingsRoutes = require("./src/routes/adminSettingsRoutes");
+const chatbotRoutes = require("./src/routes/chatbotRoutes");
 
 app.use("/admin/settings", adminSettingsRoutes);
 app.delete("/admin/delete/:id", clerkAuth, isAdmin, deleteListingByAdmin);
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/chatbot", chatbotRoutes);
 app.use("/", vehicleRoutes);
 
 // normal routes later here

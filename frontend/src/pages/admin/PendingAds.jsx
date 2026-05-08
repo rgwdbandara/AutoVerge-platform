@@ -36,22 +36,22 @@ function PendingAds() {
   const getImage = (ad) => ad?.images?.[0]?.url || ad?.images?.[0] || "/no-car.png";
 
   if (loading) {
-    return <div className="p-6">Loading pending ads...</div>;
+    return <div className="p-6 text-slate-600 dark:text-slate-300">Loading pending ads...</div>;
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 text-slate-900 dark:text-white">
       <h1 className="mb-6 text-2xl font-bold">Pending Ads</h1>
 
       {ads.length === 0 ? (
-        <p>No pending ads</p>
+        <p className="text-slate-500 dark:text-slate-400">No pending ads</p>
       ) : (
         <div className="space-y-4">
           {ads.map((ad) => (
             <div
               key={ad._id}
               onClick={() => navigate(`/admin/car/${ad._id}`)}
-              className="flex items-center justify-between p-4 transition bg-white shadow cursor-pointer rounded-xl hover:bg-gray-50"
+              className="flex cursor-pointer items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow transition-colors duration-300 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:hover:bg-slate-800"
             >
               <div className="flex items-center gap-4">
                 <img
@@ -61,9 +61,9 @@ function PendingAds() {
                 />
 
                 <div>
-                  <h2 className="text-lg font-semibold">{ad.title || `${ad.brand} ${ad.model}`}</h2>
-                  <p className="text-sm text-gray-500">Seller: {ad.sellerClerkId}</p>
-                  <p className="font-bold text-blue-600">LKR {ad.price?.toLocaleString?.() || ad.price}</p>
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{ad.title || `${ad.brand} ${ad.model}`}</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Seller: {ad.sellerClerkId}</p>
+                  <p className="font-bold text-blue-600 dark:text-blue-400">LKR {ad.price?.toLocaleString?.() || ad.price}</p>
                 </div>
               </div>
 
@@ -73,7 +73,7 @@ function PendingAds() {
                     e.stopPropagation();
                     handleApprove(ad._id);
                   }}
-                  className="px-4 py-2 text-white bg-green-500 rounded-lg hover:bg-green-600"
+                  className="rounded-lg bg-green-500 px-4 py-2 text-white transition hover:bg-green-600"
                 >
                   Approve
                 </button>
@@ -83,7 +83,7 @@ function PendingAds() {
                     e.stopPropagation();
                     handleReject(ad._id);
                   }}
-                  className="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600"
+                  className="rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600"
                 >
                   Reject
                 </button>

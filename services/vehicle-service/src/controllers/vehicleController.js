@@ -471,17 +471,26 @@ exports.searchByImage = async (req, res) => {
       return res.status(400).json({ error: "No image uploaded" });
     }
 
-    // 🔥 1. GPT (optional hint)
+    // 1. Vision analysis: decide whether this is actually a vehicle image
     const detected = await analyzeImageWithGPT(file);
-    console.log("🤖 GPT:", detected);
 
-    // 🔥 2. CNN features (MOST IMPORTANT)
+    if (!detected.isVehicle) {
+      return res.status(200).json({
+        success: false,
+        isVehicle: false,
+        message:
+          "Please upload a vehicle image. The uploaded image does not appear to contain a car or vehicle.",
+        results: [],
+      });
+    }
+
+    // 2. CNN features (vehicle images only)
     const featureData = await extractFeaturesFromFile(file);
     const featureVector = featureData.feature_vector;
 
     console.log("🧠 VECTOR:", featureVector.length);
 
-    // 🔥 3. Search
+    // 3. Search
     const results = await searchVehiclesByImage(
       featureVector,
       "unknown",
@@ -491,6 +500,7 @@ exports.searchByImage = async (req, res) => {
 
     res.json({
       success: true,
+      isVehicle: true,
       detected,
       totalMatches: results.length,
       results,

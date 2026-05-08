@@ -6,7 +6,7 @@ function AuthPage() {
   const isSignup = location.pathname === "/sign-up";
 
   return (
-    <div className="relative w-full h-screen">
+    <div className="relative min-h-screen w-full overflow-hidden">
 
       {/* 🔥 BACKGROUND IMAGE */}
       <img
@@ -19,22 +19,22 @@ function AuthPage() {
       <div className="absolute inset-0 bg-black/60"></div>
 
       {/* 🔥 CONTENT */}
-      <div className="relative z-10 flex h-full">
+      <div className="relative z-10 flex min-h-screen flex-col lg:flex-row">
 
         {/* LEFT TEXT */}
-        <div className="flex-col justify-center hidden w-1/2 px-16 text-white md:flex">
-          <h1 className="mb-4 text-5xl font-bold">
+        <div className="hidden flex-col justify-center px-6 py-14 text-white md:flex lg:w-1/2 lg:px-16">
+          <h1 className="mb-4 text-4xl font-bold lg:text-5xl">
             Don’t keep your car waiting
           </h1>
-          <p className="text-lg">
+          <p className="max-w-lg text-lg">
             Post it for free. Buyers are looking right now!
           </p>
         </div>
 
         {/* RIGHT FORM */}
-        <div className="flex items-center justify-center w-full md:w-1/2">
+        <div className="flex w-full items-center justify-center px-4 py-10 md:px-6 lg:w-1/2">
 
-          <div className="bg-white/90 backdrop-blur-md p-8 rounded-xl shadow-xl w-[400px]">
+          <div className="w-full max-w-md rounded-xl bg-white/90 p-6 shadow-xl backdrop-blur-md sm:p-8">
 
             {isSignup ? <SignUp /> : <SignIn />}
 
