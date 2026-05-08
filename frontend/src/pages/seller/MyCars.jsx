@@ -56,20 +56,20 @@ function MyCars() {
 
   // 🔄 Loading
   if (loading) {
-    return <p className="text-center">Loading...</p>;
+    return <p className="text-center text-slate-600 dark:text-slate-300">Loading...</p>;
   }
 
   // ❌ Empty
   if (!cars.length) {
     return (
-      <div className="mt-20 text-center">
+      <div className="mt-20 text-center text-slate-900 dark:text-white">
         <p className="mb-2 text-lg font-medium">
           You don't have any ads yet.
         </p>
 
         <button
           onClick={() => navigate("/seller/add-car")}
-          className="px-6 py-3 text-white bg-gray-800 rounded-lg hover:bg-black"
+          className="rounded-lg bg-slate-900 px-6 py-3 text-white transition hover:bg-black dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
         >
           POST YOUR AD
         </button>
@@ -79,7 +79,7 @@ function MyCars() {
 
   // ✅ LIST VIEW
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-6 text-slate-900 dark:text-white">
 
       <h2 className="text-2xl font-semibold">My Listings</h2>
 
@@ -87,7 +87,7 @@ function MyCars() {
         <div
           key={car._id}
           onClick={() => navigate(`/cars/${car._id}`)}
-          className="flex items-center justify-between w-full gap-6 p-6 transition bg-white border border-gray-100 shadow-sm cursor-pointer rounded-2xl hover:shadow-md"
+          className="flex w-full items-center justify-between gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors duration-300 hover:shadow-md dark:border-white/10 dark:bg-slate-900"
         >
 
           {/* 🔹 LEFT - IMAGE */}
@@ -96,7 +96,7 @@ function MyCars() {
             <img
               src={getPrimaryImage(car)}
               alt={car.model}
-              className="object-cover w-40 bg-gray-100 h-28 rounded-xl"
+              className="h-28 w-40 rounded-xl object-cover bg-slate-100 dark:bg-slate-800"
             />
 
             {/* 🔹 DETAILS */}
@@ -105,15 +105,15 @@ function MyCars() {
                 {car.brand} {car.model}
               </h3>
 
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-slate-600 dark:text-slate-300">
                 {car.year} • {car.fuelType} • {car.transmission}
               </p>
 
-              <p className="mt-1 font-bold text-blue-600">
+              <p className="mt-1 font-bold text-blue-600 dark:text-blue-400">
                 LKR {car.price?.toLocaleString()}
               </p>
 
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-500">
                 {car.location?.city}, {car.location?.district}
               </p>
             </div>
@@ -121,18 +121,18 @@ function MyCars() {
           </div>
 
           {/* 🔹 RIGHT - ACTIONS */}
-          <div className="flex gap-3 shrink-0">
+          <div className="flex shrink-0 gap-3">
 
             <button
               onClick={(e) => handleEdit(e, car._id)}
-              className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400"
             >
               Edit
             </button>
 
             <button
               onClick={(e) => handleDelete(e, car._id)}
-              className="px-4 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600"
+              className="rounded-lg bg-red-500 px-4 py-2 text-sm text-white transition hover:bg-red-600"
             >
               Delete
             </button>
@@ -146,7 +146,7 @@ function MyCars() {
       <div className="mt-8">
         <button
           onClick={() => navigate("/seller/add-car")}
-          className="w-full px-6 py-3 font-medium text-white transition bg-gray-800 rounded-lg hover:bg-black"
+          className="w-full rounded-lg bg-slate-900 px-6 py-3 font-medium text-white transition hover:bg-black dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
         >
           + POST NEW AD
         </button>

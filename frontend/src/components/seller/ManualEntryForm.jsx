@@ -222,14 +222,14 @@ location: {
 
   return (
 
-    <div className="p-6 bg-white shadow-md rounded-xl">
+    <div className="rounded-xl bg-white p-4 shadow-md sm:p-6">
 
       <h3 className="mb-4 text-lg font-semibold">
         Car Details
       </h3>
 
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <input
             name="make"
             value={form.make}
@@ -461,11 +461,11 @@ location: {
           <label className="block mb-2 font-medium">
             Images <span className="text-red-500">*</span>
           </label>
-          <p className="mb-2 text-sm text-gray-500">
+            <p className="mb-2 text-sm text-gray-500">
             Upload at least 2 images. Best results come with 4 or more images.
           </p>
 
-          <div className="p-6 text-center border-2 border-dashed rounded">
+          <div className="rounded border-2 border-dashed p-4 text-center sm:p-6">
             <input
               type="file"
               multiple
@@ -492,7 +492,7 @@ location: {
                 {selectedImages.length} image(s) selected
               </div>
 
-              <div className="grid grid-cols-3 gap-3 mt-3 md:grid-cols-6">
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                 {selectedImages.map((image, index) => (
                   <div key={index} className="relative">
                     <img
@@ -517,7 +517,7 @@ location: {
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                      className="px-2 py-1 mt-2 text-xs text-white bg-red-500 rounded"
+                      className="mt-2 rounded bg-red-500 px-2 py-1 text-xs text-white"
                     >
                       Remove
                     </button>
@@ -531,7 +531,7 @@ location: {
         <button
   type="submit"
   disabled={uploading}
-  className="w-full py-3 mt-6 text-white transition bg-black rounded-xl hover:bg-gray-800 disabled:opacity-50"
+          className="mt-6 w-full rounded-xl bg-slate-900 py-3 text-white transition hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-slate-100"
 >
   {uploading
     ? "Uploading images..."

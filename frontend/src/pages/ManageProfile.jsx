@@ -98,7 +98,7 @@ function ManageProfile() {
   };
 
   return (
-    <div>
+    <div className="text-slate-900 dark:text-white">
 
       {/* ONLY CONTENT — NO SIDEBAR */}
       <h2 className="mb-6 text-2xl font-semibold">Change Details</h2>
@@ -107,15 +107,15 @@ function ManageProfile() {
 
         {/* Email */}
         <div>
-          <label className="block mb-1 text-sm text-gray-600">Email</label>
+          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">Email</label>
           <div className="flex gap-3">
             <input
               type="text"
               value={email}
               disabled
-              className="w-full px-4 py-3 bg-gray-100 border rounded-md"
+              className="w-full rounded-md border border-slate-200 bg-slate-100 px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-800 dark:text-white"
             />
-            <button className="px-5 py-3 text-white bg-gray-500 rounded-md">
+            <button className="rounded-md bg-slate-500 px-5 py-3 text-white transition hover:bg-slate-600 dark:bg-slate-600 dark:hover:bg-slate-500">
               Update
             </button>
           </div>
@@ -123,16 +123,16 @@ function ManageProfile() {
 
         {/* Phone */}
         <div>
-          <label className="block mb-1 text-sm text-gray-600">Phone</label>
+          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">Phone</label>
           <div className="flex gap-3">
             <input
               type="text"
               value={phone}
               placeholder="Add Mobile Number"
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-4 py-3 border rounded-md"
+              className="w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white"
             />
-            <button className="px-5 py-3 text-white bg-gray-500 rounded-md">
+            <button className="rounded-md bg-slate-500 px-5 py-3 text-white transition hover:bg-slate-600 dark:bg-slate-600 dark:hover:bg-slate-500">
               Update
             </button>
           </div>
@@ -140,22 +140,22 @@ function ManageProfile() {
 
         {/* Name */}
         <div>
-          <label className="block mb-1 text-sm text-gray-600">Name</label>
+          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">Name</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-3 border rounded-md"
+            className="w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white"
           />
         </div>
 
         {/* Location */}
         <div>
-          <label className="block mb-1 text-sm text-gray-600">Location</label>
+          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">Location</label>
           <select
             value={district}
             onChange={(e) => setDistrict(e.target.value)}
-            className="w-full px-4 py-3 border rounded-md"
+            className="w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white"
           >
             <option value="">Select district</option>
             <option value="Colombo">Colombo</option>
@@ -168,13 +168,13 @@ function ManageProfile() {
 
         {/* Sub Location */}
         <div className="col-span-2">
-          <label className="block mb-1 text-sm text-gray-600">
+          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">
             Sub Location
           </label>
           <select
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            className="w-full px-4 py-3 border rounded-md"
+            className="w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white"
           >
             <option value="">Select sub location</option>
             <option value="Colombo 01">Colombo 01</option>
@@ -190,32 +190,32 @@ function ManageProfile() {
       <button
         onClick={handleUpdateDetails}
         disabled={saving}
-        className="px-6 py-3 mt-6 font-semibold text-black bg-yellow-500 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+        className="mt-6 rounded-md bg-yellow-500 px-6 py-3 font-semibold text-black transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {saving ? "Updating..." : "Update Details"}
       </button>
 
       {/* PASSWORD */}
       <div className="mt-10">
-        <h2 className="mb-4 text-xl font-semibold">Change Password</h2>
+        <h2 className="mb-4 text-xl font-semibold text-slate-900 dark:text-white">Change Password</h2>
 
         <div className="grid grid-cols-2 gap-6">
 
           <div>
-            <label className="text-sm text-gray-600">Current Password</label>
-            <input className="w-full px-4 py-3 mt-1 border rounded-md" />
+            <label className="text-sm text-slate-600 dark:text-slate-300">Current Password</label>
+            <input className="mt-1 w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white" />
           </div>
 
           <div>
-            <label className="text-sm text-gray-600">New Password</label>
-            <input className="w-full px-4 py-3 mt-1 border rounded-md" />
+            <label className="text-sm text-slate-600 dark:text-slate-300">New Password</label>
+            <input className="mt-1 w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white" />
           </div>
 
           <div>
-            <label className="text-sm text-gray-600">
+            <label className="text-sm text-slate-600 dark:text-slate-300">
               Confirm New Password
             </label>
-            <input className="w-full px-4 py-3 mt-1 border rounded-md" />
+            <input className="mt-1 w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white" />
           </div>
 
         </div>

@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Loader2, UploadCloud } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const normalizeBodyType = (type) => {
   const clean = (type || "").toLowerCase();
@@ -14,6 +15,7 @@ const normalizeBodyType = (type) => {
 };
 
 function AIUpload({ onAutoFill }) {
+  const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -25,7 +27,7 @@ function AIUpload({ onAutoFill }) {
 
     setIsAnalyzing(true);
     setError("");
-    setStatus("Running visual similarity analysis...");
+    setStatus(t("aiUpload.analyzing"));
 
     try {
       const formData = new FormData();
@@ -42,6 +44,12 @@ function AIUpload({ onAutoFill }) {
         throw new Error(data.error || data.message || "Image analysis failed.");
       }
 
+      if (data.isVehicle === false) {
+        setError(t("aiUpload.noVehicle"));
+        setStatus("");
+        return;
+      }
+
       const detected = data?.detected || {};
       const mappedData = {
         brand: detected.brand || "",
@@ -54,9 +62,9 @@ function AIUpload({ onAutoFill }) {
         onAutoFill(mappedData);
       }
 
-      setStatus("Details extracted and applied to Manual Entry form.");
+      setStatus(t("aiUpload.success"));
     } catch (err) {
-      setError(err.message || "Failed to extract details from image.");
+      setError(err.message || t("aiUpload.noVehicle"));
       setStatus("");
     } finally {
       setIsAnalyzing(false);
@@ -80,9 +88,9 @@ function AIUpload({ onAutoFill }) {
 
   return (
     <div className="p-6 bg-white rounded shadow">
-      <h3 className="mb-2 text-lg font-semibold">AI-Powered Car Details Extraction</h3>
+      <h3 className="mb-2 text-lg font-semibold">{t("aiUpload.title")}</h3>
       <p className="mb-4 text-gray-500">
-        Upload a car image and the Manual Entry form will auto-fill detected details.
+        {t("aiUpload.description")}
       </p>
 
       <input
@@ -100,9 +108,9 @@ function AIUpload({ onAutoFill }) {
         className="p-16 text-center border-2 border-dashed rounded cursor-pointer hover:bg-gray-50"
       >
         <UploadCloud className="w-8 h-8 mx-auto mb-3 text-gray-500" />
-        <p className="font-medium">Drag & drop or click to upload car image</p>
+        <p className="font-medium">{t("aiUpload.dropzone")}</p>
         {selectedFile && (
-          <p className="mt-2 text-sm text-gray-500">Selected: {selectedFile.name}</p>
+          <p className="mt-2 text-sm text-gray-500">{t("aiUpload.selected", { name: selectedFile.name })}</p>
         )}
       </div>
 
@@ -120,13 +128,13 @@ function AIUpload({ onAutoFill }) {
       {error && <div className="mt-4 text-sm font-medium text-red-600">{error}</div>}
 
       <div className="p-4 mt-6 rounded bg-gray-50">
-        <h4 className="mb-2 font-semibold">How it works</h4>
+        <h4 className="mb-2 font-semibold">{t("aiUpload.howItWorks")}</h4>
         <ol className="space-y-1 text-sm text-gray-600">
-          <li>1 Upload car image</li>
-          <li>2 Visual feature analysis runs on the image</li>
-          <li>3 Brand, model, and body type are detected when available</li>
-          <li>4 Manual Entry form auto-fills automatically</li>
-          <li>5 Review and complete remaining fields</li>
+          <li>1 {t("aiUpload.step1")}</li>
+          <li>2 {t("aiUpload.step2")}</li>
+          <li>3 {t("aiUpload.step3")}</li>
+          <li>4 {t("aiUpload.step4")}</li>
+          <li>5 {t("aiUpload.step5")}</li>
         </ol>
       </div>
     </div>

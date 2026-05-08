@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Heart, BadgeCheck } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const getMatchLabelColor = (label) => {
   const colors = {
@@ -23,6 +24,7 @@ const getRankBadgeColor = (rank) => {
 };
 
 function ImageSearchResultCard({ result, rank, onSelect }) {
+  const { t } = useTranslation();
   const [isFavorite, setIsFavorite] = useState(false);
 
   const toggleFavorite = (e) => {
@@ -32,11 +34,37 @@ function ImageSearchResultCard({ result, rank, onSelect }) {
   };
 
   const showRankBadge = rank && rank <= 3;
+  const matchLabelMap = {
+    "Best Match": t("searchResultCard.bestMatch", { defaultValue: "Best Match" }),
+    "Highly Similar": t("searchResultCard.highlySimilar", { defaultValue: "Highly Similar" }),
+    "Similar": t("searchResultCard.similar", { defaultValue: "Similar" }),
+    "Partial Match": t("searchResultCard.partialMatch", { defaultValue: "Partial Match" }),
+    "Low Match": t("searchResultCard.lowMatch", { defaultValue: "Low Match" }),
+  };
+  const featureLabelMap = {
+    "front grille": t("features.frontGrille", { defaultValue: "Front grille" }),
+    headlights: t("features.headlights", { defaultValue: "Headlights" }),
+    "front bumper": t("features.frontBumper", { defaultValue: "Front bumper" }),
+    "side profile": t("features.sideProfile", { defaultValue: "Side profile" }),
+    "wheel arch": t("features.wheelArch", { defaultValue: "Wheel arch" }),
+    "body line": t("features.bodyLine", { defaultValue: "Body line" }),
+    "rear shape": t("features.rearShape", { defaultValue: "Rear shape" }),
+    "tail lights": t("features.tailLights", { defaultValue: "Tail lights" }),
+    "rear bumper": t("features.rearBumper", { defaultValue: "Rear bumper" }),
+    "body shape": t("features.bodyShape", { defaultValue: "Body shape" }),
+    "visible exterior features": t("features.visibleExteriorFeatures", { defaultValue: "Visible exterior features" }),
+    "vehicle proportions": t("features.vehicleProportions", { defaultValue: "Vehicle proportions" }),
+    "interior cabin": t("features.interiorCabin", { defaultValue: "Interior cabin" }),
+    dashboard: t("features.dashboard", { defaultValue: "Dashboard" }),
+    seats: t("features.seats", { defaultValue: "Seats" }),
+  };
+
+  const translatedMatchLabel = matchLabelMap[result.matchLabel] || result.matchLabel;
 
   return (
     <div
       onClick={() => onSelect && onSelect(result)}
-      className="overflow-hidden transition cursor-pointer bg-white border border-gray-200 shadow rounded-xl hover:shadow-lg hover:border-blue-300"
+      className="overflow-hidden transition-transform duration-200 transform cursor-pointer bg-white/60 backdrop-blur-sm border border-gray-200/60 shadow-lg rounded-2xl hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-800/60 dark:border-slate-700"
     >
       {/* Image Container with Rank Badge */}
       <div className="relative">
@@ -87,7 +115,7 @@ function ImageSearchResultCard({ result, rank, onSelect }) {
               result.matchLabel
             )}`}
           >
-            {result.matchLabel}
+            {translatedMatchLabel}
           </span>
           <span className="text-sm font-bold text-gray-700">
             {result.matchPercentage}%
@@ -97,8 +125,8 @@ function ImageSearchResultCard({ result, rank, onSelect }) {
         {/* Match Reason / Explanation */}
         <div className="p-3 mt-3 rounded-lg bg-blue-50 border border-blue-100">
           <p className="text-sm text-gray-700">
-            <span className="font-semibold text-blue-700">Why recommended: </span>
-            {result.matchReason}
+              <span className="font-semibold text-blue-700">{t("searchResultCard.whyRecommended", { defaultValue: "Why recommended" })}: </span>
+              {result.matchReason}
           </p>
         </div>
 
@@ -108,16 +136,16 @@ function ImageSearchResultCard({ result, rank, onSelect }) {
             {result.matchedFeatures.map((feature, idx) => (
               <span
                 key={idx}
-                className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full"
+                className="px-3 py-1 text-xs font-medium text-slate-700 bg-white/60 border border-slate-100 rounded-full shadow-sm"
               >
-                {feature}
+                {featureLabelMap[feature.toLowerCase()] || feature}
               </span>
             ))}
           </div>
         )}
 
         {/* Price */}
-        <p className="mt-4 text-lg font-bold text-blue-600">
+        <p className="mt-4 text-lg font-bold text-sky-600">
           LKR {Number(result.price || 0).toLocaleString()}
         </p>
 
@@ -134,7 +162,7 @@ function ImageSearchResultCard({ result, rank, onSelect }) {
               <div className="flex items-center gap-1">
                 <BadgeCheck size={16} className="text-green-600" />
                 <span className="text-xs font-semibold text-green-700">
-                  Grade: {result.autoTrustGrade}
+                  {t("searchResultCard.grade", { defaultValue: "Grade" })}: {result.autoTrustGrade}
                 </span>
               </div>
             )}
@@ -145,9 +173,9 @@ function ImageSearchResultCard({ result, rank, onSelect }) {
         <Link
           to={`/cars/${result._id}`}
           onClick={(e) => e.stopPropagation()}
-          className="block w-full py-2 mt-4 text-sm font-semibold text-center text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"
+          className="inline-flex items-center justify-center w-full gap-2 px-4 py-2 mt-4 text-sm font-semibold text-center text-white transition bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:from-blue-700 hover:to-indigo-700"
         >
-          View Full Details
+          {t("searchResultCard.viewFullDetails", { defaultValue: "View full details" })}
         </Link>
       </div>
     </div>
