@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ImagePlus, Loader2, Search, Sparkles, X } from "lucide-react";
+import ImageSearchResultCard from "./seller/ImageSearchResultCard";
 
 function Hero() {
   const navigate = useNavigate();
@@ -318,73 +319,12 @@ function Hero() {
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {results.map((car, index) => (
-                <div
+                <ImageSearchResultCard
                   key={car._id || car.id || `${car.title}-${car.brand}-${car.model}`}
-                  onClick={() => car._id && handleCardClick(car._id)}
-                  className="overflow-hidden transition-all duration-300 bg-white shadow-xl cursor-pointer rounded-3xl hover:-translate-y-1 hover:shadow-2xl"
-                >
-                      <div className="relative">
-                        <img
-                          src={car.matchedImage || car.image}
-                          alt={car.title}
-                          className="object-cover w-full h-56"
-                        />
-
-                        {index < 3 && (
-                          <div className="absolute flex items-center justify-center font-bold text-white bg-black rounded-full shadow-lg top-3 left-3 w-9 h-9 ring-2 ring-white/20">
-                            {index + 1}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="p-5">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="w-full">
-                            <h3 className="text-lg font-bold text-gray-900">
-                              {car.title}
-                            </h3>
-                            <p className="mt-1 text-sm text-gray-500">
-                              {car.brand} {car.model} • {car.year}
-                            </p>
-
-                            <div className="h-3" />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3 mt-5 text-sm">
-                          <div className="p-3 rounded-2xl bg-gray-50">
-                            <p className="text-xs text-gray-500">Price</p>
-                            <p className="mt-1 font-semibold text-gray-900">
-                              Rs. {car.price?.toLocaleString?.() ?? car.price}
-                            </p>
-                          </div>
-
-                          <div className="p-3 rounded-2xl bg-gray-50">
-                            <p className="text-xs text-gray-500">Trust Level</p>
-                            <p className="mt-1 font-semibold text-gray-900">
-                              {car.trustLevel || "N/A"}
-                            </p>
-                          </div>
-
-                          <div className="p-3 rounded-2xl bg-gray-50">
-                            <p className="text-xs text-gray-500">Body Type</p>
-                            <p className="mt-1 font-semibold text-gray-900">
-                              {car.bodyType || "N/A"}
-                            </p>
-                          </div>
-
-                          <div className="p-3 rounded-2xl bg-gray-50">
-                            <p className="text-xs text-gray-500">Grade</p>
-                            <p className="mt-1 font-semibold text-gray-900">
-                              {car.autoTrustGrade || "N/A"}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2 mt-5">
-                        </div>
-                      </div>
-                </div>
+                  result={car}
+                  rank={index + 1}
+                  onSelect={() => car._id && handleCardClick(car._id)}
+                />
               ))}
             </div>
           </div>
@@ -410,9 +350,6 @@ function Hero() {
               </div>
             )}
           </div>
-        ){"}"}
-      
-    
     </section>
   );
 }

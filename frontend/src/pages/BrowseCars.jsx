@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useApi } from "../lib/api";
 import CarCard from "../components/car/CarCard";
 const makes = ["BMW","Ford","Honda","Hyundai","Land Rover","Mahindra","Mercedes-Benz","Rivian","Tata"];
@@ -9,6 +10,7 @@ const transmissions = ["Automatic","Manual","Semi-Automatic"];
 
 
 function BrowseCars() {
+  const { t } = useTranslation();
   const api = useApi();
 
   // search state
@@ -91,7 +93,7 @@ function BrowseCars() {
   return (
     <div className="px-6 py-10 mx-auto max-w-7xl">
 
-      <h1 className="mb-8 text-4xl font-bold text-blue-600">Browse Cars</h1>
+      <h1 className="mb-8 text-4xl font-bold text-blue-600">{t("browse.title")}</h1>
 
       {/* SEARCH BAR */}
       <div className="flex gap-3 mb-6">
@@ -99,7 +101,7 @@ function BrowseCars() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && fetchCars()}
-          placeholder="Search by make, model, fuel, location..."
+          placeholder={t("browse.searchPlaceholder")}
           className="w-full px-4 py-3 border rounded-xl"
         />
 
@@ -107,7 +109,7 @@ function BrowseCars() {
           onClick={fetchCars}
           className="px-6 py-3 text-white bg-black rounded-xl hover:bg-gray-900"
         >
-          Search
+          {t("buttons.search")}
         </button>
       </div>
 
@@ -117,13 +119,13 @@ function BrowseCars() {
         <div className="col-span-1 p-5 space-y-6 bg-white shadow rounded-xl">
 
           <div className="flex items-center justify-between">
-            <h2 className="font-bold">Filters</h2>
-            <button onClick={clearAll} className="text-sm text-gray-500">Clear All</button>
+            <h2 className="font-bold">{t("browse.filters")}</h2>
+            <button onClick={clearAll} className="text-sm text-gray-500">{t("browse.clearAll")}</button>
           </div>
 
           {/* PRICE */}
           <div>
-            <p className="mb-4 font-semibold">Price Range</p>
+            <p className="mb-4 font-semibold">{t("browse.priceRange")}</p>
             <input
               type="range"
               min="10000"
@@ -140,7 +142,7 @@ function BrowseCars() {
 
           {/* MAKE */}
           <div>
-            <p className="mb-2 font-semibold">Make</p>
+            <p className="mb-2 font-semibold">{t("browse.make")}</p>
             <div className="flex flex-wrap gap-2">
               {makes.map(m => (
                 <span
@@ -156,7 +158,7 @@ function BrowseCars() {
 
           {/* BODY */}
           <div>
-            <p className="mb-2 font-semibold">Body Type</p>
+            <p className="mb-2 font-semibold">{t("browse.bodyType")}</p>
             <div className="flex flex-wrap gap-2">
               {bodyTypes.map(b => (
                 <span
@@ -172,7 +174,7 @@ function BrowseCars() {
 
           {/* FUEL */}
           <div>
-            <p className="mb-2 font-semibold">Fuel Type</p>
+            <p className="mb-2 font-semibold">{t("browse.fuelType")}</p>
             <div className="flex flex-wrap gap-2">
               {fuelTypes.map(f => (
                 <span
@@ -188,7 +190,7 @@ function BrowseCars() {
 
           {/* TRANSMISSION */}
           <div>
-            <p className="mb-2 font-semibold">Transmission</p>
+            <p className="mb-2 font-semibold">{t("browse.transmission")}</p>
             <div className="flex flex-wrap gap-2">
               {transmissions.map(t => (
                 <span
@@ -206,7 +208,7 @@ function BrowseCars() {
             onClick={fetchCars}
             className="w-full py-3 mt-6 font-semibold text-white transition bg-gray-900 rounded-lg shadow-sm hover:bg-black"
           >
-            Apply Filters
+            {t("browse.applyFilters")}
           </button>
         </div>
 
@@ -214,12 +216,12 @@ function BrowseCars() {
         <div className="col-span-3">
 
           {loading && (
-            <p className="py-10 text-center">Searching cars...</p>
+            <p className="py-10 text-center">{t("browse.searchingCars")}</p>
           )}
 
           {!loading && cars.length === 0 && (
             <p className="py-10 text-center text-gray-500">
-              No cars found
+              {t("browse.noCarsFound")}
             </p>
           )}
 
