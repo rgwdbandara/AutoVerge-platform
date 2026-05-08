@@ -4,6 +4,12 @@ import AIUpload from "../../components/seller/AIUpload";
 
 function AddCar() {
   const [activeTab, setActiveTab] = useState("manual");
+  const [aiPrefillData, setAiPrefillData] = useState(null);
+
+  const handleAiAutoFill = (data) => {
+    setAiPrefillData(data);
+    setActiveTab("manual");
+  };
 
   return (
     <div className="min-h-screen px-4 py-10 bg-gray-100">
@@ -39,8 +45,8 @@ function AddCar() {
 
         {/* 🔹 CONTENT SWITCH */}
         <div>
-          {activeTab === "manual" && <ManualEntryForm />}
-          {activeTab === "ai" && <AIUpload />}
+          {activeTab === "manual" && <ManualEntryForm initialData={aiPrefillData} />}
+          {activeTab === "ai" && <AIUpload onAutoFill={handleAiAutoFill} />}
         </div>
 
       </div>
