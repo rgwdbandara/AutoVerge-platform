@@ -1,6 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white">
       
@@ -15,7 +18,10 @@ export default function Footer() {
             </div>
 
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              Find, compare and understand vehicles using AI-powered image search.
+              {t("footer.description", {
+                defaultValue:
+                  "Find, compare and understand vehicles using AI-powered image search.",
+              })}
             </p>
 
             {/* SOCIAL LINKS */}
@@ -37,25 +43,25 @@ export default function Footer() {
           {/* EXPLORE */}
           <div>
             <h4 className="mb-3 font-medium text-slate-900 dark:text-white">
-              Explore
+              {t("footer.explore", { defaultValue: "Explore" })}
             </h4>
 
             <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
               <li>
                 <a href="/browse" className="transition hover:text-blue-500">
-                  Browse Cars
+                  {t("footer.links.browseCars", { defaultValue: "Browse Cars" })}
                 </a>
               </li>
 
               <li>
                 <a href="/sell" className="transition hover:text-blue-500">
-                  Sell a Car
+                  {t("footer.links.sellCar", { defaultValue: "Sell a Car" })}
                 </a>
               </li>
 
               <li>
                 <a href="/favorites" className="transition hover:text-blue-500">
-                  Favorites
+                  {t("footer.links.favorites", { defaultValue: "Favorites" })}
                 </a>
               </li>
             </ul>
@@ -64,25 +70,25 @@ export default function Footer() {
           {/* COMPANY */}
           <div>
             <h4 className="mb-3 font-medium text-slate-900 dark:text-white">
-              Company
+              {t("footer.company", { defaultValue: "Company" })}
             </h4>
 
             <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
               <li>
                 <a href="/about" className="transition hover:text-blue-500">
-                  About
+                  {t("footer.links.about", { defaultValue: "About" })}
                 </a>
               </li>
 
               <li>
                 <a href="/careers" className="transition hover:text-blue-500">
-                  Careers
+                  {t("footer.links.careers", { defaultValue: "Careers" })}
                 </a>
               </li>
 
               <li>
                 <a href="/contact" className="transition hover:text-blue-500">
-                  Contact
+                  {t("footer.links.contact", { defaultValue: "Contact" })}
                 </a>
               </li>
             </ul>
@@ -91,20 +97,20 @@ export default function Footer() {
           {/* NEWSLETTER */}
           <div>
             <h4 className="mb-3 font-medium text-slate-900 dark:text-white">
-              Stay in the loop
+              {t("footer.stayInLoop", { defaultValue: "Stay in the loop" })}
             </h4>
 
             <form className="flex gap-2">
               <input
                 className="flex-1 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 text-slate-900 placeholder:text-slate-500 dark:border-white/10 dark:bg-slate-900 dark:text-white"
-                placeholder="Your email"
+                placeholder={t("footer.emailPlaceholder", { defaultValue: "Your email" })}
               />
 
               <button
                 type="button"
                 className="px-4 py-2 text-sm font-semibold text-white transition bg-indigo-600 rounded-md hover:bg-indigo-500"
               >
-                Subscribe
+                {t("footer.subscribe", { defaultValue: "Subscribe" })}
               </button>
             </form>
 
@@ -117,7 +123,7 @@ export default function Footer() {
 
         {/* BOTTOM */}
         <div className="pt-6 text-sm border-t border-slate-200 text-slate-600 dark:border-white/10 dark:text-slate-300">
-          © {new Date().getFullYear()} AutoVerge — All rights reserved.
+          © {new Date().getFullYear()} AutoVerge — {t("footer.rights", { defaultValue: "All rights reserved." })}
         </div>
 
       </div>

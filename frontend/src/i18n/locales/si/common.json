@@ -2,6 +2,7 @@
   "navbar": {
     "home": "මුල් පිටුව",
     "browseCars": "වාහන බලන්න",
+    "sellVehicle": "ඔබේ වාහනය විකිණන්න",
     "sellYourVehicle": "ඔබේ වාහනය විකිණන්න",
     "adminDashboard": "පරිපාලක පාලක පුවරුව",
     "dashboard": "පාලක පුවරුව",
@@ -9,6 +10,7 @@
     "language": "භාෂාව"
   },
   "hero": {
+      "loading": "පූරණය වෙමින්...",
     "badge": "AI බලගන්වන ස්මාර්ට් වේදිකාව",
     "titleLine1": "ඔබට ගැලපෙන වාහනය සොයාගන්න",
     "titleLine2": "AutoVerge AI සමඟ",
@@ -167,7 +169,254 @@
     "q6": "ගැණුම්කරුවන්ට ලැබෙන tools මොනවාද?",
     "a6": "ගැණුම්කරුවන්ට vehicles compare කිරීම, EMI estimate කිරීම, AutoTrust grading බැලීම සහ image-based search භාවිතා කිරීම කළ හැක."
   },
+  "home": {
+    "featuredCars": {
+      "loading": "වාහන පූරණය වෙමින් පවතී...",
+      "title": "විශේෂාංග වාහන",
+      "subtitle": "AutoVerge විසින් තෝරාගත් ජනප්‍රිය වාහන"
+    },
+    "browseByMake": {
+      "title": "Brand අනුව බලන්න",
+      "subtitle": "ජනප්‍රිය brands"
+    },
+    "bodyType": {
+      "title": "Body Type අනුව බලන්න",
+      "viewAll": "සියල්ල බලන්න",
+      "explore": "ගවේෂණය කරන්න"
+    },
+    "whyUs": {
+      "title": "අපි වෙනස් වන ආකාරය",
+      "items": {
+        "smartSearch": {
+          "title": "ස්මාර්ට් සෙවීම සහ නිර්දේශ",
+          "description": "ඔබේ budget සහ කැමැත්තට වඩා හොඳින් ගැලපෙන වාහන රූප සෙවීම් සහ නිර්දේශ සමඟ සොයා බලන්න."
+        },
+        "emi": {
+          "title": "EMI Calculator",
+          "description": "මිලදී ගැනීමට පෙර මාසික ගෙවීම් ඉක්මනින් ගණනය කර finansing options සංසන්දනය කරන්න."
+        },
+        "autotrust": {
+          "title": "AutoTrust ශ්‍රේණිගත කිරීම සහ මිල විශ්ලේෂණය",
+          "description": "විනිවිද පෙනෙන condition grading සහ AI-powered price insights භාවිතා කර වඩා ආරක්ෂිත තීරණ ගන්න."
+        }
+      }
+    },
+    "faq": {
+      "title": "නිතර අසන ප්‍රශ්න",
+      "items": {
+        "imageSearch": {
+          "q": "රූප සෙවීම වැඩ කරන්නේ කෙසේද?",
+          "a": "වාහන රූපයක් upload කරන්න, AutoVerge එහි දෘශ්‍ය ලක්ෂණ ලබා ඇති listings සමඟ සසඳයි."
+        },
+        "language": {
+          "q": "English සහ Sinhala අතර මාරු විය හැකිද?",
+          "a": "ඔව්, navbar එකේ language toggle එකෙන් සම්පූර්ණ interface එකම වහාම වෙනස් වේ."
+        },
+        "aiSearch": {
+          "q": "AI සෙවීම නොමිලේද?",
+          "a": "පරිශීලකයින්ට අමතර පියවරක් නැතිව AI-powered matching සහය ලබාදේ."
+        },
+        "favorites": {
+          "q": "ප්‍රිය වාහන සුරැකිය හැකිද?",
+          "a": "ඔව්, sign in කළ පරිශීලකයින්ට වාහන favorites ලැයිස්තුවට සුරැකිය හැක."
+        },
+        "account": {
+          "q": "වාහනයක් පළ කිරීමට ගිණුමක් අවශ්‍යද?",
+          "a": "ඔව්, ඔබේ listings profile එකට සම්බන්ධ වීමට පළමුව sign in වන්න."
+        },
+        "devices": {
+          "q": "AutoVerge සහය දෙන උපාංග මොනවාද?",
+          "a": "Site එක responsive වන අතර desktop සහ mobile උපාංග දෙකම හොඳින් සහය දක්වයි."
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "එය ක්‍රියා කරන ආකාරය",
+      "subtitle": "අපගේ advanced AI image-matching pipeline භාවිතා කර වාහන සොයාගැනීමට සරල පියවර.",
+      "steps": {
+        "upload": {
+          "title": "Upload හෝ Search",
+          "desc": "ගැලපෙන වාහන සොයා ගැනීම ආරම්භ කිරීමට ඡායාරූපයක් ලබාදෙන්න හෝ image search භාවිතා කරන්න."
+        },
+        "analyze": {
+          "title": "AI විශේෂාංග විශ්ලේෂණය කරයි",
+          "desc": "අපගේ models exterior shape, trim සහ visual cues විශ්ලේෂණය කර සමාන වාහන සොයයි."
+        },
+        "matches": {
+          "title": "ස්මාර්ට් ගැලපීම් ලබාගන්න",
+          "desc": "විශ්වාස අගයන් සහ කෙටි පැහැදිලි කිරීම් සමඟ ranked matches ලබාගන්න."
+        }
+      }
+    },
+    "cta": {
+      "title": "නිවැරදි වාහනයට ඔබේ ගමන ආරම්භ කරන්න",
+      "subtitle": "බුද්ධිමත් search, විශ්වාසදායක AutoTrust grading, සහ AI-based price insights සමඟ ඔබේ ideal car එක සොයාගන්න.",
+      "button": "සියලු වාහන බලන්න"
+    },
+    "latestNews": {
+      "label": "නවතම වාහන පුවත්",
+      "title": "අලුත් කතා, reviews, සහ market updates",
+      "subtitle": "AutoVerge වෙතින් නවතම automotive headlines, electric vehicle updates, සහ expert insights බලන්න.",
+      "viewAll": "සියලු articles බලන්න"
+    }
+  },
+  "footer": {
+    "description": "AI බලගැන්වූ image search භාවිතා කර වාහන සොයා, සංසන්දනය කර, තේරුම් ගන්න.",
+    "explore": "ගවේෂණය",
+    "company": "සමාගම",
+    "stayInLoop": "නවතම දේ සමඟ සිටින්න",
+    "emailPlaceholder": "ඔබේ email",
+    "subscribe": "Subscribe",
+    "rights": "සියලු හිමිකම් ඇවිරිණි.",
+    "links": {
+      "browseCars": "වාහන බලන්න",
+      "sellCar": "වාහනයක් විකිණන්න",
+      "favorites": "ප්‍රියතම",
+      "about": "අපි ගැන",
+      "careers": "රැකියා",
+      "contact": "සම්බන්ධ වන්න"
+    }
+  },
+  "articles": {
+    "error": "අලුත් articles දැන් ලබාගත නොහැක.",
+    "badge": "AutoVerge Articles",
+    "heroTitle": "නවතම වාහන පුවත්, reviews සහ AI අවබෝධය",
+    "heroDescription": "AI-generated automotive insights, EV news, vehicle buying guides, transportation trends, සහ Sri Lankan car market updates බලන්න.",
+    "storyCount": "{{count}} stories",
+    "freshCoverage": "නවතම coverage",
+    "filters": {
+      "all": "සියල්ල"
+    },
+    "allArticles": "සියලු articles",
+    "archiveHelp": "සම්පූර්ණ archive එක බලන්න හෝ මාතෘකාව අනුව සීමා කරන්න.",
+    "showingCount": "Article {{count}}ක් පෙන්වයි",
+    "noAdditional": "මෙම category එකට තව stories නැත.",
+    "noArticlesLabel": "Articles නැත",
+    "noArticlesTitle": "මෙම category එකට ගැළපෙන stories නැත.",
+    "noArticlesDescription": "සම්පූර්ණ archive එක බලන්න සියල්ලට යන්න හෝ ඊළඟ article එක පළවනතුරු ඉන්න.",
+    "latestPosts": "නවතම Posts"
+  },
+  "articleDetails": {
+    "loading": "පූරණය වෙමින්...",
+    "back": "Articles වෙත ආපසු",
+    "moreStories": "තවත් Stories",
+    "relatedArticles": "සම්බන්ධ Articles"
+  },
+  "dashboard": {
+    "title": "පාලක පුවරුව",
+    "logout": "Logout",
+    "menu": {
+      "myAccount": "මගේ ගිණුම",
+      "manageProfile": "ගිණුම කළමනාකරණය",
+      "myListings": "මගේ දැන්වීම්",
+      "favorites": "මගේ ප්‍රියතම",
+      "pendingAds": "බලාපොරොත්තු ads",
+      "expiredAds": "කල් ඉකුත් වූ ads",
+      "phoneNumbers": "දුරකථන අංක"
+    }
+  },
+  "admin": {
+    "title": "පරිපාලක පැනලය",
+    "logout": "Logout",
+    "menu": {
+      "dashboard": "පාලක පුවරුව",
+      "pendingAds": "බලාපොරොත්තු ads",
+      "cars": "වාහන",
+      "aiArticles": "AI Articles",
+      "settings": "සැකසුම්"
+    }
+  },
+  "auth": {
+    "title": "ඔබේ වාහනය බලා සිටීමට ඉඩ නොදෙන්න",
+    "description": "නොමිලේ පළ කරන්න. ගැණුම්කරුවන් දැන්ම සොයමින් සිටී!"
+  },
+  "adminArticles": {
+    "title": "AI Article Generator",
+    "subtitle": "Articles ස්වයංක්‍රීයව සාදා පළ කරන්න",
+    "topicLabel": "Article Topic",
+    "topicPlaceholder": "උදා: 2026 ශ්‍රී ලංකාවේ හොඳම Hybrid Cars",
+    "categoryLabel": "Category",
+    "heroImageLabel": "අමතර Hero Image",
+    "generating": "Generate කරමින්...",
+    "generate": "AI Article සාදන්න",
+    "viewCreated": "සාදන ලද Article බලන්න",
+    "createdLabel": "සාදන ලද්දේ:",
+    "slugLabel": "Slug:",
+    "existingTitle": "පවතින Articles",
+    "editTitle": "Article සංස්කරණය",
+    "titleLabel": "Title",
+    "summaryLabel": "Summary",
+    "contentLabel": "Content (Markdown)",
+    "imageLabel": "Image",
+    "enterTopic": "කරුණාකර article topic එක ඇතුළත් කරන්න.",
+    "generateFailed": "Article generate කිරීමට අසමත් විය",
+    "deleteFailed": "Article මකා දැමීමට අසමත් විය",
+    "saveFailed": "Article සුරැකීමට අසමත් විය"
+  },
+  "profile": {
+    "title": "විස්තර වෙනස් කරන්න",
+    "fields": {
+      "email": "Email",
+      "phone": "Phone",
+      "name": "Name",
+      "location": "Location",
+      "subLocation": "Sub Location"
+    },
+    "placeholders": {
+      "phone": "ජංගම අංකය එක් කරන්න",
+      "district": "දිස්ත්‍රික්කය තෝරන්න",
+      "subLocation": "උප ස්ථානය තෝරන්න"
+    },
+    "actions": {
+      "updateDetails": "විස්තර යාවත්කාලීන කරන්න"
+    },
+    "password": {
+      "title": "මුරපදය වෙනස් කරන්න",
+      "current": "දැනට පවතින මුරපදය",
+      "new": "නව මුරපදය",
+      "confirm": "නව මුරපදය තහවුරු කරන්න"
+    },
+    "alerts": {
+      "updateSuccess": "පැතිකඩය සාර්ථකව යාවත්කාලීන විය",
+      "updateFailed": "පැතිකඩය යාවත්කාලීන කිරීමට අසමත් විය",
+      "deleteConfirm": "ඔබේ ගිණුම මකා දැමීමට අවශ්‍ය බව තහවුරුද? මෙය නැවත හැරවිය නොහැක.",
+      "deleteFailed": "ගිණුම මකා දැමීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න."
+    }
+  },
+  "seller": {
+    "editCar": {
+      "success": "වාහනය සාර්ථකව යාවත්කාලීන විය ✅",
+      "failed": "යාවත්කාලීන කිරීම අසාර්ථකයි ❌",
+      "notFound": "වාහනය හමු නොවීය"
+    },
+    "expiredAds": {
+      "loading": "කල් ඉකුත් වූ දැන්වීම් පූරණය වෙමින්...",
+      "title": "කල් ඉකුත් වූ දැන්වීම්",
+      "vehicleName": "වාහනයේ නම",
+      "expireDate": "කල් ඉකුත් වන දිනය",
+      "reactivateAd": "දැන්වීම නැවත ක්‍රියාත්මක කරන්න",
+      "none": "කල් ඉකුත් වූ දැන්වීම් හමු නොවීය",
+      "reactivate": "නැවත ක්‍රියාත්මක කරන්න",
+      "reactivated": "දැන්වීම තවත් දින 30කට නැවත ක්‍රියාත්මක විය ✅",
+      "reactivateFailed": "දැන්වීම නැවත ක්‍රියාත්මක කිරීමට අසමත් විය"
+    },
+    "dashboard": {
+      "totalCars": "සම්පූර්ණ වාහන",
+      "availableCars": "ලබා ගත හැකි වාහන",
+      "soldCars": "විකිණූ වාහන",
+      "featuredCars": "විශේෂාංග වාහන"
+    }
+  },
   "common": {
-    "loading": "लोड වෙමින්..."
+    "loading": "පූරණය වෙමින්...",
+    "edit": "සංස්කරණය",
+    "delete": "මකන්න",
+    "cancel": "අවලංගු කරන්න",
+    "save": "සුරකින්න",
+    "update": "යාවත්කාලීන කරන්න",
+    "updating": "යාවත්කාලීන වෙමින්...",
+    "no": "අංකය",
+    "image": "රූපය",
+    "options": "විකල්ප"
   }
 }

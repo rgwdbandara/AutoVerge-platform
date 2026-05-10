@@ -2,7 +2,9 @@
   "navbar": {
     "home": "Home",
     "browseCars": "Browse Cars",
+    "articles": "Articles",
     "sellVehicle": "Sell Your Vehicle",
+    "sellYourVehicle": "Sell Your Vehicle",
     "adminDashboard": "Admin Dashboard",
     "dashboard": "Dashboard"
   },
@@ -134,6 +136,13 @@
     "lowMatch": "Low Match",
     "whyRecommended": "Why Recommended",
     "grade": "Grade"
+  },
+  "searchResultCard": {
+    "brandMatch": "Brand: match",
+    "brandMismatch": "Brand: differs",
+    "modelMatch": "Model: match",
+    "modelMismatch": "Model: differs",
+    "viewFullDetails": "View Full Details →"
   },
   "footer": {
     "tagline": "Your trusted partner in finding the perfect vehicle",

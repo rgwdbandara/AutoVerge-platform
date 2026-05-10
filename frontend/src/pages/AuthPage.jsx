@@ -1,9 +1,11 @@
 import { SignIn, SignUp } from "@clerk/clerk-react";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function AuthPage() {
   const location = useLocation();
   const isSignup = location.pathname === "/sign-up";
+  const { t } = useTranslation();
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
@@ -24,10 +26,10 @@ function AuthPage() {
         {/* LEFT TEXT */}
         <div className="hidden flex-col justify-center px-6 py-14 text-white md:flex lg:w-1/2 lg:px-16">
           <h1 className="mb-4 text-4xl font-bold lg:text-5xl">
-            Don’t keep your car waiting
+            {t("auth.title", { defaultValue: "Don’t keep your car waiting" })}
           </h1>
           <p className="max-w-lg text-lg">
-            Post it for free. Buyers are looking right now!
+            {t("auth.description", { defaultValue: "Post it for free. Buyers are looking right now!" })}
           </p>
         </div>
 

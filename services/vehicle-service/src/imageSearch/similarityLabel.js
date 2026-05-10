@@ -1,21 +1,28 @@
 /**
  * Utility functions for similarity labeling
- * Generates supervisor-friendly visual matching labels
+ * Generates professional match labels with better categorization
+ * 
+ * Match Categories:
+ * - Exact Match (97-98%)
+ * - Similar Match (88-96%)
+ * - Related Match (81-87%)
+ * - Partial Match (65-80%)
+ * - Low Match (<65%)
  */
 
 const getMatchLabel = (percentage) => {
-  if (percentage >= 90) return "Best Match";
-  if (percentage >= 80) return "Highly Similar";
-  if (percentage >= 70) return "Similar";
-  if (percentage >= 60) return "Partial Match";
+  if (percentage >= 97) return "Exact Match";
+  if (percentage >= 88) return "Similar Match";
+  if (percentage >= 81) return "Related Match";
+  if (percentage >= 65) return "Partial Match";
   return "Low Match";
 };
 
 const getMatchColor = (matchLabel) => {
   const colors = {
-    "Best Match": "text-green-700",
-    "Highly Similar": "text-emerald-600",
-    "Similar": "text-blue-600",
+    "Exact Match": "text-green-700",
+    "Similar Match": "text-emerald-600",
+    "Related Match": "text-blue-600",
     "Partial Match": "text-amber-600",
     "Low Match": "text-gray-600",
   };
@@ -24,9 +31,9 @@ const getMatchColor = (matchLabel) => {
 
 const getMatchBgColor = (matchLabel) => {
   const colors = {
-    "Best Match": "bg-green-50",
-    "Highly Similar": "bg-emerald-50",
-    "Similar": "bg-blue-50",
+    "Exact Match": "bg-green-50",
+    "Similar Match": "bg-emerald-50",
+    "Related Match": "bg-blue-50",
     "Partial Match": "bg-amber-50",
     "Low Match": "bg-gray-50",
   };

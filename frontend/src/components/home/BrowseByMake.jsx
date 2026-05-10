@@ -1,5 +1,6 @@
 
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import bmw from "../../assets/logos/bmw.webp";
 import ford from "../../assets/logos/ford.webp";
@@ -19,12 +20,13 @@ const makes = [
 
 
 function BrowseByMake() {
+  const { t } = useTranslation();
   return (
     <section className="bg-slate-50 dark:bg-slate-950 py-24 text-slate-900 dark:text-white transition-colors duration-300">
       <div className="px-6 mx-auto max-w-7xl">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Browse by Make</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-300">Popular brands</p>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{t("home.browseByMake.title", { defaultValue: "Browse by Make" })}</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-300">{t("home.browseByMake.subtitle", { defaultValue: "Popular brands" })}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">

@@ -6,6 +6,7 @@ import AdminCarDetails from "../pages/admin/AdminCarDetails";
 import AdminLayout from "../layouts/AdminLayout";
 import AdminCars from "../pages/admin/AdminCars";
 import AdminSettings from "../pages/admin/AdminSettings";
+import AdminAIArticles from "../pages/admin/AdminAIArticles";
 
 export const adminRoutes = (
   <>
@@ -22,6 +23,7 @@ export const adminRoutes = (
       <Route path="pending" element={<PendingAds />} />
       <Route path="car/:id" element={<AdminCarDetails />} />
       <Route path="cars" element={<AdminCars />} />
+      <Route path="ai-articles" element={<AdminAIArticles />} />
       <Route path="settings" element={<AdminSettings />} />
     </Route>
   </>

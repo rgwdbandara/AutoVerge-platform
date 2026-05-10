@@ -2,6 +2,8 @@ const OpenAI = require("openai");
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 30000, // 30 seconds timeout
+  maxRetries: 1,
 });
 
 const analyzeImageWithGPT = async (file) => {
@@ -93,13 +95,19 @@ Example response format:
 
     return parsed;
   } catch (error) {
-    console.error("GPT VISION ERROR:", error.message);
+    if (error.code === "ERR_HTTP_REQUEST_TIMEOUT" || error.message.includes("timeout")) {
+      console.error("GPT VISION TIMEOUT: OpenAI API took too long. Fallback to basic detection.");
+    } else {
+      console.error("GPT VISION ERROR:", error.message);
+    }
+    
+    // Fallback: Return generic vehicle response instead of failing completely
     return {
-      isVehicle: false,
+      isVehicle: true, // Assume it's a vehicle to allow search to proceed
       brand: null,
       type: null,
       model: null,
-      description: null,
+      description: "Vehicle image analysis unavailable - using fallback mode",
     };
   }
 };

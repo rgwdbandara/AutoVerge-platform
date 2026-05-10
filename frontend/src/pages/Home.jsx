@@ -8,7 +8,7 @@ import BodyType from "../components/home/BodyType";
 import FAQ from "../components/home/FAQ";
 
 import HowItWorks from "../components/home/HowItWorks";
-import AIMatchingDemo from "../components/home/AIMatchingDemo";
+import LatestAutomotiveNews from "../components/home/LatestAutomotiveNews";
 import Footer from "../components/Footer";
 import AutoVergeChatbot from "../components/chatbot/AutoVergeChatbot";
 
@@ -20,6 +20,8 @@ function Home() {
 
       <FeaturedCars />
 
+      <LatestAutomotiveNews />
+
       <BrowseByMake />
 
       {/* 🔥 ADD THESE BELOW */}
@@ -28,8 +30,6 @@ function Home() {
       <BodyType />
 
       <HowItWorks />
-
-      <AIMatchingDemo />
 
       <FAQ />
 

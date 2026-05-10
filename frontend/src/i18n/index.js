@@ -25,7 +25,7 @@ i18n
     ns: ["common"],
     detection: {
       order: ["localStorage", "navigator", "htmlTag"],
-      lookupLocalStorage: "autoverge_language",
+      lookupLocalStorage: "autoverge_lang",
       caches: ["localStorage"],
     },
     interpolation: {

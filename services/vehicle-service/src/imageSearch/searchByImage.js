@@ -1,40 +1,114 @@
 const Vehicle = require("../models/Vehicle");
 const cosineSimilarity = require("./cosineSimilarity");
+const {
+  calculateBrandMatch,
+  calculateBodyTypeMatch,
+  calculateWeightedScore,
+  normalizeScoreToPercentage,
+  getMatchCategory,
+} = require("./weightedScoring");
+const {
+  generateMatchExplanation,
+  generateIntelligentFeatures,
+} = require("./explanationGenerator");
 
-const normalize = (str) =>
-  (str || "")
+const normalizeKey = (value) =>
+  (value || "")
     .toString()
     .toLowerCase()
     .replace(/[-\s]/g, "")
     .replace(/[^a-z0-9]/g, "");
 
-const brandAliases = {
-  mercedes: "mercedesbenz",
-  mercedesbenz: "mercedesbenz",
-  benz: "mercedesbenz",
+const CATEGORY_GROUPS = {
+  hatchback: ["hatchback", "liftback", "compact", "subcompact"],
+  suv: ["suv", "crossover", "cuv"],
+  sedan: ["sedan", "saloon", "notchback"],
+  wagon: ["wagon", "estate", "shootingbrake", "mpv", "minivan", "van"],
+  pickup: ["pickup", "truck"],
+  coupe: ["coupe", "roadster", "convertible"],
 };
 
-const normalizeBrand = (brand) => {
-  const clean = normalize(brand);
-  return brandAliases[clean] || clean;
+const CATEGORY_KEYWORDS = [
+  ["pickup", "pickup"],
+  ["hilux", "pickup"],
+  ["truck", "pickup"],
+  ["wagon", "wagon"],
+  ["fielder", "wagon"],
+  ["probox", "wagon"],
+  ["van", "wagon"],
+  ["mpv", "wagon"],
+  ["minivan", "wagon"],
+  ["suv", "suv"],
+  ["crossover", "suv"],
+  ["cuv", "suv"],
+  ["vezel", "suv"],
+  ["chr", "suv"],
+  ["raize", "suv"],
+  ["urbancruiser", "suv"],
+  ["harrier", "suv"],
+  ["safari", "suv"],
+  ["magnite", "suv"],
+  ["hatchback", "hatchback"],
+  ["liftback", "hatchback"],
+  ["aqua", "hatchback"],
+  ["vitz", "hatchback"],
+  ["priusc", "hatchback"],
+  ["fit", "hatchback"],
+  ["alto", "hatchback"],
+  ["dayz", "hatchback"],
+  ["demio", "hatchback"],
+  ["yaris", "hatchback"],
+  ["civic", "sedan"],
+  ["axio", "sedan"],
+  ["sedan", "sedan"],
+];
+
+const inferCategoryFromText = (text) => {
+  const normalized = normalizeKey(text);
+  if (!normalized) return null;
+
+  for (const [keyword, category] of CATEGORY_KEYWORDS) {
+    if (normalized.includes(keyword)) {
+      return category;
+    }
+  }
+
+  return null;
 };
 
-const isModelRelated = (detectedModel, vehicleModel) => {
-  const detected = normalize(detectedModel);
-  const vehicle = normalize(vehicleModel);
+const getVehicleCategory = (vehicle) =>
+  inferCategoryFromText(`${vehicle?.title || ""} ${vehicle?.model || ""} ${vehicle?.bodyType || ""}`) ||
+  inferCategoryFromText(vehicle?.bodyType) ||
+  "unknown";
 
-  if (!detected || !vehicle) return false;
-  if (detected === vehicle) return true;
-  if (detected.includes(vehicle) || vehicle.includes(detected)) return true;
+const getDetectedCategory = (detected) =>
+  inferCategoryFromText(`${detected?.model || ""} ${detected?.type || ""} ${detected?.description || ""}`) ||
+  inferCategoryFromText(detected?.type) ||
+  "unknown";
 
-  const detectedParts = detected.split(/(?=\d)|(?<=\d)/).filter(Boolean);
-  const vehicleParts = vehicle.split(/(?=\d)|(?<=\d)/).filter(Boolean);
+const categoriesCompatible = (detectedCategory, vehicleCategory) => {
+  if (!detectedCategory || !vehicleCategory || detectedCategory === "unknown" || vehicleCategory === "unknown") {
+    return true;
+  }
 
-  return (
-    detectedParts.some((part) => vehicle.includes(part)) ||
-    vehicleParts.some((part) => detected.includes(part))
-  );
+  const detectedGroup = Object.entries(CATEGORY_GROUPS).find(([, values]) => values.includes(detectedCategory));
+  const vehicleGroup = Object.entries(CATEGORY_GROUPS).find(([, values]) => values.includes(vehicleCategory));
+
+  if (detectedGroup && vehicleGroup) {
+    return detectedGroup[0] === vehicleGroup[0];
+  }
+
+  return detectedCategory === vehicleCategory;
 };
+
+const isRelatedKey = (left, right) => {
+  if (!left || !right) {
+    return false;
+  }
+
+  return left === right || left.includes(right) || right.includes(left);
+};
+
 
 const parseArgs = (arg2, arg3, arg4) => {
   if (arg2 && typeof arg2 === "object" && !Array.isArray(arg2)) {
@@ -52,156 +126,6 @@ const parseArgs = (arg2, arg3, arg4) => {
   };
 };
 
-// Generate match label based on match percentage
-const getMatchLabel = (percentage) => {
-  if (percentage >= 90) return "Best Match";
-  if (percentage >= 80) return "Highly Similar";
-  if (percentage >= 70) return "Similar";
-  if (percentage >= 60) return "Partial Match";
-  return "Low Match";
-};
-
-// Generate match reason based on available fields
-const getMatchReason = (vehicle, detected, matchPercentage) => {
-  // Priority 1: Brand match (strongest signal)
-  if (detected?.brand && vehicle.brand) {
-    const dbBrand = normalizeBrand(vehicle.brand);
-    const gptBrand = normalizeBrand(detected.brand);
-
-    if (dbBrand && gptBrand && (dbBrand.includes(gptBrand) || gptBrand.includes(dbBrand))) {
-      // Priority 1a: Brand + Model match (strongest)
-      if (detected?.model && vehicle.model) {
-        if (isModelRelated(detected.model, vehicle.model)) {
-          return `Matching ${vehicle.brand} ${vehicle.model} - brand, model, and body shape detected.`;
-        }
-      }
-      // Priority 1b: Brand + Body type match
-      if (vehicle.bodyType && detected?.type) {
-        const detectedType = normalize(detected.type);
-        const bodyType = normalize(vehicle.bodyType);
-        if (detectedType && bodyType && bodyType.includes(detectedType)) {
-          return `${vehicle.brand} vehicle - matching brand and body type (${vehicle.bodyType}) detected.`;
-        }
-      }
-      // Priority 1c: Brand match only
-      return `${vehicle.brand} detected - matching brand with similar visual features.`;
-    }
-  }
-
-  // Priority 2: Model match (without brand)
-  if (detected?.model && vehicle.model) {
-    if (isModelRelated(detected.model, vehicle.model)) {
-      return `${vehicle.brand} ${vehicle.model} model matched - similar exterior styling detected.`;
-    }
-  }
-
-  // Priority 3: Body type match
-  if (vehicle.bodyType && detected?.type) {
-    const detectedType = normalize(detected.type);
-    const bodyType = normalize(vehicle.bodyType);
-    if (detectedType && bodyType && bodyType.includes(detectedType)) {
-      return `Similar vehicle body type (${vehicle.bodyType}) and overall shape detected.`;
-    }
-  }
-
-  // Priority 4: View angle match
-  if (detected?.viewType) {
-    return "Matching viewing angle and visible exterior structure.";
-  }
-
-  // Priority 5: High similarity score
-  if (matchPercentage >= 85) {
-    return "Strong visual similarity found in the uploaded image.";
-  }
-
-  if (matchPercentage >= 70) {
-    return "Exterior vehicle features show visual similarity.";
-  }
-
-  return "Recommended based on closest visual feature similarity.";
-};
-
-// Generate matched features array based on viewType and vehicle-specific signals
-const getMatchedFeatures = (detected, viewType, vehicle, bestScore) => {
-  const view = (viewType || "").toLowerCase();
-  const features = new Set();
-
-  const add = (...items) => {
-    items.filter(Boolean).forEach((item) => features.add(item));
-  };
-
-  const addVehicleSpecificFeature = () => {
-    const body = (vehicle?.bodyType || "").toLowerCase();
-    const model = (vehicle?.model || "").toLowerCase();
-
-    if (body.includes("suv")) add("high ground clearance");
-    else if (body.includes("sedan")) add("sedan proportions");
-    else if (body.includes("coupe")) add("sleek roofline");
-    else if (body.includes("hatchback")) add("compact rear hatch");
-    else if (body.includes("wagon")) add("extended cargo area");
-    else if (body.includes("truck")) add("cargo bed design");
-
-    if (model.includes("c")) add("model styling cues");
-    if (model.includes("sport") || model.includes("amg")) add("sport styling");
-    if (model.includes("x")) add("distinctive front fascia");
-  };
-
-  if (view.includes("front") || view.includes("grille")) {
-    add("front grille", "headlights", "front bumper");
-    addVehicleSpecificFeature();
-  } else if (view.includes("side")) {
-    add("side profile", "wheel arch", "body line");
-    addVehicleSpecificFeature();
-  } else if (view.includes("rear")) {
-    add("rear shape", "tail lights", "rear bumper");
-    addVehicleSpecificFeature();
-  } else if (view.includes("interior")) {
-    add("interior cabin", "dashboard", "seats");
-  } else if (view.includes("angled") || view.includes("corner")) {
-    add("body shape", "wheel design", "lighting");
-    addVehicleSpecificFeature();
-  } else if (detected?.type) {
-    const type = (detected.type || "").toLowerCase();
-
-    if (type.includes("suv") || type.includes("truck")) {
-      add("high ground clearance", "roof line", "cargo area");
-    } else if (type.includes("sedan")) {
-      add("body line", "window trim", "door design");
-    } else if (type.includes("coupe") || type.includes("sports")) {
-      add("aerodynamic shape", "side vents", "lowered stance");
-    } else if (type.includes("hatchback") || type.includes("compact")) {
-      add("rear hatch design", "bumper contour", "compact proportions");
-    } else {
-      add("body shape", "visible exterior features", "vehicle proportions");
-    }
-
-    addVehicleSpecificFeature();
-  } else if (vehicle.bodyType) {
-    const body = (vehicle.bodyType || "").toLowerCase();
-
-    if (body.includes("suv")) {
-      add("high ground clearance", "roof design", "cargo area");
-    } else if (body.includes("sedan")) {
-      add("body proportion", "window design", "door handles");
-    } else if (body.includes("coupe")) {
-      add("sleek profile", "side vents", "aggressive styling");
-    } else if (body.includes("hatchback")) {
-      add("compact shape", "rear glass", "tailgate design");
-    } else {
-      add("body shape", "visible exterior features", "vehicle proportions");
-    }
-
-    addVehicleSpecificFeature();
-  } else {
-    add("body shape", "visible exterior features", "vehicle proportions");
-  }
-
-  if (bestScore >= 0.85) add("strong overall visual alignment");
-  if (detected?.brand) add(`${detected.brand} styling cues`);
-  if (detected?.model) add(`${detected.model} design language`);
-
-  return Array.from(features).slice(0, 4);
-};
 
 const searchVehiclesByImage = async (
   queryFeatureVector,
@@ -220,16 +144,67 @@ const searchVehiclesByImage = async (
   );
 
   const vehicles = await Vehicle.find({ status: "active" });
-  const results = [];
+  const candidates = [];
 
-  for (const vehicle of vehicles) {
+  const inventoryBrands = new Set(
+    vehicles.map((vehicle) => normalizeKey(vehicle.brand)).filter(Boolean)
+  );
+  const detectedBrandKey = normalizeKey(detected?.brand);
+  const detectedModelKey = normalizeKey(detected?.model);
+  const detectedCategory = getDetectedCategory(detected);
+  const brandExistsInInventory = detectedBrandKey
+    ? inventoryBrands.has(detectedBrandKey)
+    : false;
+
+  const candidateVehicles = vehicles.filter((vehicle) => {
+    const vehicleBrandKey = normalizeKey(vehicle.brand);
+    const vehicleModelKey = normalizeKey(vehicle.model || vehicle.title);
+    const vehicleCategory = getVehicleCategory(vehicle);
+    const hasBrand = detectedBrandKey ? vehicleBrandKey === detectedBrandKey : true;
+    const hasRelatedModel = detectedModelKey
+      ? vehicleModelKey === detectedModelKey || vehicleModelKey.includes(detectedModelKey) || detectedModelKey.includes(vehicleModelKey)
+      : false;
+    const sameCategory = categoriesCompatible(detectedCategory, vehicleCategory);
+
+    if (detectedBrandKey && detectedModelKey) {
+      return hasBrand || hasRelatedModel || sameCategory;
+    }
+
+    if (detectedBrandKey) {
+      return hasBrand || sameCategory;
+    }
+
+    return sameCategory || hasRelatedModel;
+  });
+
+  for (const vehicle of candidateVehicles) {
     if (!Array.isArray(vehicle.images) || vehicle.images.length === 0) {
       continue;
     }
 
+    const vehicleBrandKey = normalizeKey(vehicle.brand);
+    const vehicleModelKey = normalizeKey(vehicle.model || vehicle.title);
+    const vehicleCategory = getVehicleCategory(vehicle);
+
+    const strictBrandMatch =
+      detectedBrandKey && vehicleBrandKey && detectedBrandKey === vehicleBrandKey
+        ? 1
+        : 0;
+    const brandMatch = brandExistsInInventory
+      ? Math.max(
+          calculateBrandMatch(detected?.brand, vehicle.brand),
+          strictBrandMatch
+        )
+      : 0;
+    const bodyTypeMatch = categoriesCompatible(detectedCategory, vehicleCategory)
+      ? Math.max(0.6, calculateBodyTypeMatch(detected?.type, vehicle.bodyType))
+      : calculateBodyTypeMatch(detected?.type, vehicle.bodyType);
+    const modelMatch = isRelatedKey(detectedModelKey, vehicleModelKey) ? 1 : 0;
+
     let bestScore = -1;
     let bestImage = null;
     let bestImageViewType = null;
+    let bestVisualSimilarity = 0;
 
     for (const image of vehicle.images) {
       if (!Array.isArray(image.embedding)) {
@@ -240,64 +215,54 @@ const searchVehiclesByImage = async (
         continue;
       }
 
-      const similarity = cosineSimilarity(queryFeatureVector, image.embedding);
-      let finalScore = similarity * 0.6;
+      // Calculate visual similarity using cosine similarity
+      const visualSimilarity = cosineSimilarity(
+        queryFeatureVector,
+        image.embedding
+      );
 
-      if (detected?.brand && vehicle.brand) {
-        const dbBrand = normalizeBrand(vehicle.brand);
-        const gptBrand = normalizeBrand(detected.brand);
+      // Calculate final weighted score
+      // Formula: visualSimilarity * 0.65 + brandMatch * 0.20 + bodyTypeMatch * 0.15
+      const finalScore = calculateWeightedScore(
+        visualSimilarity,
+        brandMatch,
+        bodyTypeMatch,
+        modelMatch
+      );
 
-        if (dbBrand && gptBrand && (dbBrand.includes(gptBrand) || gptBrand.includes(dbBrand))) {
-          finalScore += 0.3;
-        }
-      }
-
-      if (detected?.type && vehicle.bodyType) {
-        const detectedType = normalize(detected.type);
-        const bodyType = normalize(vehicle.bodyType);
-
-        if (detectedType && bodyType && bodyType.includes(detectedType)) {
-          finalScore += 0.25;
-        }
-      }
-
-      if (detected?.model && vehicle.model) {
-        if (isModelRelated(detected.model, vehicle.model)) {
-          finalScore += 0.2;
-        }
-      }
-
-      if (
-        typeof image.viewType === "string" &&
-        typeof queryViewType === "string" &&
-        image.viewType.toLowerCase() === queryViewType.toLowerCase()
-      ) {
-        finalScore += 0.05;
-      }
-
-      if (
-        typeof image.isExterior === "boolean" &&
-        typeof queryIsExterior === "boolean" &&
-        image.isExterior === queryIsExterior
-      ) {
-        finalScore += 0.05;
-      }
-
+      // Keep track of best image for this vehicle
       if (finalScore > bestScore) {
         bestScore = finalScore;
         bestImage = image.url;
         bestImageViewType = image.viewType || "unknown";
+        bestVisualSimilarity = visualSimilarity;
       }
     }
 
     if (bestImage) {
-      // Convert similarityScore to percentage
-      const matchPercentage = Math.min(Math.round(bestScore * 100), 100);
-      const matchLabel = getMatchLabel(matchPercentage);
-      const matchReason = getMatchReason(vehicle, detected, matchPercentage);
-      const matchedFeatures = getMatchedFeatures(detected, bestImageViewType, vehicle, bestScore);
+      // Normalize score to realistic percentage
+      const matchPercentage = normalizeScoreToPercentage(bestScore);
 
-      results.push({
+      // Get match category
+      const matchLabel = getMatchCategory(bestScore);
+
+      // Generate intelligent explanation
+      const matchReason = generateMatchExplanation(
+        vehicle,
+        detected,
+        bestScore,
+        matchLabel
+      );
+
+      // Generate intelligent matched features
+      const matchedFeatures = generateIntelligentFeatures(
+        detected,
+        vehicle,
+        bestScore,
+        matchLabel
+      );
+
+      candidates.push({
         _id: vehicle._id,
         title: vehicle.title,
         brand: vehicle.brand,
@@ -313,13 +278,128 @@ const searchVehiclesByImage = async (
         matchLabel,
         matchReason,
         matchedFeatures,
+        __brandMatch: brandMatch,
+        __bodyTypeMatch: bodyTypeMatch,
+        __modelMatch: modelMatch,
+        __visualSimilarity: Number(bestVisualSimilarity.toFixed(4)),
       });
     }
   }
 
-  results.sort((a, b) => b.similarityScore - a.similarityScore);
+  // Rank candidates with requirement-first scoring: exact brand+model first, then same-brand / same-body-type, then visual fallback.
+  const rankedCandidates = candidates.sort((a, b) => {
+    const scoreA =
+      (a.__brandMatch > 0 ? 2.5 : 0) +
+      (a.__modelMatch > 0 ? 3 : 0) +
+      a.__bodyTypeMatch * 1.2 +
+      a.__visualSimilarity * 0.8;
+    const scoreB =
+      (b.__brandMatch > 0 ? 2.5 : 0) +
+      (b.__modelMatch > 0 ? 3 : 0) +
+      b.__bodyTypeMatch * 1.2 +
+      b.__visualSimilarity * 0.8;
+    return scoreB - scoreA;
+  });
 
-  return results.slice(0, 10);
+  const MIN_CONFIDENCE_SCORE = 0.3;
+  const MIN_FALLBACK_SCORE = 0.7;
+  const MIN_RESULTS = 3;
+  const selected = [];
+  const selectedIds = new Set();
+  const selectedModelKeys = new Set();
+
+  const addIfNew = (item, enforceModelDiversity = true) => {
+    const key = String(item._id);
+    const modelKey = normalizeKey(item.model || item.title);
+
+    if (selectedIds.has(key)) {
+      return;
+    }
+
+    if (enforceModelDiversity && modelKey && selectedModelKeys.has(modelKey)) {
+      return;
+    }
+
+    selected.push(item);
+    selectedIds.add(key);
+    if (modelKey) {
+      selectedModelKeys.add(modelKey);
+    }
+  };
+
+  // 0) Exact brand + model matches first when available.
+  if (detectedBrandKey || detectedModelKey) {
+    const exactMatches = rankedCandidates.filter((item) => {
+      const sameBrand = detectedBrandKey
+        ? normalizeKey(item.brand) === detectedBrandKey
+        : false;
+      const sameModel = detectedModelKey
+        ? isRelatedKey(detectedModelKey, normalizeKey(item.model || item.title))
+        : false;
+
+      return sameBrand && sameModel;
+    });
+
+    for (const item of exactMatches) {
+      if (selected.length >= MIN_RESULTS) {
+        break;
+      }
+      addIfNew(item, false);
+    }
+  }
+
+  // 1) Keep same-brand, same-body-type, and strong visual matches next.
+  for (const item of rankedCandidates) {
+    if (selected.length >= MIN_RESULTS) {
+      break;
+    }
+    const isStrongSameBrand =
+      detectedBrandKey && normalizeKey(item.brand) === detectedBrandKey;
+    const isStrongSameType =
+      detectedCategory !== "unknown" && categoriesCompatible(detectedCategory, getVehicleCategory(item));
+    if (
+      item.__modelMatch > 0 ||
+      isStrongSameBrand ||
+      isStrongSameType ||
+      item.similarityScore >= MIN_CONFIDENCE_SCORE
+    ) {
+      addIfNew(item);
+    }
+  }
+
+  // 2) If fewer than 3, fill with best fallback matches (same body type or decent visual score).
+  if (selected.length < MIN_RESULTS) {
+    for (const item of rankedCandidates) {
+      if (selected.length >= MIN_RESULTS) {
+        break;
+      }
+
+      if (
+        item.similarityScore >= MIN_FALLBACK_SCORE ||
+        item.__bodyTypeMatch >= 0.8 ||
+        item.__visualSimilarity >= MIN_FALLBACK_SCORE
+      ) {
+        addIfNew(item);
+      }
+    }
+  }
+
+  // 3) Last safety fallback: always return top ranked matches if inventory exists.
+  if (selected.length === 0 && rankedCandidates.length > 0) {
+    for (const item of rankedCandidates.slice(0, MIN_RESULTS)) {
+      addIfNew(item, false);
+    }
+  }
+
+  return selected
+    .slice(0, 10)
+    .map(({ __brandMatch, __bodyTypeMatch, __modelMatch, __visualSimilarity, ...cleaned }) => ({
+      ...cleaned,
+      brandMatch: !!__brandMatch,
+      modelMatch: !!__modelMatch,
+      bodyTypeMatch: typeof __bodyTypeMatch === "number" ? Number(__bodyTypeMatch.toFixed(3)) : __bodyTypeMatch,
+      visualSimilarity: typeof __visualSimilarity === "number" ? Number(__visualSimilarity.toFixed(4)) : __visualSimilarity,
+    }));
 };
 
 module.exports = searchVehiclesByImage;
