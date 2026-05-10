@@ -5,11 +5,15 @@ import { useTranslation } from "react-i18next";
 
 const getMatchLabelColor = (label) => {
   const colors = {
+    "Exact Match": "text-green-700 bg-green-50 border-green-200",
+    "Similar Match": "text-emerald-600 bg-emerald-50 border-emerald-200",
+    "Related Match": "text-blue-600 bg-blue-50 border-blue-200",
+    "Partial Match": "text-amber-600 bg-amber-50 border-amber-200",
+    "Low Match": "text-gray-600 bg-gray-50 border-gray-200",
+    // Legacy support
     "Best Match": "text-green-700 bg-green-50 border-green-200",
     "Highly Similar": "text-emerald-600 bg-emerald-50 border-emerald-200",
     "Similar": "text-blue-600 bg-blue-50 border-blue-200",
-    "Partial Match": "text-amber-600 bg-amber-50 border-amber-200",
-    "Low Match": "text-gray-600 bg-gray-50 border-gray-200",
   };
   return colors[label] || colors["Low Match"];
 };
@@ -35,11 +39,15 @@ function ImageSearchResultCard({ result, rank, onSelect }) {
 
   const showRankBadge = rank && rank <= 3;
   const matchLabelMap = {
-    "Best Match": t("searchResultCard.bestMatch", { defaultValue: "Best Match" }),
-    "Highly Similar": t("searchResultCard.highlySimilar", { defaultValue: "Highly Similar" }),
-    "Similar": t("searchResultCard.similar", { defaultValue: "Similar" }),
+    "Exact Match": t("searchResultCard.exactMatch", { defaultValue: "Exact Match" }),
+    "Similar Match": t("searchResultCard.similarMatch", { defaultValue: "Similar Match" }),
+    "Related Match": t("searchResultCard.relatedMatch", { defaultValue: "Related Match" }),
     "Partial Match": t("searchResultCard.partialMatch", { defaultValue: "Partial Match" }),
     "Low Match": t("searchResultCard.lowMatch", { defaultValue: "Low Match" }),
+    // Legacy support for old labels
+    "Best Match": t("searchResultCard.exactMatch", { defaultValue: "Exact Match" }),
+    "Highly Similar": t("searchResultCard.similarMatch", { defaultValue: "Similar Match" }),
+    "Similar": t("searchResultCard.relatedMatch", { defaultValue: "Related Match" }),
   };
   const featureLabelMap = {
     "front grille": t("features.frontGrille", { defaultValue: "Front grille" }),
@@ -64,14 +72,14 @@ function ImageSearchResultCard({ result, rank, onSelect }) {
   return (
     <div
       onClick={() => onSelect && onSelect(result)}
-      className="overflow-hidden transition-transform duration-200 transform cursor-pointer bg-white/60 backdrop-blur-sm border border-gray-200/60 shadow-lg rounded-2xl hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-800/60 dark:border-slate-700"
+      className="overflow-hidden transition-all duration-300 transform border shadow-xl cursor-pointer group bg-white/80 backdrop-blur-md border-white/30 rounded-3xl hover:-translate-y-3 hover:shadow-2xl hover:bg-white/95 dark:bg-slate-800/80 dark:border-slate-600/50 dark:hover:bg-slate-800/95 dark:hover:border-slate-500"
     >
       {/* Image Container with Rank Badge */}
-      <div className="relative">
+      <div className="relative overflow-hidden bg-gradient-to-b from-gray-200 to-gray-100 dark:from-slate-700 dark:to-slate-800">
         <img
           src={result.matchedImage}
           alt={result.title}
-          className="object-cover w-full h-52"
+          className="object-cover w-full h-64 transition-transform duration-500 sm:h-56 lg:h-64 group-hover:scale-110"
         />
 
         {/* Rank Badge (Top Left) */}
@@ -102,67 +110,98 @@ function ImageSearchResultCard({ result, rank, onSelect }) {
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-5 space-y-4 sm:p-4 md:p-5">
         {/* Title */}
-        <h3 className="text-lg font-bold text-gray-900 line-clamp-2">
-          {result.title}
-        </h3>
+        <div>
+          <h3 className="text-lg font-black text-gray-900 transition sm:text-base md:text-lg line-clamp-2 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
+            {result.title}
+          </h3>
+        </div>
 
-        {/* Match Label & Percentage */}
-        <div className="flex items-center gap-2 mt-2">
+        {/* Match Label & Percentage - Side by side */}
+        <div className="flex flex-wrap items-center gap-3">
           <span
-            className={`px-3 py-1 text-sm font-semibold rounded-full border ${getMatchLabelColor(
+            className={`px-4 py-2 text-xs sm:text-xs md:text-sm font-bold rounded-full border shadow-sm transition ${getMatchLabelColor(
               result.matchLabel
             )}`}
           >
             {translatedMatchLabel}
           </span>
-          <span className="text-sm font-bold text-gray-700">
+          <span className="text-base font-black text-green-600 dark:text-green-400 bg-green-50/50 dark:bg-green-950/30 px-3 py-1.5 rounded-full">
             {result.matchPercentage}%
           </span>
         </div>
 
-        {/* Match Reason / Explanation */}
-        <div className="p-3 mt-3 rounded-lg bg-blue-50 border border-blue-100">
-          <p className="text-sm text-gray-700">
-              <span className="font-semibold text-blue-700">{t("searchResultCard.whyRecommended", { defaultValue: "Why recommended" })}: </span>
-              {result.matchReason}
+        {/* Match Reason / Explanation - Highlighted box */}
+        <div className="p-4 border-l-4 border-blue-500 rounded-lg bg-gradient-to-r from-blue-50 to-blue-50/50 dark:from-blue-950/50 dark:to-blue-950/20 dark:border-blue-700">
+          <p className="text-xs leading-relaxed text-gray-700 sm:text-xs md:text-sm dark:text-blue-100 line-clamp-2">
+            <span className="text-sm font-bold text-blue-700 dark:text-blue-300">✓ </span>
+            {result.matchReason}
           </p>
         </div>
 
         {/* Matched Features (Chips) */}
         {result.matchedFeatures && result.matchedFeatures.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            {result.matchedFeatures.map((feature, idx) => (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {result.matchedFeatures.slice(0, 3).map((feature, idx) => (
               <span
                 key={idx}
-                className="px-3 py-1 text-xs font-medium text-slate-700 bg-white/60 border border-slate-100 rounded-full shadow-sm"
+                className="px-3 py-1.5 text-xs font-semibold border rounded-full shadow-sm transition text-slate-700 bg-white/80 border-slate-200/80 dark:bg-slate-700/60 dark:text-slate-100 dark:border-slate-600/80 hover:bg-white dark:hover:bg-slate-700"
               >
-                {featureLabelMap[feature.toLowerCase()] || feature}
+                #{featureLabelMap[feature.toLowerCase()] || feature}
               </span>
             ))}
           </div>
         )}
 
+        {/* Brand / Model match indicators */}
+        <div className="flex flex-wrap gap-2 pt-3">
+          <span
+            className={`px-3 py-1.5 text-xs font-bold rounded-full ${
+              result.brandMatch ? "bg-green-50 text-green-800 border border-green-200" : "bg-red-50 text-red-800 border border-red-200"
+            }`}
+          >
+            {result.brandMatch ? t("searchResultCard.brandMatch", { defaultValue: "Brand: match" }) : t("searchResultCard.brandMismatch", { defaultValue: "Brand: differs" })}
+          </span>
+
+          <span
+            className={`px-3 py-1.5 text-xs font-bold rounded-full ${
+              result.modelMatch ? "bg-green-50 text-green-800 border border-green-200" : "bg-amber-50 text-amber-800 border border-amber-200"
+            }`}
+          >
+            {result.modelMatch ? t("searchResultCard.modelMatch", { defaultValue: "Model: match" }) : t("searchResultCard.modelMismatch", { defaultValue: "Model: differs" })}
+          </span>
+        </div>
+
         {/* Price */}
-        <p className="mt-4 text-lg font-bold text-sky-600">
-          LKR {Number(result.price || 0).toLocaleString()}
-        </p>
+        <div className="pt-2 border-t border-gray-200/50 dark:border-slate-700/50">
+          <p className="text-2xl font-black text-sky-600 dark:text-sky-400">
+            LKR {Number(result.price || 0).toLocaleString()}
+          </p>
+        </div>
 
         {/* Vehicle Details */}
-        <div className="flex gap-3 mt-2 text-sm text-gray-600">
-          {result.year && <span>{result.year}</span>}
-          {result.bodyType && <span>{result.bodyType}</span>}
+        <div className="flex flex-wrap gap-2">
+          {result.year && (
+            <span className="px-3 py-1.5 text-xs sm:text-xs md:text-sm font-bold text-slate-700 bg-slate-100 dark:bg-slate-700 dark:text-slate-100 rounded-lg">
+              {result.year}
+            </span>
+          )}
+          {result.bodyType && (
+            <span className="px-3 py-1.5 text-xs sm:text-xs md:text-sm font-bold text-slate-700 bg-slate-100 dark:bg-slate-700 dark:text-slate-100 rounded-lg">
+              {result.bodyType}
+            </span>
+          )}
         </div>
 
         {/* Trust Level & Grade */}
         {(result.trustLevel || result.autoTrustGrade) && (
-          <div className="flex items-center gap-2 mt-3">
+          <div className="flex items-center gap-2 p-3 border rounded-lg bg-green-50/50 dark:bg-green-950/30 border-green-200/50 dark:border-green-800/50">
             {result.autoTrustGrade && (
-              <div className="flex items-center gap-1">
-                <BadgeCheck size={16} className="text-green-600" />
-                <span className="text-xs font-semibold text-green-700">
-                  {t("searchResultCard.grade", { defaultValue: "Grade" })}: {result.autoTrustGrade}
+              <div className="flex items-center flex-1 gap-2">
+                <BadgeCheck size={18} className="flex-shrink-0 text-green-600 dark:text-green-400" />
+                <span className="text-xs font-bold text-green-700 sm:text-xs md:text-sm dark:text-green-400">
+                  AutoTrust Grade: <span className="text-green-900 dark:text-green-200">{result.autoTrustGrade}</span>
                 </span>
               </div>
             )}
@@ -173,9 +212,9 @@ function ImageSearchResultCard({ result, rank, onSelect }) {
         <Link
           to={`/cars/${result._id}`}
           onClick={(e) => e.stopPropagation()}
-          className="inline-flex items-center justify-center w-full gap-2 px-4 py-2 mt-4 text-sm font-semibold text-center text-white transition bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:from-blue-700 hover:to-indigo-700"
+          className="inline-flex items-center justify-center w-full gap-2 px-4 py-3 mt-2 text-xs font-bold text-center text-white transition duration-300 shadow-md sm:text-xs md:text-sm bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:from-blue-700 hover:to-indigo-700 active:scale-95 hover:shadow-lg"
         >
-          {t("searchResultCard.viewFullDetails", { defaultValue: "View full details" })}
+          {t("searchResultCard.viewFullDetails", { defaultValue: "View Full Details →" })}
         </Link>
       </div>
     </div>

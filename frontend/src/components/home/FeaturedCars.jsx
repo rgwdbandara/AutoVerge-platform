@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useApi } from "../../lib/api";
 import CarCard from "../car/CarCard";
 
 function FeaturedCars() {
+  const { t } = useTranslation();
   const api = useApi();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,14 +24,14 @@ function FeaturedCars() {
     loadCars();
   }, [api]);
 
-  if (loading) return <p className="py-10 text-center">Loading cars...</p>;
+  if (loading) return <p className="py-10 text-center">{t("home.featuredCars.loading", { defaultValue: "Loading cars..." })}</p>;
 
   return (
     <section className="bg-slate-50 dark:bg-slate-950 py-24 text-slate-900 dark:text-white transition-colors duration-300">
       <div className="px-6 mx-auto max-w-7xl">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Featured Cars</h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Popular picks curated by AutoVerge</p>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{t("home.featuredCars.title", { defaultValue: "Featured Cars" })}</h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t("home.featuredCars.subtitle", { defaultValue: "Popular picks curated by AutoVerge" })}</p>
         </div>
 
         <div className="overflow-x-auto -mx-6 py-4">

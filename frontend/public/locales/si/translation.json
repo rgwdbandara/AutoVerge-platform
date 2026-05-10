@@ -2,7 +2,9 @@
   "navbar": {
     "home": "මුල් පිටුව",
     "browseCars": "මෝටර් රථ සොයන්න",
+    "articles": "ලිපි",
     "sellVehicle": "ඔබගේ වාහනය විකුණන්න",
+    "sellYourVehicle": "ඔබගේ වාහනය විකිණන්න",
     "adminDashboard": "පරිපාලක උපකරණ පුවරුව",
     "dashboard": "උපකරණ පුවරුව"
   },
@@ -134,6 +136,13 @@
     "lowMatch": "අඩු ගැලපීම",
     "whyRecommended": "එය ඇයි නිර්දේශ කරන ලද්දේ",
     "grade": "ශ්‍රේණිය"
+  },
+  "searchResultCard": {
+    "brandMatch": "වෙළඳ නාමය: ගැලපේ",
+    "brandMismatch": "වෙළඳ නාමය: වෙනස් වේ",
+    "modelMatch": "මොඩලය: ගැලපේ",
+    "modelMismatch": "මොඩලය: වෙනස් වේ",
+    "viewFullDetails": "සම්පූර්ණ විස්තර බලන්න →"
   },
   "footer": {
     "tagline": "පරිපූර්ණ වාහනය සොයා ගැනීමේ ඔබගේ විශ්වාස කරන සහකරු",

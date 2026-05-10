@@ -25,6 +25,10 @@ import MyFavorites from "./pages/MyFavorites";
 // Sell Landing Page
 import Sell from "./pages/Sell";
 
+
+import Articles from "./pages/Articles";
+import ArticleDetails from "./pages/ArticleDetails";
+
 function App() {
   return (
     <BrowserRouter>
@@ -59,6 +63,9 @@ function App() {
             <Route path="expired" element={<ExpiredAds />} />
             <Route path="pending" element={<PendingAds />} />
           </Route>
+
+          <Route path="/articles" element={<Articles />} />
+          <Route path="/articles/:slug" element={<ArticleDetails />} />
 
           {adminRoutes}
 

@@ -57,7 +57,7 @@ function CarDetails() {
 
   if (!car) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 dark:text-white">
         <div className="px-6 py-12 mx-auto max-w-7xl">
           <div className="animate-pulse">
             <div className="h-10 w-72 rounded-xl bg-slate-200" />
@@ -78,9 +78,9 @@ function CarDetails() {
   const canCall = Boolean(safePhone);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 dark:text-white">
       <div className="px-4 py-8 mx-auto max-w-7xl md:px-6 lg:py-10">
-        <div className="overflow-hidden border shadow-sm bg-white/80 rounded-3xl border-slate-200">
+        <div className="overflow-hidden border shadow-sm bg-white/80 dark:bg-slate-800/60 rounded-3xl border-slate-200 dark:border-white/10">
           <div className="grid grid-cols-1 gap-8 p-5 lg:grid-cols-12 md:p-7">
             <section className="lg:col-span-7">
               <div className="overflow-hidden border shadow-sm rounded-2xl border-slate-200">
@@ -102,8 +102,8 @@ function CarDetails() {
                       onClick={() => setActiveImage(imageUrl)}
                       className={`overflow-hidden border rounded-xl transition ${
                         isActive
-                          ? "border-slate-900 ring-2 ring-slate-300"
-                          : "border-slate-200 hover:border-slate-400"
+                            ? "border-slate-900 ring-2 ring-slate-300 dark:border-white/20 dark:ring-white/20"
+                              : "border-slate-200 hover:border-slate-400 dark:border-white/10 dark:hover:border-white/20"
                       }`}
                       type="button"
                     >
@@ -120,13 +120,13 @@ function CarDetails() {
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <button
                   type="button"
-                  className="py-3 font-medium transition border rounded-xl border-slate-300 text-slate-700 hover:bg-slate-100"
+                  className="py-3 font-medium transition border rounded-xl border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-slate-800"
                 >
                   Save
                 </button>
                 <button
                   type="button"
-                  className="py-3 font-medium transition border rounded-xl border-slate-300 text-slate-700 hover:bg-slate-100"
+                  className="py-3 font-medium transition border rounded-xl border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-slate-800"
                 >
                   Share
                 </button>
@@ -135,7 +135,7 @@ function CarDetails() {
 
             <section className="lg:col-span-5">
               <div className="space-y-4 lg:sticky lg:top-24">
-                <div className="p-5 bg-white border shadow-sm rounded-2xl border-slate-200">
+                <div className="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 dark:bg-slate-800 dark:border-white/10">
                   <div className="flex items-center justify-between gap-2">
                     <span className="inline-flex px-3 py-1 text-xs font-semibold tracking-wide uppercase rounded-full bg-slate-900 text-slate-100">
                       {car.brand || "Car"}
@@ -145,7 +145,7 @@ function CarDetails() {
                     </span>
                   </div>
 
-                  <h1 className="mt-3 text-2xl font-bold leading-tight text-slate-900 md:text-3xl">
+                  <h1 className="mt-3 text-2xl font-bold leading-tight text-slate-900 md:text-3xl dark:text-white">
                     {car.title}
                   </h1>
 
@@ -154,21 +154,21 @@ function CarDetails() {
                   </p>
 
                   <div className="grid grid-cols-3 gap-2 mt-5 text-center">
-                    <div className="p-3 rounded-xl bg-slate-100">
-                      <p className="text-xs text-slate-500">Mileage</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-800">
+                    <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
+                      <p className="text-xs text-slate-500 dark:text-slate-300">Mileage</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-white">
                         {car.mileage || "N/A"}
                       </p>
                     </div>
-                    <div className="p-3 rounded-xl bg-slate-100">
-                      <p className="text-xs text-slate-500">Fuel</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-800">
+                    <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
+                      <p className="text-xs text-slate-500 dark:text-slate-300">Fuel</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-white">
                         {car.fuelType || "N/A"}
                       </p>
                     </div>
-                    <div className="p-3 rounded-xl bg-slate-100">
-                      <p className="text-xs text-slate-500">Gearbox</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-800">
+                    <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
+                      <p className="text-xs text-slate-500 dark:text-slate-300">Gearbox</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-white">
                         {car.transmission || "N/A"}
                       </p>
                     </div>
@@ -177,12 +177,12 @@ function CarDetails() {
 
                 <div
                   onClick={() => setShowEMI(true)}
-                  className="p-5 transition border border-blue-100 shadow-sm cursor-pointer rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 hover:shadow-md"
+                  className="p-5 transition border border-blue-100 shadow-sm cursor-pointer rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 hover:shadow-md dark:bg-slate-800/40 dark:border-white/10"
                 >
                   <h3 className="text-lg font-semibold text-slate-900">EMI Calculator</h3>
-                  <p className="mt-2 text-sm text-slate-600">Estimated Monthly Payment</p>
-                  <p className="mt-1 text-2xl font-bold text-slate-900">LKR {formatLKR(emi)}</p>
-                  <p className="mt-1 text-xs text-slate-500">Based on 4.5% interest for 60 months</p>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Estimated Monthly Payment</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">LKR {formatLKR(emi)}</p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-300">Based on 4.5% interest for 60 months</p>
                 </div>
 
                 {showEMI && (

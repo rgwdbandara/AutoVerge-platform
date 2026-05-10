@@ -1,23 +1,26 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useClerk } from "@clerk/clerk-react";
+import { useTranslation } from "react-i18next";
 
 function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useClerk();
+  const { t } = useTranslation();
 
   const menu = [
-    { name: "Dashboard", path: "/admin/dashboard" },
-    { name: "Pending Ads", path: "/admin/pending" },
-    { name: "Cars", path: "/admin/cars" },
-    { name: "Settings", path: "/admin/settings" },
+    { name: t("admin.menu.dashboard", { defaultValue: "Dashboard" }), path: "/admin/dashboard" },
+    { name: t("admin.menu.pendingAds", { defaultValue: "Pending Ads" }), path: "/admin/pending" },
+    { name: t("admin.menu.cars", { defaultValue: "Cars" }), path: "/admin/cars" },
+    { name: t("admin.menu.aiArticles", { defaultValue: "AI Articles" }), path: "/admin/ai-articles" },
+    { name: t("admin.menu.settings", { defaultValue: "Settings" }), path: "/admin/settings" },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-20 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-white">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:gap-8 lg:py-10">
-        <div className="h-fit w-full rounded-xl border border-slate-200 bg-white p-5 shadow transition-colors duration-300 dark:border-white/10 dark:bg-slate-900 lg:sticky lg:top-24 lg:w-64">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Admin Panel</h2>
+    <div className="min-h-screen bg-slate-50 pt-16 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-white">
+      <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-4 sm:px-6 lg:flex-row lg:gap-6 lg:py-6">
+        <div className="h-fit w-full rounded-xl border border-slate-200 bg-white p-5 shadow transition-colors duration-300 dark:border-white/10 dark:bg-slate-900 lg:sticky lg:top-20 lg:w-64">
+          <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">{t("admin.title", { defaultValue: "Admin Panel" })}</h2>
 
           <div className="space-y-2">
             {menu.map((item) => (
@@ -40,11 +43,11 @@ function AdminLayout() {
             onClick={() => signOut(() => navigate("/"))}
             className="mt-6 w-full rounded-md border border-red-400 py-2 text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
           >
-            Logout
+            {t("admin.logout", { defaultValue: "Logout" })}
           </button>
         </div>
 
-        <div className="min-h-[calc(100vh-10rem)] flex-1 rounded-xl border border-slate-200 bg-white p-4 shadow transition-colors duration-300 dark:border-white/10 dark:bg-slate-900 sm:p-6 md:p-8">
+        <div className="min-h-[calc(100vh-9rem)] flex-1 rounded-xl border border-slate-200 bg-white p-4 shadow transition-colors duration-300 dark:border-white/10 dark:bg-slate-900 sm:p-6 md:p-8">
           <Outlet />
         </div>
       </div>

@@ -1,24 +1,33 @@
 import React from "react";
 import { UploadCloud, Cpu, CheckCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function HowItWorks() {
+  const { t } = useTranslation();
+
   const steps = [
     {
       id: 1,
-      title: "Upload or Search",
-      desc: "Provide a photo or use our image search to start finding matching vehicles.",
+      title: t("home.howItWorks.steps.upload.title", { defaultValue: "Upload or Search" }),
+      desc: t("home.howItWorks.steps.upload.desc", {
+        defaultValue: "Provide a photo or use our image search to start finding matching vehicles.",
+      }),
       icon: UploadCloud,
     },
     {
       id: 2,
-      title: "AI Analyzes Features",
-      desc: "Our models analyze exterior shape, trim, and visual cues to find similar cars.",
+      title: t("home.howItWorks.steps.analyze.title", { defaultValue: "AI Analyzes Features" }),
+      desc: t("home.howItWorks.steps.analyze.desc", {
+        defaultValue: "Our models analyze exterior shape, trim, and visual cues to find similar cars.",
+      }),
       icon: Cpu,
     },
     {
       id: 3,
-      title: "Get Smart Matches",
-      desc: "Receive ranked matches with confidence scores and concise explanations.",
+      title: t("home.howItWorks.steps.matches.title", { defaultValue: "Get Smart Matches" }),
+      desc: t("home.howItWorks.steps.matches.desc", {
+        defaultValue: "Receive ranked matches with confidence scores and concise explanations.",
+      }),
       icon: CheckCircle,
     },
   ];
@@ -27,12 +36,14 @@ export default function HowItWorks() {
     <section className="py-20 transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white">
       <div className="px-6 mx-auto max-w-7xl">
         <h2 className="mb-6 text-3xl font-semibold text-center text-slate-900 dark:text-white">
-          How It Works
+          {t("home.howItWorks.title", { defaultValue: "How It Works" })}
         </h2>
 
         <p className="max-w-2xl mx-auto mb-10 text-lg text-center text-slate-600 dark:text-slate-300">
-          Simple steps to discover vehicles using our advanced AI image-matching
-          pipeline.
+          {t("home.howItWorks.subtitle", {
+            defaultValue:
+              "Simple steps to discover vehicles using our advanced AI image-matching pipeline.",
+          })}
         </p>
 
         <div className="grid gap-6 md:grid-cols-3">

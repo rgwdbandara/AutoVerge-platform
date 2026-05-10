@@ -1,28 +1,45 @@
+import { useTranslation } from "react-i18next";
+
 export default function FAQ() {
+  const { t } = useTranslation();
+
   const faqs = [
     {
-      q: "How does image search work?",
-      a: "Upload a car image and AutoVerge compares its visual features against available listings."
+      q: t("home.faq.items.imageSearch.q", { defaultValue: "How does image search work?" }),
+      a: t("home.faq.items.imageSearch.a", {
+        defaultValue:
+          "Upload a car image and AutoVerge compares its visual features against available listings.",
+      }),
     },
     {
-      q: "Can I switch between English and Sinhala?",
-      a: "Yes, the language toggle in the navbar changes the whole interface instantly."
+      q: t("home.faq.items.language.q", { defaultValue: "Can I switch between English and Sinhala?" }),
+      a: t("home.faq.items.language.a", {
+        defaultValue: "Yes, the language toggle in the navbar changes the whole interface instantly.",
+      }),
     },
     {
-      q: "Is the AI search free to use?",
-      a: "The interface supports AI-powered matching without extra steps for users."
+      q: t("home.faq.items.aiSearch.q", { defaultValue: "Is the AI search free to use?" }),
+      a: t("home.faq.items.aiSearch.a", {
+        defaultValue: "The interface supports AI-powered matching without extra steps for users.",
+      }),
     },
     {
-      q: "Can I save favorite cars?",
-      a: "Yes, signed-in users can save vehicles to their favorites list."
+      q: t("home.faq.items.favorites.q", { defaultValue: "Can I save favorite cars?" }),
+      a: t("home.faq.items.favorites.a", {
+        defaultValue: "Yes, signed-in users can save vehicles to their favorites list.",
+      }),
     },
     {
-      q: "Do I need an account to post a vehicle?",
-      a: "Yes, sign in first so your listings are linked to your profile."
+      q: t("home.faq.items.account.q", { defaultValue: "Do I need an account to post a vehicle?" }),
+      a: t("home.faq.items.account.a", {
+        defaultValue: "Yes, sign in first so your listings are linked to your profile.",
+      }),
     },
     {
-      q: "What devices does AutoVerge support?",
-      a: "The site is responsive and works well on desktop and mobile devices."
+      q: t("home.faq.items.devices.q", { defaultValue: "What devices does AutoVerge support?" }),
+      a: t("home.faq.items.devices.a", {
+        defaultValue: "The site is responsive and works well on desktop and mobile devices.",
+      }),
     }
   ];
 
@@ -30,7 +47,7 @@ export default function FAQ() {
     <section className="bg-slate-50 dark:bg-slate-950 py-24 text-slate-900 dark:text-white transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-6">
         <h2 className="mb-10 text-center text-4xl font-semibold text-slate-900 dark:text-white">
-          Frequently Asked Questions
+          {t("home.faq.title", { defaultValue: "Frequently Asked Questions" })}
         </h2>
 
         <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm transition-colors duration-300">

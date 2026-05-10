@@ -2,12 +2,14 @@ import { useClerk, useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useApi } from "../lib/api";
+import { useTranslation } from "react-i18next";
 
 function ManageProfile() {
   const { signOut } = useClerk();
   const { user, isLoaded } = useUser();
   const navigate = useNavigate();
   const api = useApi();
+  const { t } = useTranslation();
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -65,10 +67,10 @@ function ManageProfile() {
         }),
       });
 
-      alert("Profile updated successfully");
+      alert(t("profile.alerts.updateSuccess", { defaultValue: "Profile updated successfully" }));
     } catch (err) {
       console.error("Profile update error:", err);
-      alert("Failed to update profile");
+      alert(t("profile.alerts.updateFailed", { defaultValue: "Failed to update profile" }));
     } finally {
       setSaving(false);
     }
@@ -76,7 +78,9 @@ function ManageProfile() {
 
   const handleDeleteAccount = async () => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete your account? This action cannot be undone."
+      t("profile.alerts.deleteConfirm", {
+        defaultValue: "Are you sure you want to delete your account? This action cannot be undone.",
+      })
     );
     if (!confirmed) return;
 
@@ -92,7 +96,7 @@ function ManageProfile() {
       navigate("/");
     } catch (err) {
       console.error("Account deletion error:", err);
-      alert("Failed to delete account. Please try again.");
+      alert(t("profile.alerts.deleteFailed", { defaultValue: "Failed to delete account. Please try again." }));
       setDeleting(false);
     }
   };
@@ -101,13 +105,13 @@ function ManageProfile() {
     <div className="text-slate-900 dark:text-white">
 
       {/* ONLY CONTENT — NO SIDEBAR */}
-      <h2 className="mb-6 text-2xl font-semibold">Change Details</h2>
+      <h2 className="mb-6 text-2xl font-semibold">{t("profile.title", { defaultValue: "Change Details" })}</h2>
 
       <div className="grid grid-cols-2 gap-6">
 
         {/* Email */}
         <div>
-          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">Email</label>
+          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">{t("profile.fields.email", { defaultValue: "Email" })}</label>
           <div className="flex gap-3">
             <input
               type="text"
@@ -116,31 +120,31 @@ function ManageProfile() {
               className="w-full rounded-md border border-slate-200 bg-slate-100 px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-800 dark:text-white"
             />
             <button className="rounded-md bg-slate-500 px-5 py-3 text-white transition hover:bg-slate-600 dark:bg-slate-600 dark:hover:bg-slate-500">
-              Update
+              {t("common.update", { defaultValue: "Update" })}
             </button>
           </div>
         </div>
 
         {/* Phone */}
         <div>
-          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">Phone</label>
+          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">{t("profile.fields.phone", { defaultValue: "Phone" })}</label>
           <div className="flex gap-3">
             <input
               type="text"
               value={phone}
-              placeholder="Add Mobile Number"
+              placeholder={t("profile.placeholders.phone", { defaultValue: "Add Mobile Number" })}
               onChange={(e) => setPhone(e.target.value)}
               className="w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white"
             />
             <button className="rounded-md bg-slate-500 px-5 py-3 text-white transition hover:bg-slate-600 dark:bg-slate-600 dark:hover:bg-slate-500">
-              Update
+              {t("common.update", { defaultValue: "Update" })}
             </button>
           </div>
         </div>
 
         {/* Name */}
         <div>
-          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">Name</label>
+          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">{t("profile.fields.name", { defaultValue: "Name" })}</label>
           <input
             type="text"
             value={name}
@@ -151,13 +155,13 @@ function ManageProfile() {
 
         {/* Location */}
         <div>
-          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">Location</label>
+          <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">{t("profile.fields.location", { defaultValue: "Location" })}</label>
           <select
             value={district}
             onChange={(e) => setDistrict(e.target.value)}
             className="w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white"
           >
-            <option value="">Select district</option>
+            <option value="">{t("profile.placeholders.district", { defaultValue: "Select district" })}</option>
             <option value="Colombo">Colombo</option>
             <option value="Kandy">Kandy</option>
             <option value="Galle">Galle</option>
@@ -169,14 +173,14 @@ function ManageProfile() {
         {/* Sub Location */}
         <div className="col-span-2">
           <label className="mb-1 block text-sm text-slate-600 dark:text-slate-300">
-            Sub Location
+            {t("profile.fields.subLocation", { defaultValue: "Sub Location" })}
           </label>
           <select
             value={city}
             onChange={(e) => setCity(e.target.value)}
             className="w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white"
           >
-            <option value="">Select sub location</option>
+            <option value="">{t("profile.placeholders.subLocation", { defaultValue: "Select sub location" })}</option>
             <option value="Colombo 01">Colombo 01</option>
             <option value="Colombo 03">Colombo 03</option>
             <option value="Maharagama">Maharagama</option>
@@ -192,28 +196,28 @@ function ManageProfile() {
         disabled={saving}
         className="mt-6 rounded-md bg-yellow-500 px-6 py-3 font-semibold text-black transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {saving ? "Updating..." : "Update Details"}
+        {saving ? t("common.updating", { defaultValue: "Updating..." }) : t("profile.actions.updateDetails", { defaultValue: "Update Details" })}
       </button>
 
       {/* PASSWORD */}
       <div className="mt-10">
-        <h2 className="mb-4 text-xl font-semibold text-slate-900 dark:text-white">Change Password</h2>
+        <h2 className="mb-4 text-xl font-semibold text-slate-900 dark:text-white">{t("profile.password.title", { defaultValue: "Change Password" })}</h2>
 
         <div className="grid grid-cols-2 gap-6">
 
           <div>
-            <label className="text-sm text-slate-600 dark:text-slate-300">Current Password</label>
+            <label className="text-sm text-slate-600 dark:text-slate-300">{t("profile.password.current", { defaultValue: "Current Password" })}</label>
             <input className="mt-1 w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white" />
           </div>
 
           <div>
-            <label className="text-sm text-slate-600 dark:text-slate-300">New Password</label>
+            <label className="text-sm text-slate-600 dark:text-slate-300">{t("profile.password.new", { defaultValue: "New Password" })}</label>
             <input className="mt-1 w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white" />
           </div>
 
           <div>
             <label className="text-sm text-slate-600 dark:text-slate-300">
-              Confirm New Password
+              {t("profile.password.confirm", { defaultValue: "Confirm New Password" })}
             </label>
             <input className="mt-1 w-full rounded-md border border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white" />
           </div>

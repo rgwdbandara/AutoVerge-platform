@@ -65,7 +65,7 @@ function BrowseCars() {
   };
 
   const tagStyle = (active) =>
-    `px-3 py-1 rounded-lg border cursor-pointer text-sm     ${active ? "bg-blue-100 border-blue-400" : "bg-gray-100"}`;
+    `px-3 py-1 rounded-lg border cursor-pointer text-sm     ${active ? "bg-blue-100 border-blue-400 dark:bg-blue-900" : "bg-gray-100 dark:bg-slate-700"}`;
 
   // Fetch cars with dynamic query string
   const fetchCars = async () => {
@@ -102,12 +102,12 @@ function BrowseCars() {
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && fetchCars()}
           placeholder={t("browse.searchPlaceholder")}
-          className="w-full px-4 py-3 border rounded-xl"
+          className="w-full px-4 py-3 border rounded-xl bg-white dark:bg-slate-900 dark:text-white dark:border-white/10"
         />
 
         <button
           onClick={fetchCars}
-          className="w-full rounded-xl bg-black px-6 py-3 text-white hover:bg-gray-900 sm:w-auto"
+          className="w-full rounded-xl bg-black px-6 py-3 text-white hover:bg-gray-900 sm:w-auto dark:bg-slate-800"
         >
           {t("buttons.search")}
         </button>
@@ -116,11 +116,11 @@ function BrowseCars() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-8">
 
         {/* FILTERS */}
-        <div className="space-y-6 rounded-xl bg-white p-4 shadow sm:p-5 lg:col-span-1">
+        <div className="space-y-6 rounded-xl bg-white p-4 shadow sm:p-5 lg:col-span-1 dark:bg-slate-800 dark:text-white">
 
           <div className="flex items-center justify-between">
             <h2 className="font-bold">{t("browse.filters")}</h2>
-            <button onClick={clearAll} className="text-sm text-gray-500">{t("browse.clearAll")}</button>
+            <button onClick={clearAll} className="text-sm text-gray-500 dark:text-slate-300">{t("browse.clearAll")}</button>
           </div>
 
           {/* PRICE */}
@@ -206,7 +206,7 @@ function BrowseCars() {
 
           <button
             onClick={fetchCars}
-            className="w-full py-3 mt-6 font-semibold text-white transition bg-gray-900 rounded-lg shadow-sm hover:bg-black"
+            className="w-full py-3 mt-6 font-semibold text-white transition bg-gray-900 rounded-lg shadow-sm hover:bg-black dark:bg-slate-700"
           >
             {t("browse.applyFilters")}
           </button>

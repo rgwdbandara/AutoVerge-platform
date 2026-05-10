@@ -4,9 +4,11 @@ import hatchback from "../../assets/body-types/hatchback.png";
 import convertible from "../../assets/body-types/convertible.png";
 
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function BodyType() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const types = [
     { name: "SUV", image: suv },
@@ -19,13 +21,13 @@ export default function BodyType() {
     <section className="bg-slate-50 dark:bg-slate-950 py-24 text-slate-900 dark:text-white transition-colors duration-300">
       <div className="px-6 mx-auto max-w-7xl">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-semibold text-slate-900 dark:text-white">Browse by Body Type</h2>
+          <h2 className="text-3xl font-semibold text-slate-900 dark:text-white">{t("home.bodyType.title", { defaultValue: "Browse by Body Type" })}</h2>
 
           <button
             onClick={() => navigate("/browse")}
             className="px-5 py-2 text-sm font-medium transition rounded-full border border-slate-200 text-slate-700 hover:border-slate-500 hover:bg-white dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800"
           >
-            View All
+            {t("home.bodyType.viewAll", { defaultValue: "View All" })}
           </button>
         </div>
 
@@ -46,7 +48,7 @@ export default function BodyType() {
 
               <div className="absolute flex items-center justify-between text-white bottom-4 left-4 right-4">
                 <h3 className="text-xl font-semibold">{type.name}</h3>
-                <span className="px-3 py-1 text-xs rounded-full bg-white/20">Explore</span>
+                <span className="px-3 py-1 text-xs rounded-full bg-white/20">{t("home.bodyType.explore", { defaultValue: "Explore" })}</span>
               </div>
             </button>
           ))}
