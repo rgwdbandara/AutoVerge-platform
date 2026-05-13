@@ -2,9 +2,10 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useApi } from "../lib/api";
+import { useSearchParams } from "react-router-dom";
 import CarCard from "../components/car/CarCard";
 const makes = ["BMW","Ford","Honda","Hyundai","Land Rover","Mahindra","Mercedes-Benz","Rivian","Tata"];
-const bodyTypes = ["Coupe","Hatchback","Sedan","SUV"];
+const bodyTypes = ["Coupe","Convertible","Hatchback","Sedan","SUV","Wagon","Crossover","Pickup","Van","Minivan"];
 const fuelTypes = ["Diesel","Electric","Gasoline","Hybrid","Petrol"];
 const transmissions = ["Automatic","Manual","Semi-Automatic"];
 
@@ -12,14 +13,15 @@ const transmissions = ["Automatic","Manual","Semi-Automatic"];
 function BrowseCars() {
   const { t } = useTranslation();
   const api = useApi();
+  const [searchParams] = useSearchParams();
 
   // search state
   const [search, setSearch] = useState("");
 
-  // filters state
+  // filters state - initialize bodyType from URL query param
   const [filters, setFilters] = useState({
     make: "",
-    bodyType: "",
+    bodyType: searchParams.get("bodyType") || "",
     fuelType: "",
     transmission: "",
     maxPrice: "",
@@ -43,6 +45,35 @@ function BrowseCars() {
     };
     loadAllCars();
   }, [api]);
+
+  // Auto-fetch when filters or search change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (search || filters.make || filters.bodyType || filters.fuelType || filters.transmission || filters.maxPrice) {
+        setLoading(true);
+        const fetchFiltered = async () => {
+          try {
+            const params = new URLSearchParams();
+            if (search) params.append("search", search);
+            if (filters.make) params.append("make", filters.make);
+            if (filters.bodyType) params.append("bodyType", filters.bodyType);
+            if (filters.fuelType) params.append("fuelType", filters.fuelType);
+            if (filters.transmission) params.append("transmission", filters.transmission);
+            if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
+            const data = await api(`/api/vehicles?${params.toString()}`);
+            setCars(data);
+          } catch (err) {
+            console.error("Auto-filter failed:", err);
+          } finally {
+            setLoading(false);
+          }
+        };
+        fetchFiltered();
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
+  }, [search, filters, api]);
 
   const clearAll = async () => {
     setSearch("");
@@ -91,23 +122,23 @@ function BrowseCars() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
+    <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 sm:py-10">
 
       <h1 className="mb-6 text-3xl font-bold text-blue-600 sm:mb-8 sm:text-4xl">{t("browse.title")}</h1>
 
       {/* SEARCH BAR */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col gap-3 mb-6 sm:flex-row">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && fetchCars()}
           placeholder={t("browse.searchPlaceholder")}
-          className="w-full px-4 py-3 border rounded-xl bg-white dark:bg-slate-900 dark:text-white dark:border-white/10"
+          className="w-full px-4 py-3 bg-white border rounded-xl dark:bg-slate-900 dark:text-white dark:border-white/10"
         />
 
         <button
           onClick={fetchCars}
-          className="w-full rounded-xl bg-black px-6 py-3 text-white hover:bg-gray-900 sm:w-auto dark:bg-slate-800"
+          className="w-full px-6 py-3 text-white bg-black rounded-xl hover:bg-gray-900 sm:w-auto dark:bg-slate-800"
         >
           {t("buttons.search")}
         </button>
@@ -116,7 +147,7 @@ function BrowseCars() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-8">
 
         {/* FILTERS */}
-        <div className="space-y-6 rounded-xl bg-white p-4 shadow sm:p-5 lg:col-span-1 dark:bg-slate-800 dark:text-white">
+        <div className="p-4 space-y-6 bg-white shadow rounded-xl sm:p-5 lg:col-span-1 dark:bg-slate-800 dark:text-white">
 
           <div className="flex items-center justify-between">
             <h2 className="font-bold">{t("browse.filters")}</h2>
