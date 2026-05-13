@@ -115,13 +115,18 @@ function AutoVergeChatbot() {
 
       const data = await response.json();
 
+      const fallbackHelpful = `I can help with:\n• Car recommendations\n• EMI calculations\n• Vehicle comparisons\n• Buying tips\n• EV news\n\nExamples:\n- Best SUV under 15 million\n- Aqua vs Fit\n- EMI for 12 million car`;
+
+      const botText =
+        (data && typeof data.reply === 'string' && data.reply.trim())
+          ? data.reply
+          : (data && data.reply && data.reply.text) || fallbackHelpful;
+
       setMessages((prev) => [
         ...prev,
         {
           role: "bot",
-          text:
-            data.reply ||
-            "Sorry, I couldn't process your request.",
+          text: botText,
           vehicles: data.vehicles || [],
         },
       ]);
@@ -143,7 +148,7 @@ function AutoVergeChatbot() {
       {/* FLOATING BUTTON */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-2xl transition-all hover:scale-105 hover:bg-blue-700 sm:bottom-6 sm:right-6 sm:h-16 sm:w-16"
+        className="fixed z-50 flex items-center justify-center text-white transition-all bg-blue-600 rounded-full shadow-2xl bottom-4 right-4 h-14 w-14 hover:scale-105 hover:bg-blue-700 sm:bottom-6 sm:right-6 sm:h-16 sm:w-16"
       >
         {isOpen ? <X size={28} /> : <MessageCircle size={28} />}
       </button>
@@ -153,7 +158,7 @@ function AutoVergeChatbot() {
         <div className="fixed bottom-4 right-4 z-50 flex h-[70vh] w-[calc(100vw-2rem)] max-w-[420px] flex-col overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-2xl sm:bottom-28 sm:right-6 sm:h-[600px] sm:w-[360px] sm:rounded-[2rem]">
 
           {/* HEADER */}
-          <div className="flex items-center gap-3 bg-slate-950 px-4 py-3 text-white sm:px-5 sm:py-4">
+          <div className="flex items-center gap-3 px-4 py-3 text-white bg-slate-950 sm:px-5 sm:py-4">
             <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-full">
               <Bot size={20} />
             </div>
@@ -169,14 +174,14 @@ function AutoVergeChatbot() {
           </div>
 
           {/* MESSAGES */}
-          <div className="flex-1 space-y-4 overflow-y-auto bg-slate-50 px-3 py-4 sm:px-4 sm:py-5">
+          <div className="flex-1 px-3 py-4 space-y-4 overflow-y-auto bg-slate-50 sm:px-4 sm:py-5">
 
             <div className="flex flex-wrap gap-2 mb-4">
               {quickPrompts.map((prompt) => (
                 <button
                   key={prompt}
                   onClick={() => handleQuickPrompt(prompt)}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold shadow-sm transition hover:border-blue-200 hover:bg-blue-50 sm:px-4"
+                  className="px-3 py-2 text-xs font-semibold transition bg-white border rounded-full shadow-sm border-slate-200 hover:border-blue-200 hover:bg-blue-50 sm:px-4"
                 >
                   {prompt}
                 </button>
@@ -206,7 +211,7 @@ function AutoVergeChatbot() {
                       {msg.vehicles.map((car) => (
                         <div
                           key={car._id}
-                          className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                          className="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200"
                         >
                           <img
                             src={car.images?.[0]?.url}
@@ -231,7 +236,7 @@ function AutoVergeChatbot() {
                               onClick={() =>
                                 window.location.href = `/cars/${car._id}`
                               }
-                              className="mt-3 w-full rounded-xl bg-slate-950 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                              className="w-full py-2 mt-3 text-sm font-semibold text-white transition rounded-xl bg-slate-950 hover:bg-slate-800"
                             >
                               View Vehicle
                             </button>
@@ -246,7 +251,7 @@ function AutoVergeChatbot() {
 
             {loading && (
               <div className="flex justify-start">
-                <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
+                <div className="flex items-center gap-2 px-4 py-3 text-sm bg-white border rounded-2xl border-slate-200">
                   <Loader2
                     size={16}
                     className="animate-spin"
@@ -280,7 +285,7 @@ function AutoVergeChatbot() {
           </div>
 
           {/* INPUT */}
-          <div className="border-t border-slate-200 bg-white p-3 sm:p-4">
+          <div className="p-3 bg-white border-t border-slate-200 sm:p-4">
             <div className="flex items-center gap-2">
 
               <input
@@ -295,13 +300,13 @@ function AutoVergeChatbot() {
                   }
                 }}
                 placeholder="Ask something..."
-                className="flex-1 rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+                className="flex-1 px-4 py-3 text-sm border outline-none rounded-2xl border-slate-200 focus:border-blue-500"
               />
 
               <button
                 onClick={sendMessage}
                 disabled={loading}
-                className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-60"
+                className="flex items-center justify-center w-12 h-12 text-white transition bg-blue-600 rounded-2xl hover:bg-blue-700 disabled:opacity-60"
               >
                 <Send size={18} />
               </button>

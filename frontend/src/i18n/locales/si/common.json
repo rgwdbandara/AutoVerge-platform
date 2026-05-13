@@ -2,6 +2,7 @@
   "navbar": {
     "home": "මුල් පිටුව",
     "browseCars": "වාහන බලන්න",
+    "articles": "පුවත්",
     "sellVehicle": "ඔබේ වාහනය විකිණන්න",
     "sellYourVehicle": "ඔබේ වාහනය විකිණන්න",
     "adminDashboard": "පරිපාලක පාලක පුවරුව",
@@ -104,6 +105,37 @@
     "similar": "සමාන",
     "partialMatch": "අර්ධ ගැලපීම",
     "lowMatch": "අඩු ගැලපීම"
+  },
+  "articles": {
+    "badge": "AutoVerge පුවත්",
+    "heroTitle": "නවතම වාහන පුවත්, reviews සහ AI insights",
+    "heroDescription": "AI මත පදනම් වූ automotive insights, EV පුවත්, වාහන මිලදී ගැනීමේ මාර්ගෝපදේශ, ගමනාගමන ප්‍රවණතා සහ ශ්‍රී ලංකාවේ කාර් වෙළඳපොළ යාවත්කාලීන බලන්න.",
+    "storyCount": "{{count}} කතා",
+    "freshCoverage": "නවතම ආවරණය",
+    "latestArticlesLabel": "පුවත්",
+    "featuredStory": "විශේෂාංග කතාව",
+    "readLeadStory": "ප්‍රධාන කතාව කියවන්න",
+    "readFullArticle": "සම්පූර්ණ කතාව කියවන්න",
+    "freshPicks": "නව තේරීම්",
+    "whatToReadNext": "ඊළඟට කියවිය යුතු දේ",
+    "viewAll": "සියල්ල බලන්න",
+    "latestArticle": "නවතම පුවත",
+    "latestUpdate": "නවතම යාවත්කාලීනය",
+    "readArticle": "කතාව කියවන්න",
+    "newsCategory": "පුවත්",
+    "latestArticlesWillAppear": "නවතම පුවත් මෙහි පෙන්වනු ඇත. පුවත් feed එක පූරණය වූ පසු.",
+    "filters": {
+      "all": "සියල්ල"
+    },
+    "error": "මේ මොහොතේ නවතම පුවත් පූරණය කළ නොහැක.",
+    "noAdditional": "මෙම කාණ්ඩයේ තව පුවත් නැත.",
+    "noArticlesLabel": "පුවත් නැත",
+    "noArticlesTitle": "මෙම කාණ්ඩයට ගැළපෙන පුවත් තවම නැත.",
+    "noArticlesDescription": "සියල්ලට ආපසු යන්න හෝ ඊළඟ පුවත පළ වන තෙක් රැඳී සිටින්න.",
+    "latestPosts": "නවතම පුවත්",
+    "allArticles": "සියලු පුවත්",
+    "archiveHelp": "සම්පූර්ණ පුවත් ලේඛනය බලන්න හෝ මාතෘකාව අනුව පුවත් පෙරහන් කරන්න.",
+    "showingCount": "පුවත් {{count}}ක් පෙන්වයි"
   },
   "sell": {
     "hero": {
@@ -257,7 +289,7 @@
       "label": "නවතම වාහන පුවත්",
       "title": "අලුත් කතා, reviews, සහ market updates",
       "subtitle": "AutoVerge වෙතින් නවතම automotive headlines, electric vehicle updates, සහ expert insights බලන්න.",
-      "viewAll": "සියලු articles බලන්න"
+      "viewAll": "සියලු පුවත් බලන්න"
     }
   },
   "footer": {
@@ -277,34 +309,15 @@
       "contact": "සම්බන්ධ වන්න"
     }
   },
-  "articles": {
-    "error": "අලුත් articles දැන් ලබාගත නොහැක.",
-    "badge": "AutoVerge Articles",
-    "heroTitle": "නවතම වාහන පුවත්, reviews සහ AI අවබෝධය",
-    "heroDescription": "AI-generated automotive insights, EV news, vehicle buying guides, transportation trends, සහ Sri Lankan car market updates බලන්න.",
-    "storyCount": "{{count}} stories",
-    "freshCoverage": "නවතම coverage",
-    "filters": {
-      "all": "සියල්ල"
-    },
-    "allArticles": "සියලු articles",
-    "archiveHelp": "සම්පූර්ණ archive එක බලන්න හෝ මාතෘකාව අනුව සීමා කරන්න.",
-    "showingCount": "Article {{count}}ක් පෙන්වයි",
-    "noAdditional": "මෙම category එකට තව stories නැත.",
-    "noArticlesLabel": "Articles නැත",
-    "noArticlesTitle": "මෙම category එකට ගැළපෙන stories නැත.",
-    "noArticlesDescription": "සම්පූර්ණ archive එක බලන්න සියල්ලට යන්න හෝ ඊළඟ article එක පළවනතුරු ඉන්න.",
-    "latestPosts": "නවතම Posts"
-  },
   "articleDetails": {
     "loading": "පූරණය වෙමින්...",
-    "back": "Articles වෙත ආපසු",
+    "back": "පුවත් වෙත ආපසු",
     "moreStories": "තවත් Stories",
-    "relatedArticles": "සම්බන්ධ Articles"
+    "relatedArticles": "සම්බන්ධ පුවත්"
   },
   "dashboard": {
     "title": "පාලක පුවරුව",
-    "logout": "Logout",
+    "logout": "පිටවෙන්න",
     "menu": {
       "myAccount": "මගේ ගිණුම",
       "manageProfile": "ගිණුම කළමනාකරණය",
@@ -317,12 +330,12 @@
   },
   "admin": {
     "title": "පරිපාලක පැනලය",
-    "logout": "Logout",
+    "logout": "පිටවෙන්න",
     "menu": {
       "dashboard": "පාලක පුවරුව",
       "pendingAds": "බලාපොරොත්තු ads",
       "cars": "වාහන",
-      "aiArticles": "AI Articles",
+      "aiArticles": "AI පුවත්",
       "settings": "සැකසුම්"
     }
   },
@@ -331,27 +344,27 @@
     "description": "නොමිලේ පළ කරන්න. ගැණුම්කරුවන් දැන්ම සොයමින් සිටී!"
   },
   "adminArticles": {
-    "title": "AI Article Generator",
-    "subtitle": "Articles ස්වයංක්‍රීයව සාදා පළ කරන්න",
-    "topicLabel": "Article Topic",
+    "title": "AI පුවත් ජනකය",
+    "subtitle": "පුවත් ස්වයංක්‍රීයව සාදා පළ කරන්න",
+    "topicLabel": "පුවත් මාතෘකාව",
     "topicPlaceholder": "උදා: 2026 ශ්‍රී ලංකාවේ හොඳම Hybrid Cars",
     "categoryLabel": "Category",
     "heroImageLabel": "අමතර Hero Image",
     "generating": "Generate කරමින්...",
-    "generate": "AI Article සාදන්න",
-    "viewCreated": "සාදන ලද Article බලන්න",
+    "generate": "AI පුවත සාදන්න",
+    "viewCreated": "සාදන ලද පුවත බලන්න",
     "createdLabel": "සාදන ලද්දේ:",
     "slugLabel": "Slug:",
-    "existingTitle": "පවතින Articles",
-    "editTitle": "Article සංස්කරණය",
+    "existingTitle": "පවතින පුවත්",
+    "editTitle": "පුවත් සංස්කරණය",
     "titleLabel": "Title",
     "summaryLabel": "Summary",
     "contentLabel": "Content (Markdown)",
     "imageLabel": "Image",
-    "enterTopic": "කරුණාකර article topic එක ඇතුළත් කරන්න.",
-    "generateFailed": "Article generate කිරීමට අසමත් විය",
-    "deleteFailed": "Article මකා දැමීමට අසමත් විය",
-    "saveFailed": "Article සුරැකීමට අසමත් විය"
+    "enterTopic": "කරුණාකර පුවත් මාතෘකාවක් ඇතුළත් කරන්න.",
+    "generateFailed": "පුවතක් සාදීමට අසමත් විය",
+    "deleteFailed": "පුවත මකා දැමීමට අසමත් විය",
+    "saveFailed": "පුවත සුරැකීමට අසමත් විය"
   },
   "profile": {
     "title": "විස්තර වෙනස් කරන්න",

@@ -2,6 +2,7 @@
   "navbar": {
     "home": "Home",
     "browseCars": "Browse Cars",
+    "articles": "Articles",
     "sellVehicle": "Sell Your Vehicle",
     "sellYourVehicle": "Sell Your Vehicle",
     "adminDashboard": "Admin Dashboard",
@@ -103,6 +104,25 @@
     "similar": "Similar",
     "partialMatch": "Partial Match",
     "lowMatch": "Low Match"
+  },
+  "articles": {
+    "badge": "AutoVerge Articles",
+    "heroTitle": "Latest Vehicle News, Reviews & AI Insights",
+    "heroDescription": "Explore AI-generated automotive insights, EV news, vehicle buying guides, transportation trends, and Sri Lankan car market updates.",
+    "storyCount": "{{count}} stories",
+    "freshCoverage": "Fresh coverage",
+    "filters": {
+      "all": "All"
+    },
+    "error": "We couldn't load the latest articles right now.",
+    "noAdditional": "No additional stories in this category yet.",
+    "noArticlesLabel": "No articles",
+    "noArticlesTitle": "No stories match this category yet.",
+    "noArticlesDescription": "Switch back to All to see the full archive, or wait for the next article to be published.",
+    "latestPosts": "Latest Posts",
+    "allArticles": "All Articles",
+    "archiveHelp": "Browse the full archive or narrow the feed by topic to keep the page focused.",
+    "showingCount": "Showing {{count}} article(s)"
   },
   "sell": {
     "hero": {
