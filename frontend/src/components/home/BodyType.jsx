@@ -35,7 +35,7 @@ export default function BodyType() {
           {types.map((type) => (
             <button
               key={type.name}
-              onClick={() => navigate("/browse")}
+              onClick={() => navigate(`/browse?bodyType=${type.name}`)}
               className="group relative h-44 overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-slate-900"
             >
               <img

@@ -12,6 +12,7 @@ function DashboardLayout() {
     { name: t("dashboard.menu.myAccount", { defaultValue: "My Account" }), path: "/profile" },
     { name: t("dashboard.menu.manageProfile", { defaultValue: "Manage Profile" }), path: "/profile/manage" },
     { name: t("dashboard.menu.myListings", { defaultValue: "My Listings" }), path: "/profile/my-cars" },
+    { name: "Received Inquiries", path: "/profile/inquiries" },
     { name: t("dashboard.menu.favorites", { defaultValue: "My Favorites" }), path: "/profile/favorites" },
     { name: t("dashboard.menu.pendingAds", { defaultValue: "Pending Ads" }), path: "/profile/pending" },
     { name: t("dashboard.menu.expiredAds", { defaultValue: "Expired Ads" }), path: "/profile/expired" },
