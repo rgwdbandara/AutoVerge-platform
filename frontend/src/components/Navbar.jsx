@@ -52,7 +52,7 @@ function Navbar() {
   const navItems = [
   { to: "/", label: t("navbar.home") },
   { to: "/browse", label: t("navbar.browseCars") },
-  { to: "/articles", label: t("navbar.articles") },
+  { to: "/articles", label: t("navbar.articles", { defaultValue: "Articles" }) },
   { to: "/sell", label: t("navbar.sellVehicle") },
   {
     to: isAdmin ? "/admin/dashboard" : "/profile",

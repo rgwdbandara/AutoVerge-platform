@@ -419,10 +419,10 @@ function Hero() {
               <div className="flex items-end justify-between gap-4 mb-5">
                 <div>
                   <p className={`text-xs font-semibold uppercase tracking-[0.32em] ${theme === "dark" ? "text-cyan-300" : "text-cyan-600"}`}>
-                    Latest Articles
+                    {t("articles.latestArticlesLabel", { defaultValue: "Latest Articles" })}
                   </p>
                   <h2 className={`mt-2 text-3xl font-black ${theme === "dark" ? "text-white" : "text-slate-900"}`}>
-                    Automotive News
+                    {t("articles.badge", { defaultValue: "AutoVerge Articles" })}
                   </h2>
                 </div>
 
@@ -484,13 +484,13 @@ function Hero() {
                       </p>
 
                       <div className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-500">
-                        Read Article <span aria-hidden="true">→</span>
+                        {t("articles.readArticle", { defaultValue: "Read Article" })} <span aria-hidden="true">→</span>
                       </div>
                     </div>
                   </Link>
                 ) : (
                   <div className={`rounded-[26px] border p-6 text-sm ${theme === "dark" ? "border-white/10 bg-white/5 text-white/70" : "border-slate-200 bg-white text-slate-600"}`}>
-                    Latest articles will appear here once the news feed loads.
+                    {t("articles.latestArticlesWillAppear", { defaultValue: "Latest articles will appear here once the news feed loads." })}
                   </div>
                 )}
               </div>
