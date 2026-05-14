@@ -1,18 +1,25 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useClerk } from "@clerk/clerk-react";
+import { useClerk, useUser } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
 
 function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useClerk();
+  const { user } = useUser();
   const { t } = useTranslation();
+  const userName = user?.fullName || user?.firstName || user?.username || "Account";
+  const userEmail = user?.primaryEmailAddress?.emailAddress || user?.emailAddresses?.[0]?.emailAddress || "";
+  const userImage = user?.imageUrl || "";
+  const avatarLetter = (user?.fullName || user?.firstName || user?.username || "A")
+    .trim()
+    .charAt(0)
+    .toUpperCase();
 
   const menu = [
     { name: t("dashboard.menu.myAccount", { defaultValue: "My Account" }), path: "/profile" },
     { name: t("dashboard.menu.manageProfile", { defaultValue: "Manage Profile" }), path: "/profile/manage" },
     { name: t("dashboard.menu.myListings", { defaultValue: "My Listings" }), path: "/profile/my-cars" },
-    { name: "Received Inquiries", path: "/profile/inquiries" },
     { name: t("dashboard.menu.favorites", { defaultValue: "My Favorites" }), path: "/profile/favorites" },
     { name: t("dashboard.menu.pendingAds", { defaultValue: "Pending Ads" }), path: "/profile/pending" },
     { name: t("dashboard.menu.expiredAds", { defaultValue: "Expired Ads" }), path: "/profile/expired" },
@@ -25,6 +32,23 @@ function DashboardLayout() {
 
         {/* LEFT SIDEBAR */}
         <div className="h-fit w-full rounded-xl border border-slate-200 bg-white p-5 shadow transition-colors duration-300 dark:border-white/10 dark:bg-slate-900 lg:sticky lg:top-20 lg:w-64">
+
+          <div className="mb-5 flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3 dark:border-white/5 dark:bg-white/5">
+            <span className="flex h-12 w-12 shrink-0 overflow-hidden rounded-full border border-white/60 bg-slate-200 shadow-sm">
+              {userImage ? (
+                <img src={userImage} alt={userName} className="h-full w-full object-cover" />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 text-base font-semibold text-white">
+                  {avatarLetter}
+                </span>
+              )}
+            </span>
+
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{userName}</p>
+              <p className="truncate text-xs text-slate-500 dark:text-slate-400">{userEmail || "Signed in user"}</p>
+            </div>
+          </div>
 
           <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">{t("dashboard.title", { defaultValue: "Dashboard" })}</h2>
 

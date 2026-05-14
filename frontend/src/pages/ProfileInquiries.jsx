@@ -22,6 +22,10 @@ function ProfileInquiries() {
         } else {
           setInquiries([]);
         }
+
+        await api("/api/vehicles/my/inquiries/mark-read", {
+          method: "POST",
+        });
       } catch (err) {
         console.error("FETCH INQUIRIES ERROR:", err);
         setError("Failed to load inquiries. Please refresh the page.");
@@ -35,7 +39,12 @@ function ProfileInquiries() {
 
   return (
     <div>
-      <h2 className="mb-4 text-xl font-semibold text-slate-900">Received Inquiries</h2>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-xl font-semibold text-slate-900">Received Inquiries</h2>
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">
+          {inquiries.length} total
+        </span>
+      </div>
 
       {loading && <p>Loading…</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}

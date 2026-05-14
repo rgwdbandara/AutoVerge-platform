@@ -25,31 +25,38 @@ const evaluateAutoTrust = async (vehicleData, oldVehicle = null) => {
 
   let grade = "D";
   let trustLevel = "Low";
+  let gradeReason = "";
 
   if (percentage >= 85) {
     grade = "A";
     trustLevel = "High";
+    gradeReason = "Excellent listing with complete details, strong visual evidence, and stable information.";
   } else if (percentage >= 70) {
     grade = "B";
     trustLevel = "Medium";
+    gradeReason = "Good listing with mostly complete details and adequate visual evidence.";
   } else if (percentage >= 50) {
     grade = "C";
     trustLevel = "Low";
+    gradeReason = "Fair listing but missing some important details or visual evidence.";
   } else {
     grade = "D";
     trustLevel = "Low";
+    gradeReason = "Poor listing with insufficient details or incomplete information.";
   }
 
   // grade cap rules
   if (!vehicleData.year || !vehicleData.mileage || !vehicleData.price) {
     grade = "D";
     trustLevel = "Low";
+    gradeReason = "Essential vehicle information is missing (year, mileage, or price).";
   }
 
   if (!vehicleData.brand || !vehicleData.model) {
     if (grade === "A") grade = "C";
     if (grade === "B") grade = "C";
     trustLevel = "Low";
+    gradeReason = "Vehicle brand or model information is missing.";
   }
 
   const validImages = (vehicleData.images || []).filter(
@@ -65,16 +72,31 @@ const evaluateAutoTrust = async (vehicleData, oldVehicle = null) => {
   if (validImages.length <= 1) {
     if (grade === "A") grade = "C";
     if (grade === "B") grade = "C";
+    gradeReason = "Limited visual evidence - at least 2 images with different angles recommended.";
   }
 
   if (completeness.level === "Weak") {
     grade = "D";
     trustLevel = "Low";
+    gradeReason = completeness.reason;
+  }
+
+  // Build detailed reason from failed checks
+  const failedChecks = [];
+  if (completeness.level === "Weak") failedChecks.push(completeness.reason);
+  if (visual.level === "Weak") failedChecks.push(visual.reason);
+  if (usage.level === "Weak") failedChecks.push(usage.reason);
+  if (maintenance.level === "Weak") failedChecks.push(maintenance.reason);
+  if (stability.level === "Weak") failedChecks.push(stability.reason);
+
+  if (failedChecks.length > 0 && grade === "D") {
+    gradeReason = failedChecks.join(". ") + ".";
   }
 
   return {
     grade,
     trustLevel,
+    gradeReason,
     checks: {
       completeness,
       visual,

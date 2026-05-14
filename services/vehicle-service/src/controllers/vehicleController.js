@@ -102,6 +102,57 @@ exports.getSellerInquiries = async (req, res) => {
   }
 };
 
+exports.getUnreadInquiryCount = async (req, res) => {
+  try {
+    const sellerClerkId = req.user.sub;
+
+    const sellerVehicles = await Vehicle.find({ sellerClerkId }).select("_id").lean();
+
+    if (!sellerVehicles.length) {
+      return res.json({ unreadCount: 0 });
+    }
+
+    const vehicleIds = sellerVehicles.map((vehicle) => vehicle._id);
+    const unreadCount = await VehicleInquiry.countDocuments({
+      vehicleId: { $in: vehicleIds },
+      readAt: null,
+    });
+
+    res.json({ unreadCount });
+  } catch (error) {
+    console.error("UNREAD INQUIRY COUNT ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch unread inquiry count" });
+  }
+};
+
+exports.markMyInquiriesAsRead = async (req, res) => {
+  try {
+    const sellerClerkId = req.user.sub;
+
+    const sellerVehicles = await Vehicle.find({ sellerClerkId }).select("_id").lean();
+
+    if (!sellerVehicles.length) {
+      return res.json({ message: "No inquiries to mark as read", updatedCount: 0 });
+    }
+
+    const vehicleIds = sellerVehicles.map((vehicle) => vehicle._id);
+    const result = await VehicleInquiry.updateMany(
+      {
+        vehicleId: { $in: vehicleIds },
+        readAt: null,
+      },
+      {
+        $set: { readAt: new Date() },
+      }
+    );
+
+    res.json({ message: "Inquiries marked as read", updatedCount: result.modifiedCount || result.nModified || 0 });
+  } catch (error) {
+    console.error("MARK INQUIRIES READ ERROR:", error);
+    res.status(500).json({ message: "Failed to mark inquiries as read" });
+  }
+};
+
 exports.markAsSold = async (req, res) => {
   try {
     const sellerClerkId = req.user.sub;
@@ -205,6 +256,7 @@ exports.updateListing = async (req, res) => {
         ...updatedData,
         autoTrustGrade: autoTrustResult.grade,
         trustLevel: autoTrustResult.trustLevel,
+        gradeReason: autoTrustResult.gradeReason,
         autoTrustCheckResults: autoTrustResult.checks,
       },
       { new: true }
@@ -227,13 +279,31 @@ exports.getMyListings = async (req, res) => {
 
     console.log("FETCHING CARS FOR USER:", sellerId);
 
-    const vehicles = await Vehicle.find({
-      sellerClerkId: sellerId,
-    }).sort({ createdAt: -1 });
+    const vehicles = await Vehicle.find({ sellerClerkId: sellerId })
+      .sort({ createdAt: -1 })
+      .lean();
 
-    console.log("FOUND VEHICLES:", vehicles.length);
+    const vehicleIds = vehicles.map((vehicle) => vehicle._id);
+    const inquiryCounts = vehicleIds.length
+      ? await VehicleInquiry.aggregate([
+          { $match: { vehicleId: { $in: vehicleIds } } },
+          { $group: { _id: "$vehicleId", count: { $sum: 1 } } },
+        ])
+      : [];
 
-    res.json(vehicles);
+    const inquiryCountMap = new Map(
+      inquiryCounts.map((item) => [item._id.toString(), item.count])
+    );
+
+    const enrichedVehicles = vehicles.map((vehicle) => ({
+      ...vehicle,
+      inquiryCount: inquiryCountMap.get(vehicle._id.toString()) || 0,
+      viewCount: vehicle.views || 0,
+    }));
+
+    console.log("FOUND VEHICLES:", enrichedVehicles.length);
+
+    res.json(enrichedVehicles);
   } catch (error) {
     console.error("MY LISTINGS ERROR:", error);
     res.status(500).json({ message: "Failed to fetch your listings" });
@@ -535,6 +605,7 @@ exports.createListing = async (req, res) => {
       ...vehicleData,
       autoTrustGrade: autoTrustResult.grade,
       trustLevel: autoTrustResult.trustLevel,
+      gradeReason: autoTrustResult.gradeReason,
       autoTrustCheckResults: autoTrustResult.checks,
     });
 

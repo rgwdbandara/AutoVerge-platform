@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useUser } from "@clerk/clerk-react";
+import { MapPin } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useApi } from "../lib/api";
 import EMIModal from "../components/finance/EMIModal";
 import PriceEstimateCard from "../components/price/PriceEstimateCard";
-import { PhoneDisplay } from "../components/PhoneDisplay";
+import RelatedCars from "../components/cars/RelatedCars";
+import SellerContactCard from "../components/cars/SellerContactCard";
 
 const getGradeColor = (grade) => {
   if (grade === "A") return "bg-green-100 text-green-700";
@@ -26,6 +29,7 @@ const buildDefaultInquiryMessage = (vehicle, listingId) => {
 
 function CarDetails() {
   const { id } = useParams();
+  const { user, isLoaded } = useUser();
   const api = useApi();
   const [car, setCar] = useState(null);
   const [activeImage, setActiveImage] = useState("");
@@ -45,18 +49,22 @@ function CarDetails() {
   const [inquirySubmitting, setInquirySubmitting] = useState(false);
   const [inquiryError, setInquiryError] = useState("");
   const [inquirySuccess, setInquirySuccess] = useState("");
-  const [contactRequest, setContactRequest] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    preferredCallTime: "",
-  });
-  const [contactSubmitting, setContactSubmitting] = useState(false);
-  const [contactError, setContactError] = useState("");
-  const [contactSuccess, setContactSuccess] = useState("");
   const [isSaved, setIsSaved] = useState(false);
   const [shareSuccess, setShareSuccess] = useState("");
   const fallbackImage = "https://via.placeholder.com/800x500";
+
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+
+    const userName = user.fullName || user.firstName || user.username || "";
+
+    if (userName) {
+      setInquiryForm((prev) => ({
+        ...prev,
+        name: prev.name || userName,
+      }));
+    }
+  }, [isLoaded, user]);
 
   useEffect(() => {
     const loadCar = async () => {
@@ -130,56 +138,6 @@ function CarDetails() {
     }
   };
 
-  const submitCallRequest = async () => {
-    try {
-      setContactError("");
-      setContactSuccess("");
-
-      if (!contactRequest.name.trim() || !contactRequest.phone.trim() || !contactRequest.preferredCallTime) {
-        setContactError("Please fill your name, phone and preferred call time.");
-        return;
-      }
-
-      setContactSubmitting(true);
-
-      const preferredText = new Date(contactRequest.preferredCallTime).toLocaleString("en-LK", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
-
-      await api(`/api/vehicles/${id}/inquiries`, {
-        method: "POST",
-        body: JSON.stringify({
-          name: contactRequest.name.trim(),
-          email: contactRequest.email.trim() || "no-email@autoverge.local",
-          phone: contactRequest.phone.trim(),
-          budget: null,
-          hasTradeIn: false,
-          consentToUpdates: true,
-          message: `Please call me regarding ${car?.title || "this vehicle"}. Preferred call time: ${preferredText}.`,
-          source: "contact-us-call-request",
-        }),
-      });
-
-      setContactSuccess("Call request sent. We will contact you at your preferred time.");
-      setContactRequest({
-        name: "",
-        email: "",
-        phone: "",
-        preferredCallTime: "",
-      });
-
-      setTimeout(() => {
-        setShowContactModal(false);
-      }, 1200);
-    } catch (error) {
-      console.error("CALL REQUEST ERROR:", error);
-      setContactError("Failed to send call request. Please try again.");
-    } finally {
-      setContactSubmitting(false);
-    }
-  };
-
   const handleSave = () => {
     setIsSaved(!isSaved);
     // Could integrate with backend favorites list here
@@ -212,9 +170,14 @@ function CarDetails() {
   }
 
   const sellerPhone = car?.contact?.phone || "";
+  const sellerName = car?.sellerName || car?.contact?.name || "Seller";
+  const sellerEmail = car?.sellerEmail || car?.contact?.email || "";
   const safePhone = sellerPhone.replace(/\D/g, "");
   const whatsappPhone = safePhone ? `94${safePhone.replace(/^0/, "")}` : "";
   const canCall = Boolean(safePhone);
+  const locationLabel = [car?.location?.city, car?.location?.district]
+    .filter(Boolean)
+    .join(", ") || "Location not available";
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 dark:text-white">
@@ -302,6 +265,11 @@ function CarDetails() {
                     LKR {car.price?.toLocaleString()}
                   </p>
 
+                  <div className="inline-flex items-center gap-2 px-4 py-2 mt-3 text-sm font-medium rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <MapPin size={16} />
+                    <span>{locationLabel}</span>
+                  </div>
+
                   <div className="grid grid-cols-3 gap-2 mt-5 text-center">
                     <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
                       <p className="text-xs text-slate-500 dark:text-slate-300">Mileage</p>
@@ -372,13 +340,11 @@ function CarDetails() {
                   <button
                     type="button"
                     onClick={() => {
-                      setContactError("");
-                      setContactSuccess("");
                       setShowContactModal(true);
                     }}
                     className="px-5 py-4 text-lg font-semibold text-center transition bg-white border rounded-2xl border-slate-300 text-slate-900 hover:bg-slate-100"
                   >
-                    Contact us
+                    Contact Seller
                   </button>
                 </div>
 
@@ -450,37 +416,26 @@ function CarDetails() {
                 )}
 
                 {showContactModal && createPortal(
-                  <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/55">
-                    <div className="relative w-full max-w-[420px] rounded-2xl bg-white p-5 shadow-2xl">
+                  <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+                    <div className="relative w-full max-w-2xl">
                       <button
                         type="button"
                         onClick={() => setShowContactModal(false)}
-                        className="absolute text-4xl leading-none right-4 top-3 text-slate-500 hover:text-slate-800"
+                        className="absolute z-10 flex items-center justify-center w-10 h-10 text-2xl leading-none transition bg-white rounded-full shadow-lg -right-1 -top-1 text-slate-500 hover:text-slate-900 dark:bg-slate-900 dark:text-slate-300"
                       >
                         ×
                       </button>
 
-                      <h3 className="text-4xl font-bold text-center text-slate-900">Contact us</h3>
+                      <SellerContactCard
+                        sellerName={sellerName}
+                        sellerPhone={sellerPhone}
+                        sellerEmail={sellerEmail}
+                        locationLabel={locationLabel}
+                        telLink={canCall ? `tel:${safePhone}` : "#"}
+                        whatsappLink={canCall ? `https://wa.me/${whatsappPhone}` : "#"}
+                      />
 
-                      <div className="mt-5 space-y-3">
-                        <a
-                          href={canCall ? `tel:${safePhone}` : "#"}
-                          className={`flex items-center justify-center rounded-xl px-4 py-3 text-lg font-semibold ${
-                            canCall
-                              ? "bg-emerald-400 text-slate-900 hover:bg-emerald-500"
-                              : "pointer-events-none bg-slate-200 text-slate-500"
-                          }`}
-                        >
-                          {canCall ? sellerPhone : "Phone not available"}
-                        </a>
-
-                        <a
-                          href={car?.contact?.email ? `mailto:${car.contact.email}` : "mailto:support@autoverge.lk"}
-                          className="flex items-center justify-center px-4 py-3 text-lg font-semibold rounded-xl bg-lime-300 text-slate-900 hover:bg-lime-400"
-                        >
-                          {car?.contact?.email || "support@autoverge.lk"}
-                        </a>
-
+                      <div className="mt-4 text-center">
                         <button
                           type="button"
                           onClick={() => {
@@ -489,64 +444,9 @@ function CarDetails() {
                             setInquirySuccess("");
                             setShowInquiry(true);
                           }}
-                          className="w-full px-4 py-3 text-lg font-semibold border rounded-xl border-slate-300 text-slate-900 hover:bg-slate-100"
+                          className="px-5 py-3 text-sm font-semibold transition bg-white border rounded-xl border-slate-300 text-slate-900 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
                         >
-                          Make an inquiry
-                        </button>
-
-                        <p className="text-sm text-center text-slate-600">
-                          Preferred time to call you
-                        </p>
-
-                        <input
-                          type="text"
-                          placeholder="Your name"
-                          value={contactRequest.name}
-                          onChange={(e) => setContactRequest((prev) => ({ ...prev, name: e.target.value }))}
-                          className="w-full px-4 py-3 rounded-lg outline-none bg-slate-100"
-                        />
-
-                        <input
-                          type="text"
-                          placeholder="Your phone number"
-                          value={contactRequest.phone}
-                          onChange={(e) => setContactRequest((prev) => ({ ...prev, phone: e.target.value }))}
-                          className="w-full px-4 py-3 rounded-lg outline-none bg-slate-100"
-                        />
-
-                        <input
-                          type="email"
-                          placeholder="Your email (optional)"
-                          value={contactRequest.email}
-                          onChange={(e) => setContactRequest((prev) => ({ ...prev, email: e.target.value }))}
-                          className="w-full px-4 py-3 rounded-lg outline-none bg-slate-100"
-                        />
-
-                        <input
-                          type="datetime-local"
-                          value={contactRequest.preferredCallTime}
-                          onChange={(e) => setContactRequest((prev) => ({ ...prev, preferredCallTime: e.target.value }))}
-                          className="w-full px-4 py-3 rounded-lg outline-none bg-slate-100"
-                        />
-
-                        {contactError && (
-                          <p className="text-sm font-medium text-red-600">{contactError}</p>
-                        )}
-                        {contactSuccess && (
-                          <p className="text-sm font-medium text-emerald-600">{contactSuccess}</p>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={submitCallRequest}
-                          disabled={contactSubmitting}
-                          className={`w-full rounded-xl px-5 py-3 text-lg font-semibold text-white ${
-                            contactSubmitting
-                              ? "cursor-not-allowed bg-emerald-300"
-                              : "bg-emerald-500 hover:bg-emerald-600"
-                          }`}
-                        >
-                          {contactSubmitting ? "Sending..." : "Request a call"}
+                          Make an inquiry instead
                         </button>
                       </div>
                     </div>
@@ -657,66 +557,20 @@ function CarDetails() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 mt-8 lg:grid-cols-12">
-          <section className="p-6 bg-white border shadow-sm lg:col-span-7 rounded-2xl border-slate-200">
-            <h2 className="text-xl font-bold text-slate-900">Description</h2>
-            <p className="mt-3 leading-7 text-slate-600">
-              {car.description || "No description available."}
-            </p>
+        <section className="p-6 mt-8 bg-white border shadow-sm rounded-2xl border-slate-200 dark:bg-slate-800 dark:border-white/10">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Description</h2>
+          <p className="mt-3 leading-7 text-slate-600 dark:text-slate-300">
+            {car.description || "No description available."}
+          </p>
 
-            <h3 className="mt-8 text-lg font-semibold text-slate-900">Key Highlights</h3>
-            <ul className="grid grid-cols-1 gap-2 mt-3 text-sm text-slate-700 md:grid-cols-2">
-              <li className="px-3 py-2 rounded-lg bg-slate-100">Transmission: {car.transmission || "N/A"}</li>
-              <li className="px-3 py-2 rounded-lg bg-slate-100">Fuel Type: {car.fuelType || "N/A"}</li>
-              <li className="px-3 py-2 rounded-lg bg-slate-100">Brand: {car.brand || "N/A"}</li>
-              <li className="px-3 py-2 rounded-lg bg-slate-100">Model: {car.model || "N/A"}</li>
-            </ul>
-          </section>
-
-          <section className="p-6 bg-white border shadow-sm lg:col-span-5 rounded-2xl border-slate-200">
-            <h2 className="text-xl font-bold text-slate-900">Seller Information</h2>
-
-            <div className="mt-4 space-y-2 text-sm text-slate-700">
-              <p>
-                <span className="font-semibold text-slate-900">Name:</span> {car?.contact?.name || "N/A"}
-              </p>
-              <p>
-                <span className="font-semibold text-slate-900">Phone:</span>{" "}
-                <PhoneDisplay phone={car?.contact?.phone} />
-              </p>
-              <p>
-                <span className="font-semibold text-slate-900">Location:</span> {car?.location?.city || "N/A"}
-                {car?.location?.district ? `, ${car.location.district}` : ""}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 mt-5 sm:grid-cols-2">
-              <a
-                href={canCall ? `tel:${safePhone}` : "#"}
-                className={`py-3 text-center rounded-xl font-medium transition ${
-                  canCall
-                    ? "bg-slate-900 text-white hover:bg-slate-800"
-                    : "bg-slate-200 text-slate-500 pointer-events-none"
-                }`}
-              >
-                Call Now
-              </a>
-
-              <a
-                href={canCall ? `https://wa.me/${whatsappPhone}` : "#"}
-                target="_blank"
-                rel="noreferrer"
-                className={`py-3 text-center rounded-xl font-medium transition ${
-                  canCall
-                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                    : "bg-slate-200 text-slate-500 pointer-events-none"
-                }`}
-              >
-                WhatsApp
-              </a>
-            </div>
-          </section>
-        </div>
+          <h3 className="mt-8 text-lg font-semibold text-slate-900 dark:text-white">Key Highlights</h3>
+          <ul className="grid grid-cols-1 gap-2 mt-3 text-sm text-slate-700 md:grid-cols-2 dark:text-slate-300">
+            <li className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5">Transmission: {car.transmission || "N/A"}</li>
+            <li className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5">Fuel Type: {car.fuelType || "N/A"}</li>
+            <li className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5">Brand: {car.brand || "N/A"}</li>
+            <li className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5">Model: {car.model || "N/A"}</li>
+          </ul>
+        </section>
 
         <section className="p-6 mt-6 bg-white border shadow-sm rounded-2xl border-slate-200">
           <h2 className="text-xl font-bold text-slate-900">Specifications</h2>
@@ -778,6 +632,14 @@ function CarDetails() {
             </div>
           </div>
 
+          {car.gradeReason && (
+            <div className="p-4 mt-4 border rounded-xl bg-slate-50 border-slate-200">
+              <p className="text-sm text-slate-700">
+                <span className="font-semibold">Why this grade?</span> {car.gradeReason}
+              </p>
+            </div>
+          )}
+
           {car.autoTrustCheckResults && (
             <div className="grid grid-cols-1 gap-3 mt-5 md:grid-cols-2 xl:grid-cols-3">
               <div className="p-4 border rounded-xl border-slate-200">
@@ -817,6 +679,8 @@ function CarDetails() {
             </div>
           )}
         </section>
+
+        <RelatedCars currentVehicleId={id} />
       </div>
     </div>
   );
