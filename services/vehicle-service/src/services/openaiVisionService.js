@@ -2,12 +2,15 @@ const OpenAI = require("openai");
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 30000, // 30 seconds timeout
+  maxRetries: 1,
 });
 
 const analyzeImageWithGPT = async (file) => {
   try {
     if (!file || !file.buffer) {
       return {
+        isVehicle: false,
         brand: null,
         type: null,
         model: null,
@@ -25,9 +28,10 @@ const analyzeImageWithGPT = async (file) => {
           content: [
             {
               type: "text",
-              text: `Analyze this vehicle image and return a short, user-friendly JSON summary.
+              text: `Analyze this image. First decide if the image contains a real vehicle/car. If it is not a vehicle, return isVehicle:false and brand/type/model as null. If it is a vehicle, return isVehicle:true with brand/type/model if visible.
 
 Return ONLY a valid JSON object with these exact fields:
+- isVehicle: true if the image contains a real vehicle/car, otherwise false
 - brand: the vehicle manufacturer name or null if uncertain
 - type: the vehicle type (SUV, Sedan, Hatchback, Coupe, Truck, Van, Crossover, etc) or null if uncertain
 - model: the specific vehicle model name or null if uncertain
@@ -37,10 +41,11 @@ Guidelines:
 - Keep description concise and helpful, around one sentence.
 - If the image shows only a partial vehicle, describe the visible parts and likely vehicle style.
 - Return null for brand/model if you are not confident.
+- If the image is not a vehicle, set brand/type/model to null and provide a short description of the non-vehicle image.
 - Return ONLY valid JSON, no markdown, no code fences.
 
 Example response format:
-{"brand":"Toyota","type":"SUV","model":"Fortuner","description":"A white midsize SUV with a tall stance and modern front styling."}`,
+{\"isVehicle\":true,\"brand\":\"Toyota\",\"type\":\"SUV\",\"model\":\"Fortuner\",\"description\":\"A white midsize SUV with a tall stance and modern front styling.\"}`,
             },
             {
               type: "image_url",
@@ -61,6 +66,7 @@ Example response format:
     text = text.replace(/```json\n?|```\n?/g, "").trim();
 
     let parsed = {
+      isVehicle: false,
       brand: null,
       type: null,
       model: null,
@@ -69,6 +75,7 @@ Example response format:
 
     try {
       parsed = JSON.parse(text);
+      parsed.isVehicle = Boolean(parsed.isVehicle);
       if (!parsed.brand) parsed.brand = null;
       if (!parsed.type) parsed.type = null;
       if (!parsed.model) parsed.model = null;
@@ -76,6 +83,7 @@ Example response format:
     } catch (parseError) {
       console.error("JSON PARSE ERROR:", parseError.message);
       parsed = {
+        isVehicle: false,
         brand: null,
         type: null,
         model: null,
@@ -87,12 +95,19 @@ Example response format:
 
     return parsed;
   } catch (error) {
-    console.error("GPT VISION ERROR:", error.message);
+    if (error.code === "ERR_HTTP_REQUEST_TIMEOUT" || error.message.includes("timeout")) {
+      console.error("GPT VISION TIMEOUT: OpenAI API took too long. Fallback to basic detection.");
+    } else {
+      console.error("GPT VISION ERROR:", error.message);
+    }
+    
+    // Fallback: Return generic vehicle response instead of failing completely
     return {
+      isVehicle: true, // Assume it's a vehicle to allow search to proceed
       brand: null,
       type: null,
       model: null,
-      description: null,
+      description: "Vehicle image analysis unavailable - using fallback mode",
     };
   }
 };

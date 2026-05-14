@@ -11,22 +11,22 @@ function Profile() {
   const [activeSection, setActiveSection] = useState("my-account");
 
   return (
-    <div className="min-h-screen px-4 pt-20 bg-gray-100 md:px-6">
+    <div className="min-h-screen bg-slate-50 px-4 pt-20 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-white md:px-6">
 
-      <div className="flex mx-auto bg-white shadow max-w-[1500px] rounded-xl">
+      <div className="mx-auto flex max-w-[1500px] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow transition-colors duration-300 dark:border-white/10 dark:bg-slate-900 lg:flex-row">
 
         {/* LEFT SIDEBAR */}
-        <div className="hidden w-1/5 p-6 border-r lg:block">
+        <div className="w-full border-r border-slate-200 p-4 dark:border-white/10 lg:block lg:w-1/5 lg:p-6">
 
-          <h2 className="mb-6 text-lg font-semibold">Dashboard</h2>
+          <h2 className="mb-6 text-lg font-semibold text-slate-900 dark:text-white">Dashboard</h2>
 
-          <div className="space-y-4 text-gray-700">
+          <div className="grid grid-cols-2 gap-3 text-slate-700 dark:text-slate-300 sm:grid-cols-3 lg:flex lg:flex-col lg:space-y-4 lg:gap-0">
 
             <button
               type="button"
               onClick={() => setActiveSection("my-account")}
               className={`flex items-center justify-between w-full cursor-pointer transition ${
-                activeSection === "my-account" ? "text-blue-600 font-medium" : "hover:text-blue-600"
+                activeSection === "my-account" ? "text-blue-600 font-medium dark:text-blue-400" : "hover:text-blue-600 dark:hover:text-blue-400"
               }`}
             >
               <span>My Account</span>
@@ -36,7 +36,7 @@ function Profile() {
             <button
               type="button"
               onClick={() => navigate("/profile/manage")}
-              className="flex items-center justify-between w-full transition hover:text-blue-600"
+              className="flex w-full items-center justify-between transition hover:text-blue-600 dark:hover:text-blue-400"
             >
               <span>Manage Profile</span>
               <span>›</span>
@@ -46,7 +46,7 @@ function Profile() {
               type="button"
               onClick={() => setActiveSection("my-favorites")}
               className={`flex items-center justify-between w-full cursor-pointer transition ${
-                activeSection === "my-favorites" ? "text-blue-600 font-medium" : "hover:text-blue-600"
+                activeSection === "my-favorites" ? "text-blue-600 font-medium dark:text-blue-400" : "hover:text-blue-600 dark:hover:text-blue-400"
               }`}
             >
               <span>❤️ My Favorites</span>
@@ -56,7 +56,7 @@ function Profile() {
             <button
               type="button"
               onClick={() => navigate("/profile/expired-ads")}
-              className="flex items-center justify-between w-full transition hover:text-blue-600"
+              className="flex w-full items-center justify-between transition hover:text-blue-600 dark:hover:text-blue-400"
             >
               <span>Expired Ads</span>
               <span>›</span>
@@ -74,7 +74,7 @@ function Profile() {
           {/* LOGOUT */}
           <button
             onClick={() => signOut(() => navigate("/"))}
-            className="px-4 py-2 mt-10 text-red-500 transition border border-red-500 rounded-lg hover:bg-red-50"
+            className="mt-10 rounded-lg border border-red-500 px-4 py-2 text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
           >
             Logout
           </button>
@@ -82,14 +82,14 @@ function Profile() {
         </div>
 
         {/* RIGHT CONTENT */}
-        <div className="w-full p-6 md:p-8 lg:w-4/5 lg:p-10">
+        <div className="w-full p-4 sm:p-6 md:p-8 lg:w-4/5 lg:p-10">
 
           {/* USER NAME */}
-          <h1 className="mb-6 text-2xl font-semibold">
+          <h1 className="mb-4 text-2xl font-semibold text-slate-900 dark:text-white sm:mb-6">
             {user?.fullName}
           </h1>
 
-          <hr className="mb-10" />
+          <hr className="mb-10 border-slate-200 dark:border-white/10" />
 
           {activeSection === "my-account" && <MyCars />}
           {activeSection === "my-favorites" && <MyFavorites />}

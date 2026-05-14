@@ -3,6 +3,25 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+	color-scheme: light;
+}
+
+html.dark {
+	color-scheme: dark;
+}
+
+body {
+	background: #f8fafc;
+	color: #0f172a;
+	transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+html.dark body {
+	background: #020617;
+	color: #e2e8f0;
+}
+
 .dotted-background {
 	background-color: #16223c;
 	background-image: radial-gradient(

@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useApi } from "../../lib/api";
 import ManualEntryForm from "../../components/seller/ManualEntryForm";
+import { useTranslation } from "react-i18next";
 
 function EditCar() {
   const { id } = useParams();
   const api = useApi();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,26 +37,26 @@ function EditCar() {
         body: updatedData,
       });
 
-      alert("Car updated successfully ✅");
+      alert(t("seller.editCar.success", { defaultValue: "Car updated successfully ✅" }));
       navigate("/profile");
     } catch (err) {
       console.error("Update failed:", err);
-      alert("Update failed ❌");
+      alert(t("seller.editCar.failed", { defaultValue: "Update failed ❌" }));
     }
   };
 
   if (loading) {
-    return <p className="p-10 text-center">Loading...</p>;
+    return <p className="p-10 text-center text-slate-600 dark:text-slate-300">{t("common.loading", { defaultValue: "Loading..." })}</p>;
   }
 
   if (!car) {
-    return <p className="p-10 text-center">Car not found</p>;
+    return <p className="p-10 text-center text-slate-600 dark:text-slate-300">{t("seller.editCar.notFound", { defaultValue: "Car not found" })}</p>;
   }
 
   return (
-    <div className="min-h-screen px-6 pt-20 bg-gray-100">
+    <div className="min-h-screen bg-slate-50 px-4 pt-20 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-white sm:px-6">
 
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
 
         {/* 🔥 ONLY FORM */}
         <ManualEntryForm

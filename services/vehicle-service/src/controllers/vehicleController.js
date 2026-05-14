@@ -1,4 +1,5 @@
 const Vehicle = require("../models/Vehicle");
+const VehicleInquiry = require("../models/VehicleInquiry");
 const evaluateAutoTrust = require("../../autotrust");
 const searchVehiclesByImage = require("../imageSearch/searchByImage");
 const generateImageEmbeddings = require("../imageSearch/generateImageEmbeddings");
@@ -18,6 +19,138 @@ const isAdminUser = (user) => {
   const role = user?.role || user?.public_metadata?.role || user?.metadata?.role;
 
   return ADMIN_EMAILS.includes(email) || role === "admin";
+};
+
+exports.submitVehicleInquiry = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      email,
+      phone,
+      budget,
+      hasTradeIn,
+      consentToUpdates,
+      message,
+      source,
+    } = req.body || {};
+
+    if (!name || !email || !phone || !message) {
+      return res.status(400).json({ message: "Name, email, phone and message are required" });
+    }
+
+    const vehicle = await Vehicle.findById(id).select("_id title contact");
+
+    if (!vehicle) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    const normalizedBudget = Number(budget);
+    const inquiry = await VehicleInquiry.create({
+      vehicleId: vehicle._id,
+      name: String(name).trim(),
+      email: String(email).trim().toLowerCase(),
+      phone: String(phone).trim(),
+      budget: Number.isFinite(normalizedBudget) && normalizedBudget > 0 ? normalizedBudget : null,
+      hasTradeIn: Boolean(hasTradeIn),
+      consentToUpdates: consentToUpdates !== false,
+      message: String(message).trim(),
+      source: source || "car-details",
+    });
+
+    res.status(201).json({
+      message: "Inquiry submitted successfully",
+      inquiryId: inquiry._id,
+    });
+  } catch (error) {
+    console.error("SUBMIT INQUIRY ERROR:", error);
+    res.status(500).json({ message: "Failed to submit inquiry" });
+  }
+};
+
+exports.getSellerInquiries = async (req, res) => {
+  try {
+    const sellerClerkId = req.user.sub;
+
+    // Get all vehicles owned by this seller
+    const sellerVehicles = await Vehicle.find({ sellerClerkId }).select("_id title");
+
+    if (!sellerVehicles.length) {
+      return res.json([]);
+    }
+
+    const vehicleIds = sellerVehicles.map((v) => v._id);
+
+    // Get all inquiries for these vehicles
+    const inquiries = await VehicleInquiry.find({ vehicleId: { $in: vehicleIds } })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Enhance inquiries with vehicle titles
+    const enriched = inquiries.map((inq) => {
+      const vehicle = sellerVehicles.find((v) => v._id.toString() === inq.vehicleId.toString());
+      return {
+        ...inq,
+        vehicleTitle: vehicle?.title || "Unknown vehicle",
+      };
+    });
+
+    res.json(enriched);
+  } catch (error) {
+    console.error("GET SELLER INQUIRIES ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch inquiries" });
+  }
+};
+
+exports.getUnreadInquiryCount = async (req, res) => {
+  try {
+    const sellerClerkId = req.user.sub;
+
+    const sellerVehicles = await Vehicle.find({ sellerClerkId }).select("_id").lean();
+
+    if (!sellerVehicles.length) {
+      return res.json({ unreadCount: 0 });
+    }
+
+    const vehicleIds = sellerVehicles.map((vehicle) => vehicle._id);
+    const unreadCount = await VehicleInquiry.countDocuments({
+      vehicleId: { $in: vehicleIds },
+      readAt: null,
+    });
+
+    res.json({ unreadCount });
+  } catch (error) {
+    console.error("UNREAD INQUIRY COUNT ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch unread inquiry count" });
+  }
+};
+
+exports.markMyInquiriesAsRead = async (req, res) => {
+  try {
+    const sellerClerkId = req.user.sub;
+
+    const sellerVehicles = await Vehicle.find({ sellerClerkId }).select("_id").lean();
+
+    if (!sellerVehicles.length) {
+      return res.json({ message: "No inquiries to mark as read", updatedCount: 0 });
+    }
+
+    const vehicleIds = sellerVehicles.map((vehicle) => vehicle._id);
+    const result = await VehicleInquiry.updateMany(
+      {
+        vehicleId: { $in: vehicleIds },
+        readAt: null,
+      },
+      {
+        $set: { readAt: new Date() },
+      }
+    );
+
+    res.json({ message: "Inquiries marked as read", updatedCount: result.modifiedCount || result.nModified || 0 });
+  } catch (error) {
+    console.error("MARK INQUIRIES READ ERROR:", error);
+    res.status(500).json({ message: "Failed to mark inquiries as read" });
+  }
 };
 
 exports.markAsSold = async (req, res) => {
@@ -123,6 +256,7 @@ exports.updateListing = async (req, res) => {
         ...updatedData,
         autoTrustGrade: autoTrustResult.grade,
         trustLevel: autoTrustResult.trustLevel,
+        gradeReason: autoTrustResult.gradeReason,
         autoTrustCheckResults: autoTrustResult.checks,
       },
       { new: true }
@@ -145,13 +279,31 @@ exports.getMyListings = async (req, res) => {
 
     console.log("FETCHING CARS FOR USER:", sellerId);
 
-    const vehicles = await Vehicle.find({
-      sellerClerkId: sellerId,
-    }).sort({ createdAt: -1 });
+    const vehicles = await Vehicle.find({ sellerClerkId: sellerId })
+      .sort({ createdAt: -1 })
+      .lean();
 
-    console.log("FOUND VEHICLES:", vehicles.length);
+    const vehicleIds = vehicles.map((vehicle) => vehicle._id);
+    const inquiryCounts = vehicleIds.length
+      ? await VehicleInquiry.aggregate([
+          { $match: { vehicleId: { $in: vehicleIds } } },
+          { $group: { _id: "$vehicleId", count: { $sum: 1 } } },
+        ])
+      : [];
 
-    res.json(vehicles);
+    const inquiryCountMap = new Map(
+      inquiryCounts.map((item) => [item._id.toString(), item.count])
+    );
+
+    const enrichedVehicles = vehicles.map((vehicle) => ({
+      ...vehicle,
+      inquiryCount: inquiryCountMap.get(vehicle._id.toString()) || 0,
+      viewCount: vehicle.views || 0,
+    }));
+
+    console.log("FOUND VEHICLES:", enrichedVehicles.length);
+
+    res.json(enrichedVehicles);
   } catch (error) {
     console.error("MY LISTINGS ERROR:", error);
     res.status(500).json({ message: "Failed to fetch your listings" });
@@ -453,6 +605,7 @@ exports.createListing = async (req, res) => {
       ...vehicleData,
       autoTrustGrade: autoTrustResult.grade,
       trustLevel: autoTrustResult.trustLevel,
+      gradeReason: autoTrustResult.gradeReason,
       autoTrustCheckResults: autoTrustResult.checks,
     });
 
@@ -471,17 +624,26 @@ exports.searchByImage = async (req, res) => {
       return res.status(400).json({ error: "No image uploaded" });
     }
 
-    // 🔥 1. GPT (optional hint)
+    // 1. Vision analysis: decide whether this is actually a vehicle image
     const detected = await analyzeImageWithGPT(file);
-    console.log("🤖 GPT:", detected);
 
-    // 🔥 2. CNN features (MOST IMPORTANT)
+    if (!detected.isVehicle) {
+      return res.status(200).json({
+        success: false,
+        isVehicle: false,
+        message:
+          "Please upload a vehicle image. The uploaded image does not appear to contain a car or vehicle.",
+        results: [],
+      });
+    }
+
+    // 2. CNN features (vehicle images only)
     const featureData = await extractFeaturesFromFile(file);
     const featureVector = featureData.feature_vector;
 
     console.log("🧠 VECTOR:", featureVector.length);
 
-    // 🔥 3. Search
+    // 3. Search
     const results = await searchVehiclesByImage(
       featureVector,
       "unknown",
@@ -491,6 +653,7 @@ exports.searchByImage = async (req, res) => {
 
     res.json({
       success: true,
+      isVehicle: true,
       detected,
       totalMatches: results.length,
       results,

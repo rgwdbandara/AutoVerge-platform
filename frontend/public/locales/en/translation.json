@@ -1,0 +1,151 @@
+{
+  "navbar": {
+    "home": "Home",
+    "browseCars": "Browse Cars",
+    "articles": "Articles",
+    "sellVehicle": "Sell Your Vehicle",
+    "sellYourVehicle": "Sell Your Vehicle",
+    "adminDashboard": "Admin Dashboard",
+    "dashboard": "Dashboard"
+  },
+  "buttons": {
+    "login": "Login",
+    "search": "Search",
+    "searching": "Searching",
+    "removeImage": "Remove",
+    "viewFullDetails": "View Full Details"
+  },
+  "hero": {
+    "badge": "AI-Powered Smart Platform",
+    "titleLine1": "Find Your Perfect Car with",
+    "titleLine2": "AutoVerge AI",
+    "typingText": "Type a make, model, or upload a car image...",
+    "searchPlaceholder": "Enter make, model, or use our Image Search...",
+    "imageButton": "Image",
+    "searchButton": "Search",
+    "uploadHint": "Upload a car photo or even a visible part of a vehicle.",
+    "imageReady": "Image ready for search",
+    "searching": "AI is analyzing your image and finding similar cars...",
+    "missingImage": "Please upload a car image first.",
+    "foundResults": "Found {{count}} similar result(s)",
+    "smartSearchTitle": "Typed search + image search in one place",
+    "smartSearchDescription": "Search by make, model, location, or upload a photo and let AI match visually similar cars.",
+    "fast": "Fast",
+    "quickResults": "Quick Results",
+    "ai": "AI",
+    "visualMatch": "Visual Match",
+    "featured": "Featured",
+    "analysisTitle": "Uploaded Image Analysis",
+    "resultsTitle": "Image Search Results",
+    "similarCarsFound": "Similar Cars Found",
+    "resultsDescription": "These results are based on visual similarity from your uploaded image.",
+    "queryAnalysis": "Query Analysis",
+    "view": "View",
+    "noVehicleTitle": "Image doesn't contain a vehicle",
+    "noVehicleDescription": "Please upload an image of a car for AI matching to work.",
+    "noResultsTitle": "No similar cars found",
+    "noResultsDescription": "Try uploading a clearer image, a larger visible vehicle part, or a different angle for better AI matching results."
+  },
+  "browse": {
+    "title": "Browse Cars",
+    "searchPlaceholder": "Search by make, model, or location...",
+    "filters": "Filters",
+    "clearAll": "Clear All",
+    "priceRange": "Price Range",
+    "make": "Make",
+    "bodyType": "Body Type",
+    "fuelType": "Fuel Type",
+    "transmission": "Transmission",
+    "applyFilters": "Apply Filters",
+    "searchingCars": "Searching cars...",
+    "noCarsFound": "No cars found"
+  },
+  "sell": {
+    "hero": {
+      "badge": "Sell smarter with AutoVerge",
+      "title": "List your vehicle with confidence",
+      "description": "Reach the right buyers faster with trusted AI-assisted pricing, simple listing tools, and a smooth posting flow.",
+      "cta": "Post Your Vehicle"
+    },
+    "beforePost": {
+      "title": "Before You Post",
+      "item1": "Write a clear title with year, make, and model.",
+      "item2": "Upload bright, well-framed photos from multiple angles.",
+      "item3": "Set a realistic asking price based on condition and market demand.",
+      "item4": "Highlight mileage, fuel type, transmission, and key features.",
+      "item5": "Avoid unclear contact details or incomplete information.",
+      "item6": "Double-check the information before publishing your ad."
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "step1Title": "Create Your Listing",
+      "step1Desc": "Choose manual entry or let AI prefill the form from an image.",
+      "step2Title": "Review Details",
+      "step2Desc": "Confirm the vehicle details, pricing, and images before publishing.",
+      "step3Title": "Reach Buyers",
+      "step3Desc": "Your car goes live and becomes visible to the right audience instantly."
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "How long does it take to post a car?",
+      "a1": "Most sellers can create a listing in just a few minutes.",
+      "q2": "Can I edit my ad later?",
+      "a2": "Yes, you can update your listing details anytime from your dashboard.",
+      "q3": "Does AutoVerge help with pricing?",
+      "a3": "Yes, AI-assisted pricing and guidance help you set a competitive price.",
+      "q4": "Do I need professional photos?",
+      "a4": "No, but clear and well-lit images perform much better.",
+      "q5": "How do buyers contact me?",
+      "a5": "Interested buyers can reach you through the contact details in your listing."
+    },
+    "support": {
+      "title": "Need Help Getting Started?",
+      "description": "Our support team can help with listings, pricing, and account setup.",
+      "cta": "Contact Support"
+    },
+    "finalCta": {
+      "title": "Ready to list your vehicle?",
+      "description": "Create your ad now and start getting attention from serious buyers.",
+      "cta": "Start Selling"
+    }
+  },
+  "homeFaq": {
+    "title": "Frequently Asked Questions",
+    "q1": "How does image search work?",
+    "a1": "Upload a car image and AutoVerge compares its visual features against available listings.",
+    "q2": "Can I switch between English and Sinhala?",
+    "a2": "Yes, the language toggle in the navbar changes the whole interface instantly.",
+    "q3": "Is the AI search free to use?",
+    "a3": "The interface supports AI-powered matching without extra steps for users.",
+    "q4": "Can I save favorite cars?",
+    "a4": "Yes, signed-in users can save vehicles to their favorites list.",
+    "q5": "Do I need an account to post a vehicle?",
+    "a5": "Yes, sign in first so your listings are linked to your profile.",
+    "q6": "What devices does AutoVerge support?",
+    "a6": "The site is responsive and works well on desktop and mobile devices."
+  },
+  "addCar": {
+    "manualEntry": "Manual Entry",
+    "aiUpload": "AI Upload"
+  },
+  "recommendation": {
+    "bestMatch": "Best Match",
+    "highlySimilar": "Highly Similar",
+    "similar": "Similar",
+    "partialMatch": "Partial Match",
+    "lowMatch": "Low Match",
+    "whyRecommended": "Why Recommended",
+    "grade": "Grade"
+  },
+  "searchResultCard": {
+    "brandMatch": "Brand: match",
+    "brandMismatch": "Brand: differs",
+    "modelMatch": "Model: match",
+    "modelMismatch": "Model: differs",
+    "viewFullDetails": "View Full Details →"
+  },
+  "footer": {
+    "tagline": "Your trusted partner in finding the perfect vehicle",
+    "copyright": "© {{year}} AutoVerge. All rights reserved."
+  }
+}

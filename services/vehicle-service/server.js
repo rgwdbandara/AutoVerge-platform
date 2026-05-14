@@ -5,6 +5,7 @@ const cors = require("cors"); // ADD THIS
 const connectDB = require("./src/config/db");
 const clerkAuth = require("./src/middleware/authMiddleware");
 const { deleteListingByAdmin } = require("./src/controllers/vehicleController");
+const { updateArticle, deleteArticle } = require("./src/controllers/articleController");
 
 
 const app = express();
@@ -34,11 +35,19 @@ connectDB();
 
 const vehicleRoutes = require("./src/routes/vehicleRoutes");
 const adminSettingsRoutes = require("./src/routes/adminSettingsRoutes");
+const chatbotRoutes = require("./src/routes/chatbotRoutes");
+const articleRoutes = require("./src/routes/articleRoutes");
 
 app.use("/admin/settings", adminSettingsRoutes);
 app.delete("/admin/delete/:id", clerkAuth, isAdmin, deleteListingByAdmin);
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/chatbot", chatbotRoutes);
 app.use("/", vehicleRoutes);
+app.use("/api/articles", articleRoutes);
+
+// Admin article management (used via API Gateway /api/admin/...)
+app.put("/admin/articles/:id", clerkAuth, isAdmin, updateArticle);
+app.delete("/admin/articles/:id", clerkAuth, isAdmin, deleteArticle);
 
 // normal routes later here
 

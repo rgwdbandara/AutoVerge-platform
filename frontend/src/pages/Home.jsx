@@ -6,25 +6,45 @@ import BrowseByMake from "../components/home/BrowseByMake";
 import WhyUs from "../components/home/WhyUs";
 import BodyType from "../components/home/BodyType";
 import FAQ from "../components/home/FAQ";
-import CTA from "../components/home/CTA";
+
+import HowItWorks from "../components/home/HowItWorks";
+import LatestAutomotiveNews from "../components/home/LatestAutomotiveNews";
+import Footer from "../components/Footer";
+import AutoVergeChatbot from "../components/chatbot/AutoVergeChatbot";
+
 
 function Home() {
   return (
     <>
-      <Hero />
+      <div id="ai-image-search" className="scroll-mt-28">
+        <Hero />
+      </div>
 
-      <FeaturedCars />
+      <div id="featured-cars" className="scroll-mt-28">
+        <FeaturedCars />
+      </div>
+
+      <div id="latest-news" className="scroll-mt-28">
+        <LatestAutomotiveNews />
+      </div>
 
       <BrowseByMake />
 
-      {/* 🔥 ADD THESE BELOW */}
       <WhyUs />
 
       <BodyType />
 
-      <FAQ />
+      <div id="how-it-works" className="scroll-mt-28">
+        <HowItWorks />
+      </div>
 
-      <CTA />
+      <div id="faq" className="scroll-mt-28">
+        <FAQ />
+      </div>
+
+      <AutoVergeChatbot />
+
+      <Footer />
     </>
   );
 }

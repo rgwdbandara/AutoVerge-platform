@@ -52,21 +52,21 @@ function AdminCars() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-slate-900 dark:text-white">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Cars Management</h1>
 
         <input
           placeholder="Search cars..."
-          className="rounded-lg border px-4 py-2"
+          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-slate-900 transition-colors duration-300 placeholder:text-slate-400 dark:border-white/10 dark:bg-slate-900 dark:text-white"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
-      <div className="overflow-hidden rounded-xl bg-white shadow">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow transition-colors duration-300 dark:border-white/10 dark:bg-slate-900">
         <table className="w-full">
-          <thead className="bg-gray-100 text-gray-600">
+          <thead className="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
             <tr>
               <th className="p-3 text-left">Car</th>
               <th>Year</th>
@@ -79,14 +79,14 @@ function AdminCars() {
 
           <tbody>
             {filteredCars.map((car) => (
-              <tr key={car._id} className="border-t">
+              <tr key={car._id} className="border-t border-slate-200 dark:border-white/10">
                 <td className="flex items-center gap-3 p-3">
                   <img
                     src={getImage(car)}
                     alt={car.title || `${car.brand || ""} ${car.model || ""}`.trim()}
                     className="h-12 w-12 rounded object-cover"
                   />
-                  <div>{car.title || `${car.brand || ""} ${car.model || ""}`.trim()}</div>
+                  <div className="text-slate-900 dark:text-white">{car.title || `${car.brand || ""} ${car.model || ""}`.trim()}</div>
                 </td>
 
                 <td>{car.year || "-"}</td>
@@ -96,10 +96,10 @@ function AdminCars() {
                   <span
                     className={`rounded px-2 py-1 text-sm ${
                       car.status === "active"
-                        ? "bg-green-100 text-green-600"
+                        ? "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-300"
                         : car.status === "pending"
-                        ? "bg-yellow-100 text-yellow-600"
-                        : "bg-red-100 text-red-600"
+                        ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-500/15 dark:text-yellow-300"
+                        : "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300"
                     }`}
                   >
                     {car.status}
@@ -111,22 +111,22 @@ function AdminCars() {
                 <td className="relative">
                   <button
                     onClick={() => setOpenMenuId((prev) => (prev === car._id ? null : car._id))}
-                    className="rounded border px-3 py-1 text-gray-700 hover:bg-gray-50"
+                    className="rounded border border-slate-200 px-3 py-1 text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800"
                   >
                     ⋮
                   </button>
 
                   {openMenuId === car._id && (
-                    <div className="absolute right-0 z-10 mt-2 w-40 overflow-hidden rounded-lg border bg-white shadow-lg">
+                    <div className="absolute right-0 z-10 mt-2 w-40 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg dark:border-white/10 dark:bg-slate-900">
                       <button
                         onClick={() => handleView(car._id)}
-                        className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                        className="block w-full px-4 py-2 text-left text-slate-900 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
                         View
                       </button>
                       <button
                         onClick={() => handleDelete(car._id)}
-                        className="block w-full px-4 py-2 text-left text-red-600 hover:bg-red-50"
+                        className="block w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
                       >
                         Delete
                       </button>

@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 function EMIModal({ price = 0, onClose }) {
   const vehiclePrice = Number(price) || 0;
-  const [downPayment, setDownPayment] = useState(0);
-  const [interest, setInterest] = useState(6.5);
-  const [years, setYears] = useState(4);
+  const [downPayment, setDownPayment] = useState(Math.round(vehiclePrice * 0.05));
+  const [interest, setInterest] = useState(15.6);
+  const [years, setYears] = useState(1);
+  const [plan, setPlan] = useState("pcp");
+  const [calculated, setCalculated] = useState(true);
 
-  const maxDownPayment = vehiclePrice > 0 ? vehiclePrice : 0;
-  const loanAmount = Math.max(vehiclePrice - downPayment, 0);
+  const maxDownPayment = Math.max(vehiclePrice, 0);
+  const loanAmount = Math.max(vehiclePrice - Math.max(downPayment, 0), 0);
   const months = years * 12;
-  const downPaymentPercent =
-    vehiclePrice > 0 ? ((downPayment / vehiclePrice) * 100).toFixed(1) : "0.0";
 
   const formatNumber = useMemo(
     () =>
@@ -20,27 +21,26 @@ function EMIModal({ price = 0, onClose }) {
     []
   );
 
-  const { emi, totalPayment, totalInterest } = useMemo(() => {
+  const { emi } = useMemo(() => {
     if (loanAmount <= 0 || months <= 0 || interest < 0) {
-      return { emi: 0, totalPayment: 0, totalInterest: 0 };
+      return { emi: 0 };
     }
 
     const monthlyRate = interest / 100 / 12;
-    const monthlyEmi =
+    let monthlyEmi =
       monthlyRate === 0
         ? loanAmount / months
         : (loanAmount * monthlyRate * (1 + monthlyRate) ** months) /
           ((1 + monthlyRate) ** months - 1);
 
-    const total = monthlyEmi * months;
-    const interestOnly = Math.max(total - loanAmount, 0);
+    if (plan === "pcp") {
+      monthlyEmi *= 0.82;
+    }
 
     return {
       emi: Number.isFinite(monthlyEmi) ? monthlyEmi : 0,
-      totalPayment: Number.isFinite(total) ? total : 0,
-      totalInterest: Number.isFinite(interestOnly) ? interestOnly : 0,
     };
-  }, [interest, loanAmount, months]);
+  }, [interest, loanAmount, months, plan]);
 
   useEffect(() => {
     const handleEsc = (e) => {
@@ -60,54 +60,41 @@ function EMIModal({ price = 0, onClose }) {
     if (e.target === e.currentTarget) onClose();
   };
 
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/55 backdrop-blur-sm"
       onClick={handleOverlayClick}
     >
-      <div className="relative w-full max-w-[640px] max-h-[90vh] overflow-y-auto rounded-2xl bg-gray-100 p-6 shadow-2xl animate-[fadeIn_0.3s_ease]">
+      <div className="relative w-full max-w-[540px] max-h-[88vh] overflow-y-auto rounded-2xl bg-slate-100 p-6 shadow-2xl animate-[fadeIn_0.3s_ease]">
         <button
           onClick={onClose}
-          className="absolute text-xl text-gray-500 top-4 right-4 hover:text-gray-800"
+          className="absolute text-3xl leading-none text-slate-500 top-3 right-4 hover:text-slate-800"
         >
           ✕
         </button>
 
-        <h2 className="mb-6 text-[34px] leading-tight font-bold text-gray-900">
-          Vehicle Car Loan Calculator
+        <h2 className="mb-4 text-2xl md:text-3xl leading-tight font-bold text-slate-900">
+          Payment calculator
         </h2>
 
-        <div className="space-y-7">
-          <div className="p-5 bg-white border border-gray-200 shadow-sm rounded-xl">
-            <label className="block mb-3 text-lg font-semibold text-gray-800">
-              Vehicle Price
-            </label>
-            <div className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-lg">
-              <span className="text-gray-500">LKR</span>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className="block mb-2 text-sm font-medium text-slate-700">Indicative price</label>
+              <div className="flex items-center px-3 py-3 bg-slate-200 rounded-xl">
               <input
                 type="number"
                 value={vehiclePrice}
                 readOnly
-                className="w-full text-2xl font-semibold text-gray-900 bg-transparent outline-none"
+                  className="w-full text-[18px] font-semibold text-slate-900 bg-transparent outline-none"
               />
+                <span className="text-[16px] text-slate-500">LKR</span>
             </div>
-            <input
-              type="range"
-              min="1000"
-              max="50000000"
-              step="1000"
-              value={vehiclePrice}
-              disabled
-              className="w-full mt-4 cursor-not-allowed accent-blue-600 opacity-70"
-            />
-          </div>
+            </div>
 
-          <div className="p-5 bg-white border border-gray-200 shadow-sm rounded-xl">
-            <label className="block mb-3 text-lg font-semibold text-gray-800">
-              Down Payment
-            </label>
-            <div className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-lg">
-              <span className="text-gray-500">LKR</span>
+            <div>
+              <label className="block mb-2 text-sm font-medium text-slate-700">Down payment</label>
+              <div className="flex items-center px-3 py-3 bg-slate-200 rounded-xl">
               <input
                 type="number"
                 value={downPayment}
@@ -115,132 +102,117 @@ function EMIModal({ price = 0, onClose }) {
                   const value = Math.max(Number(e.target.value) || 0, 0);
                   setDownPayment(value > maxDownPayment ? maxDownPayment : value);
                 }}
-                className="w-full text-2xl font-semibold text-gray-900 bg-transparent outline-none"
+                  className="w-full text-[18px] font-semibold text-slate-900 bg-transparent outline-none"
               />
+                <span className="text-[16px] text-slate-500">LKR</span>
             </div>
-            <input
-              type="range"
-              min="0"
-              max={maxDownPayment}
-              step="100"
-              value={downPayment}
-              onChange={(e) => setDownPayment(Number(e.target.value))}
-              className="w-full mt-4 accent-blue-600"
-            />
-            <p className="mt-3 text-sm text-gray-500">
-              Down payment: {downPaymentPercent}% of vehicle price
-            </p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <div className="p-5 bg-white border border-gray-200 shadow-sm rounded-xl">
-              <label className="block mb-3 text-lg font-semibold text-gray-800">
-                Interest Rate
-              </label>
-              <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className="block mb-2 text-sm font-medium text-slate-700">Loan amount</label>
+              <div className="flex items-center px-3 py-3 bg-slate-200 rounded-xl">
                 <input
                   type="number"
-                  min="1"
-                  max="30"
-                  step="0.1"
-                  value={interest}
-                  onChange={(e) => setInterest(Math.max(Number(e.target.value) || 0, 0))}
-                  className="w-full text-lg font-semibold text-gray-900 outline-none"
+                  value={loanAmount}
+                  readOnly
+                  className="w-full text-[18px] font-semibold text-slate-900 bg-transparent outline-none"
                 />
-                <span className="text-xl text-gray-500">%</span>
+                <span className="text-[16px] text-slate-500">LKR</span>
               </div>
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm font-medium text-slate-700">Loan term</label>
+              <div className="flex items-center px-3 py-3 bg-slate-200 rounded-xl">
+                <select
+                  value={years}
+                  onChange={(e) => setYears(Number(e.target.value))}
+                  className="w-full bg-transparent text-[18px] font-semibold text-slate-900 outline-none"
+                >
+                  <option value={1}>1 year</option>
+                  <option value={2}>2 years</option>
+                  <option value={3}>3 years</option>
+                  <option value={4}>4 years</option>
+                  <option value={5}>5 years</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-[280px]">
+            <label className="block mb-2 text-sm font-medium text-slate-700">Interest rate</label>
+            <div className="flex items-center px-3 py-3 bg-slate-200 rounded-xl">
               <input
-                type="range"
+                type="number"
                 min="1"
                 max="30"
                 step="0.1"
                 value={interest}
-                onChange={(e) => setInterest(Number(e.target.value))}
-                className="w-full mt-4 accent-blue-600"
+                onChange={(e) => setInterest(Math.max(Number(e.target.value) || 0, 0))}
+                className="w-full text-[18px] font-semibold text-slate-900 bg-transparent outline-none"
               />
-            </div>
-
-            <div className="p-5 bg-white border border-gray-200 shadow-sm rounded-xl">
-              <label className="block mb-3 text-lg font-semibold text-gray-800">
-                Loan Term
-              </label>
-              <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
-                <input
-                  type="number"
-                  min="1"
-                  max="10"
-                  step="1"
-                  value={years}
-                  onChange={(e) => setYears(Math.max(Number(e.target.value) || 1, 1))}
-                  className="w-full text-lg font-semibold text-gray-900 outline-none"
-                />
-                <span className="text-lg text-gray-500">Years</span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                step="1"
-                value={years}
-                onChange={(e) => setYears(Number(e.target.value))}
-                className="w-full mt-4 accent-blue-600"
-              />
+              <span className="text-[16px] text-slate-500">% p.a</span>
             </div>
           </div>
 
-          <div className="p-6 text-center bg-white border border-gray-200 shadow-sm rounded-xl">
-            <p className="text-sm text-gray-500">Monthly Payment</p>
-            <h3 className="mt-2 text-4xl font-bold tracking-tight text-gray-900">
-              LKR {formatNumber.format(emi)}
-            </h3>
-          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-slate-800">Financing plan</h3>
 
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-2">
-            <div className="p-5 bg-white border border-gray-200 shadow-sm rounded-xl">
-              <p className="text-sm text-gray-500">Vehicle Price</p>
-              <p className="mt-1 text-xl font-semibold text-gray-900">
-                LKR {formatNumber.format(vehiclePrice)}
-              </p>
+            <div className="mt-3 flex rounded-full bg-slate-200 p-1">
+              <button
+                type="button"
+                onClick={() => setPlan("pcp")}
+                className={`flex-1 rounded-full px-4 py-2 text-[16px] font-medium transition ${
+                  plan === "pcp" ? "bg-yellow-400 text-slate-900" : "text-slate-700"
+                }`}
+              >
+                PCP
+              </button>
+              <button
+                type="button"
+                onClick={() => setPlan("conventional")}
+                className={`flex-1 rounded-full px-4 py-2 text-[16px] font-medium transition ${
+                  plan === "conventional" ? "bg-yellow-400 text-slate-900" : "text-slate-700"
+                }`}
+              >
+                Conventional
+              </button>
             </div>
 
-            <div className="p-5 bg-white border border-gray-200 shadow-sm rounded-xl">
-              <p className="text-sm text-gray-500">Down Payment</p>
-              <p className="mt-1 text-xl font-semibold text-gray-900">
-                LKR {formatNumber.format(downPayment)}
-              </p>
-            </div>
-
-            <div className="p-5 bg-white border border-gray-200 shadow-sm rounded-xl">
-              <p className="text-sm text-gray-500">Loan Amount</p>
-              <p className="mt-1 text-xl font-semibold text-gray-900">
-                LKR {formatNumber.format(loanAmount)}
-              </p>
-            </div>
-
-            <div className="p-5 bg-white border border-gray-200 shadow-sm rounded-xl">
-              <p className="text-sm text-gray-500">Total Interest</p>
-              <p className="mt-1 text-xl font-semibold text-gray-900">
-                LKR {formatNumber.format(totalInterest)}
-              </p>
-            </div>
-          </div>
-
-          <div className="p-5 bg-white border border-gray-200 shadow-sm rounded-xl">
-            <p className="text-sm text-gray-500">
-              Total Amount (Down Payment + Total Payments)
-            </p>
-            <p className="mt-2 text-2xl font-semibold text-gray-900">
-              LKR {formatNumber.format(downPayment + totalPayment)}
+            <p className="mt-3 text-[16px] leading-7 text-slate-600">
+              {plan === "pcp"
+                ? "PCP (Personal Contract Plan) - Make low monthly payments, then choose to return the car, pay to own it, or upgrade to a new one."
+                : "Conventional plan - Fixed monthly payments until full ownership at the end of the loan term."}
             </p>
           </div>
 
-          <p className="mt-4 text-sm text-center text-gray-500">
-            This is an estimate. Actual EMI may vary based on your credit score and lender terms.
-          </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              type="button"
+              onClick={() => setCalculated(true)}
+              className="rounded-lg bg-emerald-500 px-5 py-2 text-[15px] font-semibold text-white transition hover:bg-emerald-600"
+            >
+              Calculate payment
+            </button>
+
+            <div className="text-left">
+              <p className="text-sm text-slate-600">Instalments</p>
+              <p className="text-3xl md:text-4xl font-bold text-slate-900">
+                LKR {formatNumber.format(calculated ? emi : 0)}
+                <span className="ml-2 text-sm font-medium text-slate-500">/ Per month</span>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  // Slightly adjust layout/typography to match screenshot: compact title, padding and action row
+  return createPortal(modalContent, document.body);
 }
 
 export default EMIModal;

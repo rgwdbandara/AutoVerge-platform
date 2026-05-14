@@ -1,9 +1,49 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import axios from "axios";
 import { ImagePlus, Loader2, Search, Sparkles, X } from "lucide-react";
+import ImageSearchResultCard from "./seller/ImageSearchResultCard";
+import { useTranslation } from "react-i18next";
+
+
+import hero1 from "../assets/hero/hero1.jpg";
+import hero2 from "../assets/hero/hero2.jpg";
+import hero3 from "../assets/hero/hero3.jpg";
+import hero4 from "../assets/hero/hero4.jpg";
+import hero5 from "../assets/hero/hero5.jpg";
+import hero6 from "../assets/hero/hero6.jpg";
+import hero7 from "../assets/hero/hero7.jpg";
+
+const slides = [hero1, hero2, hero3, hero4, hero5, hero6, hero7];
 
 function Hero() {
-  const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") return "light";
+    const saved = localStorage.getItem("autoverge_theme");
+    if (saved === "dark" || saved === "light") return saved;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, []);
+
+  useEffect(() => {
+    const handleThemeChange = () => {
+      const isDark = document.documentElement.classList.contains("dark");
+      setTheme(isDark ? "dark" : "light");
+    };
+    const observer = new MutationObserver(handleThemeChange);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
   const fileInputRef = useRef(null);
 
   const [searchText, setSearchText] = useState("");
@@ -13,10 +53,18 @@ function Hero() {
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
   const [searchResponse, setSearchResponse] = useState(null);
+  const [latestArticles, setLatestArticles] = useState([]);
+  const [articlesLoading, setArticlesLoading] = useState(true);
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const [featuredVisible, setFeaturedVisible] = useState(true);
 
   useEffect(() => {
-    const message = "Type a make, model, or upload a car image...";
+    const message = t("hero.typingText", {
+      defaultValue: "Type a make, model, or upload a car image...",
+    });
     let index = 0;
+
+    setTypedText("");
 
     const interval = setInterval(() => {
       index += 1;
@@ -28,7 +76,37 @@ function Hero() {
     }, 34);
 
     return () => clearInterval(interval);
+  }, [i18n.language, t]);
+
+  useEffect(() => {
+    const fetchLatestArticles = async () => {
+      try {
+        const response = await axios.get("http://localhost:5003/api/articles");
+        setLatestArticles((response.data.articles || []).slice(0, 3));
+      } catch (err) {
+        console.error("Failed to fetch latest articles:", err);
+      } finally {
+        setArticlesLoading(false);
+      }
+    };
+
+    fetchLatestArticles();
   }, []);
+
+  // rotate featured article every 3s
+  useEffect(() => {
+    if (!latestArticles || latestArticles.length === 0) return;
+    const iv = setInterval(() => {
+      setFeaturedIndex((p) => (p + 1) % latestArticles.length);
+    }, 3000);
+    return () => clearInterval(iv);
+  }, [latestArticles]);
+
+  useEffect(() => {
+    setFeaturedVisible(false);
+    const timeout = setTimeout(() => setFeaturedVisible(true), 40);
+    return () => clearTimeout(timeout);
+  }, [featuredIndex]);
 
   const handleImageButtonClick = () => {
     fileInputRef.current?.click();
@@ -55,10 +133,6 @@ function Hero() {
     }
   };
 
-  const handleCardClick = (carId) => {
-    navigate(`/cars/${carId}`);
-  };
-
   const handleSearch = async () => {
     setError("");
     setSearchResponse(null);
@@ -74,13 +148,10 @@ function Hero() {
       const formData = new FormData();
       formData.append("image", selectedImage);
 
-      const response = await fetch(
-        "http://localhost:5003/api/vehicles/search-by-image",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch("http://localhost:5003/api/vehicles/search-by-image", {
+        method: "POST",
+        body: formData,
+      });
 
       const data = await response.json();
 
@@ -98,57 +169,85 @@ function Hero() {
     }
   };
 
-  const results = (searchResponse?.results || []).slice(0, 3);
   const detectedAnalysis = searchResponse?.detected;
+  const results = searchResponse?.results || [];
   const analysisDescription =
     detectedAnalysis?.description ||
     "The uploaded vehicle image was analyzed and the closest available matches are shown below.";
+  const similarCount = searchResponse?.totalMatches || 0;
+  const showNoVehicleMessage = Boolean(searchResponse && searchResponse.isVehicle === false);
+  const showNoResultsMessage = Boolean(
+    searchResponse && searchResponse.isVehicle !== false && similarCount === 0 && !isSearching
+  );
 
   return (
-    <section className="relative overflow-hidden text-white min-h-[92vh] flex items-center">
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute inset-0 object-cover w-full h-full scale-105"
-      >
-        <source src="public/videos/car-bg.mp4" type="video/mp4" />
-      </video>
+    <section className="relative w-full min-h-screen overflow-hidden">
+      {/* Background image - always renders */}
+      <img
+        src={slides[currentSlide]}
+        alt="Hero Background"
+        className="absolute inset-0 object-cover w-full h-full transition-all duration-1000"
+      />
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.25),transparent_35%),linear-gradient(180deg,rgba(2,6,23,0.55),rgba(2,6,23,0.72))]" />
+      {/* Overlay - adjusts based on theme */}
+      <div
+        className={`absolute inset-0 transition-colors duration-300 ${
+          theme === "dark"
+            ? "bg-gradient-to-r from-slate-950/85 via-slate-950/55 to-slate-950/20"
+            : "bg-gradient-to-r  via-white/40 to-white/10"
+        }`}
+      />
+
+      {/* Accent gradients */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.2),transparent_40%)]" />
 
       <div className="relative z-10 w-full px-4 py-10 mx-auto max-w-7xl md:px-6 lg:py-14">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-medium border rounded-full bg-white/10 border-white/20 backdrop-blur-md">
-              <Sparkles size={16} className="text-blue-300" />
-              AI-Powered Smart Platform
+        <div className={`grid items-start gap-10 ${results.length > 0 ? "lg:grid-cols-1" : "lg:grid-cols-[1.1fr_0.9fr]"}`}>
+          <div className={`${results.length > 0 ? "w-full" : "max-w-3xl"}`}>
+            <div className={`inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-medium border rounded-full backdrop-blur-md transition-colors duration-300 ${
+              theme === "dark"
+                ? "bg-white/20 border-white/20 text-white"
+                : "bg-black/20 border-black/20 text-white"
+            }`}>
+              <Sparkles size={16} className="text-amber-300" />
+              {t("hero.badge", { defaultValue: "AI-Powered Smart Platform" })}
             </div>
 
-            <h1 className="text-4xl font-black leading-tight md:text-6xl lg:text-7xl">
-              Find Your Perfect Car with
-              <span className="block mt-2 text-transparent bg-gradient-to-r from-blue-300 via-sky-400 to-cyan-300 bg-clip-text">
-                AutoVerge AI
+            <h1 className={`text-4xl font-black leading-tight md:text-6xl lg:text-7xl transition-colors duration-300 ${
+              theme === "dark" ? "text-white" : "text-white"
+            }`}>
+              {t("hero.titleLine1", { defaultValue: "Find Your Perfect Car with" })}
+              <span className="block mt-2 text-transparent bg-gradient-to-r from-amber-300 via-yellow-300 to-orange-300 bg-clip-text">
+                {t("hero.titleLine2", { defaultValue: "AutoVerge AI" })}
               </span>
             </h1>
 
-            <div className="mt-5 text-base h-7 md:text-lg text-white/90">
-              <span className="pr-1 border-r-2 border-white/70 animate-pulse">
+            <div className={`mt-5 text-base h-7 md:text-lg transition-colors duration-300 ${
+              theme === "dark" ? "text-white/90" : "text-white/80"
+            }`}>
+              <span className={`pr-1 border-r-2 animate-pulse ${
+                theme === "dark" ? "border-white/70" : "border-white/50"
+              }`}>
                 {typedText}
               </span>
             </div>
 
-            <p className="max-w-2xl mt-4 text-base leading-7 text-white/80 md:text-lg">
-              Explore your ideal car with AI-powered matching, quick results,
-              and a clean search experience built for speed.
+            <p className={`max-w-2xl mt-4 text-base leading-7 md:text-lg transition-colors duration-300 ${
+              theme === "dark" ? "text-white/80" : "text-white/70"
+            }`}>
+              {t("hero.smartSearchDescription", {
+                defaultValue:
+                  "Search by make, model, location, or upload a photo and let AI match visually similar cars.",
+              })}
             </p>
 
             <div className="mt-8">
               <div className="flex flex-col w-full max-w-4xl overflow-hidden bg-white shadow-2xl rounded-3xl ring-1 ring-white/15 md:flex-row">
                 <input
                   type="text"
-                  placeholder="Enter make, model, or use our Image Search..."
+                  placeholder={t("hero.searchPlaceholder", {
+                    defaultValue: "Enter make, model, or use our Image Search...",
+                  })}
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
                   className="flex-1 px-6 py-4 text-black outline-none md:px-7"
@@ -169,7 +268,7 @@ function Hero() {
                   title="Upload car image"
                 >
                   <ImagePlus size={20} />
-                  <span className="text-sm font-medium">Image</span>
+                  <span className="text-sm font-medium">{t("hero.imageButton", { defaultValue: "Image" })}</span>
                 </button>
 
                 <button
@@ -181,23 +280,23 @@ function Hero() {
                   {isSearching ? (
                     <>
                       <Loader2 size={18} className="animate-spin" />
-                      Searching
+                      {t("hero.searching", { defaultValue: "AI is analyzing your image and finding similar cars..." })}
                     </>
                   ) : (
                     <>
                       <Search size={18} />
-                      Search
+                      {t("hero.searchButton", { defaultValue: "Search" })}
                     </>
                   )}
                 </button>
               </div>
 
               <p className="mt-4 text-sm text-white/70">
-                Upload a car photo or even a visible part of a vehicle.
+                {t("hero.uploadHint", { defaultValue: "Upload a car photo or even a visible part of a vehicle." })}
               </p>
 
               {selectedImage && (
-                <div className="flex items-center gap-3 p-4 mt-5 border shadow-lg w-fit bg-white/95 rounded-2xl border-white/30 text-slate-900 backdrop-blur-md">
+                <div className="flex items-center gap-3 p-4 mt-5 border shadow-lg w-fit bg-white/95 rounded-2xl border-white/20 text-slate-900 backdrop-blur-md">
                   <img
                     src={previewUrl}
                     alt="Selected preview"
@@ -222,6 +321,52 @@ function Hero() {
                 </div>
               )}
 
+              {searchResponse && !isSearching && searchResponse.isVehicle !== false && (
+                <div className="p-4 mt-5 border rounded-2xl border-white/15 bg-white/10 backdrop-blur-xl">
+                    <p className="text-sm font-semibold text-white">
+                      {t("hero.foundResults", { count: similarCount })}
+                    </p>
+                  <p className="mt-2 text-sm leading-6 text-white/80">
+                    {t("hero.resultsDescription", {
+                      defaultValue:
+                        "These results are based on visual similarity from your uploaded image.",
+                    })}
+                  </p>
+                </div>
+              )}
+
+              {searchResponse && !isSearching && searchResponse.isVehicle !== false && results.length > 0 && (
+                <div className="p-8 mt-12 border shadow-2xl rounded-3xl border-white/20 bg-gradient-to-br from-slate-950/40 via-slate-950/20 to-transparent backdrop-blur-xl">
+                  <div className="flex items-center justify-between gap-4 mb-8">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/90">
+                        🎯 {t("hero.resultsTitle", { defaultValue: "Image Search Results" })}
+                      </p>
+                      <h2 className="mt-3 text-3xl font-black text-white md:text-4xl">
+                        {t("hero.similarCarsFound", { defaultValue: "Similar Cars Found" })}
+                      </h2>
+                    </div>
+                    <div className="hidden px-6 py-3 text-sm font-semibold border rounded-full border-white/20 bg-white/10 text-white/90 md:inline-flex">
+                      <span className="text-cyan-300">Top {Math.min(results.length, 3)}</span> matches
+                    </div>
+                  </div>
+
+                  <p className="mb-6 text-sm text-white/80 md:text-base">
+                    {analysisDescription}
+                  </p>
+
+                  <div className="grid grid-cols-1 gap-6 mt-8 md:gap-7 sm:grid-cols-2 lg:grid-cols-3">
+                    {results.slice(0, 3).map((car, index) => (
+                      <ImageSearchResultCard
+                        key={car._id || car.id || `${car.title}-${index}`}
+                        result={car}
+                        rank={index + 1}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {error && (
                 <div className="max-w-xl px-4 py-3 mt-5 text-sm font-medium text-red-200 border border-red-300/30 bg-red-500/20 rounded-2xl">
                   {error}
@@ -230,189 +375,130 @@ function Hero() {
 
               {isSearching && (
                 <div className="max-w-xl px-4 py-4 mt-5 border bg-white/10 border-white/20 rounded-2xl backdrop-blur-sm">
-                  <div className="flex items-center justify-center gap-3 text-sm text-white">
-                    <Loader2 size={18} className="animate-spin" />
-                    AI is analyzing your image and finding similar cars...
-                  </div>
+                    <div className="flex items-center justify-center gap-3 text-sm text-white">
+                      <Loader2 size={18} className="animate-spin" />
+                      {t("hero.searching", { defaultValue: "AI is analyzing your image and finding similar cars..." })}
+                    </div>
                 </div>
               )}
 
-              {searchResponse && !isSearching && (
-                <div className="mt-5 text-sm text-white/80">
-                  Found <span className="font-semibold text-white">{searchResponse.totalMatches || 0}</span> similar result(s)
+              {showNoVehicleMessage && (
+                <div className="p-4 mt-5 border rounded-2xl border-white/15 bg-white/10 backdrop-blur-xl">
+                  <p className="text-sm font-semibold text-white">
+                    {t("hero.noVehicleTitle", { defaultValue: "Image doesn't contain a vehicle" })}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/80">
+                    {t("hero.noVehicleDescription", { defaultValue: "Please upload a car image first." })}
+                  </p>
+                </div>
+              )}
+
+              {showNoResultsMessage && (
+                <div className="p-4 mt-5 border rounded-2xl border-white/15 bg-white/10 backdrop-blur-xl">
+                  <p className="text-sm font-semibold text-white">
+                    {t("hero.noResultsTitle", { defaultValue: "No similar cars found" })}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/80">
+                    {t("hero.noResultsDescription", {
+                      defaultValue:
+                        "Try uploading a clearer image, a larger visible vehicle part, or a different angle for better AI matching results.",
+                    })}
+                  </p>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="hidden lg:block">
-            <div className="relative p-5 border shadow-2xl bg-white/10 rounded-[2rem] border-white/15 backdrop-blur-xl">
-              <div className="grid gap-4">
-                <div className="p-5 shadow-xl bg-white/90 rounded-3xl text-slate-900">
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-blue-600">Smart Search</p>
-                  <p className="mt-3 text-lg font-bold">Typed search + image search in one place</p>
-                  <p className="mt-2 text-sm text-slate-600">Search by make, model, location, or upload a photo and let AI match visually similar cars.</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 border bg-white/10 rounded-2xl border-white/10">
-                    <p className="text-xs text-white/60">Fast</p>
-                    <p className="mt-1 text-xl font-bold">Quick Results</p>
-                  </div>
-                  <div className="p-4 border bg-white/10 rounded-2xl border-white/10">
-                    <p className="text-xs text-white/60">AI</p>
-                    <p className="mt-1 text-xl font-bold">Visual Match</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {searchResponse && (
-          <div className="mt-12 text-left">
-            <div className="p-5 mb-8 border shadow-2xl bg-white/12 rounded-3xl border-white/15 backdrop-blur-xl">
-              <div className="flex items-start gap-3">
-                <div className="flex items-center justify-center flex-shrink-0 text-white rounded-full w-11 h-11 bg-white/10 ring-1 ring-white/15">
-                  <Sparkles size={18} />
-                </div>
+          {results.length === 0 && (
+            <div className="hidden lg:block">
+            <div className={`relative overflow-hidden rounded-[2rem] border p-5 shadow-2xl backdrop-blur-xl ${
+              theme === "dark"
+                ? "border-white/10 bg-slate-950/45"
+                : "border-white/40 bg-white/70"
+            }`}>
+              <div className="flex items-end justify-between gap-4 mb-5">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-200">
-                    Uploaded Image Analysis
+                  <p className={`text-xs font-semibold uppercase tracking-[0.32em] ${theme === "dark" ? "text-cyan-300" : "text-cyan-600"}`}>
+                    {t("articles.latestArticlesLabel", { defaultValue: "Latest Articles" })}
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-white/90 md:text-base">
-                    {analysisDescription}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {results.length > 0 && (
-          <div className="mt-12 text-left">
-            <div className="flex items-center justify-between gap-4 mb-6">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2 text-green-300">
-                      <Sparkles size={18} />
-                      <span className="text-sm font-medium">Image Search Results</span>
-                    </div>
-                    <h2 className="text-2xl font-bold text-white">
-                      Similar Cars Found
-                    </h2>
-                    <p className="mt-1 text-sm text-blue-100">
-                      These results are based on visual similarity from your uploaded image.
-                    </p>
-                  </div>
-
-                  {searchResponse?.queryAnalysis && (
-                    <div className="hidden px-4 py-3 text-sm bg-white shadow-lg md:block rounded-2xl">
-                      <p className="font-semibold text-gray-900">Query Analysis</p>
-                      <p className="mt-1 text-gray-600">
-                        View:{" "}
-                        <span className="font-medium capitalize">
-                          {searchResponse.queryAnalysis.detectedViewType || "Unknown"}
-                        </span>
-                      </p>
-                    </div>
-                  )}
+                  <h2 className={`mt-2 text-3xl font-black ${theme === "dark" ? "text-white" : "text-slate-900"}`}>
+                    {t("articles.badge", { defaultValue: "AutoVerge Articles" })}
+                  </h2>
                 </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {results.map((car, index) => (
-                <div
-                  key={car._id || car.id || `${car.title}-${car.brand}-${car.model}`}
-                  onClick={() => car._id && handleCardClick(car._id)}
-                  className="overflow-hidden transition-all duration-300 bg-white shadow-xl cursor-pointer rounded-3xl hover:-translate-y-1 hover:shadow-2xl"
+                <Link
+                  to="/articles"
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition hover:-translate-y-0.5 ${
+                    theme === "dark"
+                      ? "bg-white/10 text-white hover:bg-white/15"
+                      : "bg-slate-900 text-white hover:bg-slate-800"
+                  }`}
                 >
-                      <div className="relative">
-                        <img
-                          src={car.matchedImage || car.image}
-                          alt={car.title}
-                          className="object-cover w-full h-56"
-                        />
-
-                        {index < 3 && (
-                          <div className="absolute flex items-center justify-center font-bold text-white bg-black rounded-full shadow-lg top-3 left-3 w-9 h-9 ring-2 ring-white/20">
-                            {index + 1}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="p-5">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="w-full">
-                            <h3 className="text-lg font-bold text-gray-900">
-                              {car.title}
-                            </h3>
-                            <p className="mt-1 text-sm text-gray-500">
-                              {car.brand} {car.model} • {car.year}
-                            </p>
-
-                            <div className="h-3" />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3 mt-5 text-sm">
-                          <div className="p-3 rounded-2xl bg-gray-50">
-                            <p className="text-xs text-gray-500">Price</p>
-                            <p className="mt-1 font-semibold text-gray-900">
-                              Rs. {car.price?.toLocaleString?.() ?? car.price}
-                            </p>
-                          </div>
-
-                          <div className="p-3 rounded-2xl bg-gray-50">
-                            <p className="text-xs text-gray-500">Trust Level</p>
-                            <p className="mt-1 font-semibold text-gray-900">
-                              {car.trustLevel || "N/A"}
-                            </p>
-                          </div>
-
-                          <div className="p-3 rounded-2xl bg-gray-50">
-                            <p className="text-xs text-gray-500">Body Type</p>
-                            <p className="mt-1 font-semibold text-gray-900">
-                              {car.bodyType || "N/A"}
-                            </p>
-                          </div>
-
-                          <div className="p-3 rounded-2xl bg-gray-50">
-                            <p className="text-xs text-gray-500">Grade</p>
-                            <p className="mt-1 font-semibold text-gray-900">
-                              {car.autoTrustGrade || "N/A"}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2 mt-5">
-                        </div>
-                      </div>
-                </div>
-              ))}
-            </div>
-          </div>
-            )}
-          </div>
-        )}
-
-            {searchResponse && results.length === 0 && !error && !isSearching && (
-              <div className="mt-10">
-                <div className="px-6 py-10 bg-white shadow-2xl rounded-3xl">
-                  <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-blue-700 bg-blue-100 rounded-full">
-                    <Search size={28} />
-                  </div>
-
-                  <p className="text-xl font-bold text-gray-800">
-                    No similar cars found
-                  </p>
-                  <p className="max-w-md mx-auto mt-3 text-sm leading-6 text-gray-500">
-                    Try uploading a clearer image, a larger visible vehicle part,
-                    or a different angle for better AI matching results.
-                  </p>
-                </div>
+                  View All
+                </Link>
               </div>
-            )}
-          </div>
-        ){"}"}
-      
-    
+
+              <div className={`overflow-hidden rounded-[26px] border shadow-xl transition-all duration-500 ease-out ${
+                theme === "dark"
+                  ? "border-white/10 bg-slate-950/55"
+                  : "border-white/40 bg-white/80"
+              } ${featuredVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
+                {articlesLoading ? (
+                  <div className="h-[300px] animate-pulse bg-white/10" />
+                ) : latestArticles.length > 0 ? (
+                  <Link to={`/articles/${latestArticles[featuredIndex].slug}`} className="block">
+                    <div className="relative h-[190px] overflow-hidden">
+                      {latestArticles[featuredIndex].image ? (
+                        <img
+                          src={latestArticles[featuredIndex].image}
+                          alt={latestArticles[featuredIndex].title}
+                          className="object-cover w-full h-full transition-transform duration-700 hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center w-full h-full bg-slate-900 text-white/70">
+                          Latest article
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+                      <div className="absolute left-4 top-4 rounded-full bg-cyan-400 px-4 py-1 text-xs font-black uppercase tracking-[0.28em] text-slate-950">
+                        {latestArticles[featuredIndex].category || "News"}
+                      </div>
+                    </div>
+
+                    <div className="p-5 space-y-4">
+                      <div className="flex items-center gap-2 text-sm font-medium text-slate-400 dark:text-slate-300">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-white/70">
+                          •
+                        </span>
+                        {latestArticles[featuredIndex].publishedAt
+                          ? new Date(latestArticles[featuredIndex].publishedAt).toDateString()
+                          : "Latest update"}
+                      </div>
+
+                      <h3 className="text-2xl font-black leading-tight text-slate-900 dark:text-white">
+                        {latestArticles[featuredIndex].title}
+                      </h3>
+
+                      <p className="text-sm leading-6 text-slate-600 dark:text-slate-300 line-clamp-3">
+                        {latestArticles[featuredIndex].summary}
+                      </p>
+
+                      <div className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-500">
+                        {t("articles.readArticle", { defaultValue: "Read Article" })} <span aria-hidden="true">→</span>
+                      </div>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className={`rounded-[26px] border p-6 text-sm ${theme === "dark" ? "border-white/10 bg-white/5 text-white/70" : "border-slate-200 bg-white text-slate-600"}`}>
+                    {t("articles.latestArticlesWillAppear", { defaultValue: "Latest articles will appear here once the news feed loads." })}
+                  </div>
+                )}
+              </div>
+            </div>
+            </div>
+          )}
+        </div>
+      </div>
     </section>
   );
 }

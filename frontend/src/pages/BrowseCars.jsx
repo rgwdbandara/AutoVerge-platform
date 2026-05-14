@@ -1,26 +1,30 @@
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useApi } from "../lib/api";
+import { useSearchParams } from "react-router-dom";
 import CarCard from "../components/car/CarCard";
 const makes = ["BMW","Ford","Honda","Hyundai","Land Rover","Mahindra","Mercedes-Benz","Rivian","Tata"];
-const bodyTypes = ["Coupe","Hatchback","Sedan","SUV"];
+const bodyTypes = ["Coupe","Convertible","Hatchback","Sedan","SUV","Wagon","Crossover","Pickup","Van","Minivan"];
 const fuelTypes = ["Diesel","Electric","Gasoline","Hybrid","Petrol"];
 const transmissions = ["Automatic","Manual","Semi-Automatic"];
 
 
 function BrowseCars() {
+  const { t } = useTranslation();
   const api = useApi();
+  const [searchParams] = useSearchParams();
 
-  // search state
-  const [search, setSearch] = useState("");
+  // search state (initialize from URL)
+  const [search, setSearch] = useState(searchParams.get("search") || "");
 
-  // filters state
+  // filters state - initialize from URL query params
   const [filters, setFilters] = useState({
-    make: "",
-    bodyType: "",
-    fuelType: "",
-    transmission: "",
-    maxPrice: "",
+    make: searchParams.get("make") || "",
+    bodyType: searchParams.get("bodyType") || "",
+    fuelType: searchParams.get("fuelType") || "",
+    transmission: searchParams.get("transmission") || "",
+    maxPrice: searchParams.get("maxPrice") || "",
   });
 
   // results state
@@ -29,6 +33,9 @@ function BrowseCars() {
 
   // Load all cars on component mount
   useEffect(() => {
+    // If there are query params, let the auto-fetch effect handle filtering.
+    if (searchParams.toString()) return;
+
     const loadAllCars = async () => {
       setLoading(true);
       try {
@@ -40,7 +47,36 @@ function BrowseCars() {
       setLoading(false);
     };
     loadAllCars();
-  }, [api]);
+  }, [api, searchParams]);
+
+  // Auto-fetch when filters or search change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (search || filters.make || filters.bodyType || filters.fuelType || filters.transmission || filters.maxPrice) {
+        setLoading(true);
+        const fetchFiltered = async () => {
+          try {
+            const params = new URLSearchParams();
+            if (search) params.append("search", search);
+            if (filters.make) params.append("make", filters.make);
+            if (filters.bodyType) params.append("bodyType", filters.bodyType);
+            if (filters.fuelType) params.append("fuelType", filters.fuelType);
+            if (filters.transmission) params.append("transmission", filters.transmission);
+            if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
+            const data = await api(`/api/vehicles?${params.toString()}`);
+            setCars(data);
+          } catch (err) {
+            console.error("Auto-filter failed:", err);
+          } finally {
+            setLoading(false);
+          }
+        };
+        fetchFiltered();
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
+  }, [search, filters, api]);
 
   const clearAll = async () => {
     setSearch("");
@@ -63,7 +99,7 @@ function BrowseCars() {
   };
 
   const tagStyle = (active) =>
-    `px-3 py-1 rounded-lg border cursor-pointer text-sm     ${active ? "bg-blue-100 border-blue-400" : "bg-gray-100"}`;
+    `px-3 py-1 rounded-lg border cursor-pointer text-sm     ${active ? "bg-blue-100 border-blue-400 dark:bg-blue-900" : "bg-gray-100 dark:bg-slate-700"}`;
 
   // Fetch cars with dynamic query string
   const fetchCars = async () => {
@@ -89,41 +125,41 @@ function BrowseCars() {
   };
 
   return (
-    <div className="px-6 py-10 mx-auto max-w-7xl">
+    <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 sm:py-10">
 
-      <h1 className="mb-8 text-4xl font-bold text-blue-600">Browse Cars</h1>
+      <h1 className="mb-6 text-3xl font-bold text-blue-600 sm:mb-8 sm:text-4xl">{t("browse.title")}</h1>
 
       {/* SEARCH BAR */}
-      <div className="flex gap-3 mb-6">
+      <div className="flex flex-col gap-3 mb-6 sm:flex-row">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && fetchCars()}
-          placeholder="Search by make, model, fuel, location..."
-          className="w-full px-4 py-3 border rounded-xl"
+          placeholder={t("browse.searchPlaceholder")}
+          className="w-full px-4 py-3 bg-white border rounded-xl dark:bg-slate-900 dark:text-white dark:border-white/10"
         />
 
         <button
           onClick={fetchCars}
-          className="px-6 py-3 text-white bg-black rounded-xl hover:bg-gray-900"
+          className="w-full px-6 py-3 text-white bg-black rounded-xl hover:bg-gray-900 sm:w-auto dark:bg-slate-800"
         >
-          Search
+          {t("buttons.search")}
         </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-8">
 
         {/* FILTERS */}
-        <div className="col-span-1 p-5 space-y-6 bg-white shadow rounded-xl">
+        <div className="p-4 space-y-6 bg-white shadow rounded-xl sm:p-5 lg:col-span-1 dark:bg-slate-800 dark:text-white">
 
           <div className="flex items-center justify-between">
-            <h2 className="font-bold">Filters</h2>
-            <button onClick={clearAll} className="text-sm text-gray-500">Clear All</button>
+            <h2 className="font-bold">{t("browse.filters")}</h2>
+            <button onClick={clearAll} className="text-sm text-gray-500 dark:text-slate-300">{t("browse.clearAll")}</button>
           </div>
 
           {/* PRICE */}
           <div>
-            <p className="mb-4 font-semibold">Price Range</p>
+            <p className="mb-4 font-semibold">{t("browse.priceRange")}</p>
             <input
               type="range"
               min="10000"
@@ -140,7 +176,7 @@ function BrowseCars() {
 
           {/* MAKE */}
           <div>
-            <p className="mb-2 font-semibold">Make</p>
+            <p className="mb-2 font-semibold">{t("browse.make")}</p>
             <div className="flex flex-wrap gap-2">
               {makes.map(m => (
                 <span
@@ -156,7 +192,7 @@ function BrowseCars() {
 
           {/* BODY */}
           <div>
-            <p className="mb-2 font-semibold">Body Type</p>
+            <p className="mb-2 font-semibold">{t("browse.bodyType")}</p>
             <div className="flex flex-wrap gap-2">
               {bodyTypes.map(b => (
                 <span
@@ -172,7 +208,7 @@ function BrowseCars() {
 
           {/* FUEL */}
           <div>
-            <p className="mb-2 font-semibold">Fuel Type</p>
+            <p className="mb-2 font-semibold">{t("browse.fuelType")}</p>
             <div className="flex flex-wrap gap-2">
               {fuelTypes.map(f => (
                 <span
@@ -188,7 +224,7 @@ function BrowseCars() {
 
           {/* TRANSMISSION */}
           <div>
-            <p className="mb-2 font-semibold">Transmission</p>
+            <p className="mb-2 font-semibold">{t("browse.transmission")}</p>
             <div className="flex flex-wrap gap-2">
               {transmissions.map(t => (
                 <span
@@ -204,26 +240,26 @@ function BrowseCars() {
 
           <button
             onClick={fetchCars}
-            className="w-full py-3 mt-6 font-semibold text-white transition bg-gray-900 rounded-lg shadow-sm hover:bg-black"
+            className="w-full py-3 mt-6 font-semibold text-white transition bg-gray-900 rounded-lg shadow-sm hover:bg-black dark:bg-slate-700"
           >
-            Apply Filters
+            {t("browse.applyFilters")}
           </button>
         </div>
 
         {/* RESULTS */}
-        <div className="col-span-3">
+        <div className="lg:col-span-3">
 
           {loading && (
-            <p className="py-10 text-center">Searching cars...</p>
+            <p className="py-10 text-center">{t("browse.searchingCars")}</p>
           )}
 
           {!loading && cars.length === 0 && (
             <p className="py-10 text-center text-gray-500">
-              No cars found
+              {t("browse.noCarsFound")}
             </p>
           )}
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
             {cars.map(car => (
               <CarCard key={car._id} car={car} />
             ))}

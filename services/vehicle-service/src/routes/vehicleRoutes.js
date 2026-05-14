@@ -23,6 +23,8 @@ const {
   deleteListing,
   markAsSold,
   searchByImage,
+  submitVehicleInquiry,
+  getSellerInquiries,
 } = require("../controllers/vehicleController");
 
 const ADMIN_EMAILS = [
@@ -56,6 +58,9 @@ router.get("/", getAllListings);
 // seller dashboard (MUST be before /:id routes)
 router.get("/my", clerkAuth, getMyListings);
 
+// seller inquiries
+router.get("/my/inquiries", clerkAuth, getSellerInquiries);
+
 // seller expired listings
 router.get("/my/expired", clerkAuth, getExpiredListings);
 
@@ -87,6 +92,9 @@ router.patch("/:id/sold", clerkAuth, markAsSold);
 
 // reactivate listing
 router.patch("/:id/reactivate", clerkAuth, reactivateListing);
+
+// public inquiry submission for a listing
+router.post("/:id/inquiries", submitVehicleInquiry);
 
 // single listing
 router.get("/:id", getSingleListing);

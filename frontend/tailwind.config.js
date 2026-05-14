@@ -1,4 +1,7 @@
+import typography from "@tailwindcss/typography";
+
 export default {
+  darkMode: "class",
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
@@ -9,5 +12,20 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    typography,
+  ],
+
+  animation: {
+  slowZoom: "slowZoom 10s linear infinite",
+},
+
+keyframes: {
+  slowZoom: {
+    "0%": { transform: "scale(1)" },
+    "100%": { transform: "scale(1.08)" },
+  },
+},
+
 };
+

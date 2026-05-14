@@ -21,9 +21,14 @@ import ManageProfile from "./pages/ManageProfile";
 import ExpiredAds from "./pages/seller/ExpiredAds";
 import PendingAds from "./pages/seller/PendingAds";
 import MyFavorites from "./pages/MyFavorites";
+import ProfileInquiries from "./pages/ProfileInquiries";
 
 // Sell Landing Page
 import Sell from "./pages/Sell";
+
+
+import Articles from "./pages/Articles";
+import ArticleDetails from "./pages/ArticleDetails";
 
 function App() {
   return (
@@ -55,10 +60,14 @@ function App() {
             <Route index element={<ProfileHome />} />
             <Route path="manage" element={<ManageProfile />} />
             <Route path="my-cars" element={<MyCars />} />
+            <Route path="inquiries" element={<ProfileInquiries />} />
             <Route path="favorites" element={<MyFavorites />} />
             <Route path="expired" element={<ExpiredAds />} />
             <Route path="pending" element={<PendingAds />} />
           </Route>
+
+          <Route path="/articles" element={<Articles />} />
+          <Route path="/articles/:slug" element={<ArticleDetails />} />
 
           {adminRoutes}
 
