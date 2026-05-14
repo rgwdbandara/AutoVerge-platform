@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/clerk-react";
-import { Menu, Moon, Sun, X } from "lucide-react";
+import { SignedIn, SignedOut, SignInButton, useUser } from "@clerk/clerk-react";
+import { Bell, Menu, Moon, Sun, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import logo from "../assets/logo.png";
+import ProfileMenu from "./ProfileMenu";
+import { useApi } from "../lib/api";
 
 const ADMIN_EMAILS = [
   "admin@gmail.com",
@@ -17,6 +19,8 @@ function Navbar() {
   const { i18n, t } = useTranslation();
   const currentLang = i18n.resolvedLanguage || i18n.language;
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [unreadInquiryCount, setUnreadInquiryCount] = useState(0);
+  const api = useApi();
   
   const { user } = useUser();
   const [theme, setTheme] = useState(() => {
@@ -37,6 +41,38 @@ function Navbar() {
     document.documentElement.classList.toggle("dark", isDark);
     localStorage.setItem("autoverge_theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchUnreadInquiryCount = async () => {
+      if (!user) {
+        if (mounted) setUnreadInquiryCount(0);
+        return;
+      }
+
+      try {
+        const data = await api("/api/vehicles/my/inquiries/unread-count");
+        if (mounted) {
+          setUnreadInquiryCount(Number(data?.unreadCount || 0));
+        }
+      } catch (error) {
+        console.error("UNREAD INQUIRY COUNT ERROR:", error);
+      }
+    };
+
+    fetchUnreadInquiryCount();
+    const intervalId = setInterval(fetchUnreadInquiryCount, 15000);
+
+    const handleFocus = () => fetchUnreadInquiryCount();
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      mounted = false;
+      clearInterval(intervalId);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [api, user]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
@@ -70,11 +106,33 @@ function Navbar() {
       }`}>
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/10 via-transparent to-white/5 opacity-40" />
 
-        <Link to="/" className="relative z-10 flex items-center gap-3">
-          <img src={logo} className="h-8 md:h-9" alt="AutoVerge" />
-          <span className={`text-xl font-bold tracking-tight md:text-2xl transition-colors duration-300 ${
-            theme === "dark" ? "text-white" : "text-slate-900"
-          }`}>AutoVerge</span>
+        <Link
+          to="/"
+          className={`relative z-10 flex min-w-[180px] items-center gap-3 rounded-full border px-2.5 py-2 pl-2.5 pr-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 md:min-w-[220px] md:gap-3.5 md:pr-6 ${
+            theme === "dark"
+              ? "border-white/10 bg-white/5 hover:bg-white/10"
+              : "border-slate-200/80 bg-white/70 hover:bg-white"
+          }`}
+          aria-label="AutoVerge home"
+        >
+          <span className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border ${
+            theme === "dark" ? "border-white/10 bg-slate-950/40" : "border-white/70 bg-white"
+          }`}>
+            <img src={logo} className="object-contain w-8 h-8" alt="AutoVerge" />
+          </span>
+
+          <span className="flex flex-col min-w-0 leading-tight">
+            <span className={`text-[0.72rem] font-medium uppercase tracking-[0.32em] ${
+              theme === "dark" ? "text-slate-400" : "text-slate-500"
+            }`}>
+              Auto
+            </span>
+            <span className={`truncate text-lg font-semibold tracking-tight md:text-xl ${
+              theme === "dark" ? "text-white" : "text-slate-900"
+            }`}>
+              AutoVerge
+            </span>
+          </span>
         </Link>
 
         <nav className="relative z-10 items-center hidden gap-6 lg:flex xl:gap-8">
@@ -96,6 +154,28 @@ function Navbar() {
         </nav>
 
         <div className="relative z-10 flex items-center gap-2 md:gap-3">
+          <SignedIn>
+            <button
+              type="button"
+              onClick={() => navigate("/profile/inquiries")}
+              className={`relative inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors duration-300 ${
+                theme === "dark"
+                  ? "border-white/15 bg-white/10 text-white hover:bg-white/20"
+                  : "border-slate-200 bg-white/70 text-slate-700 hover:bg-white"
+              }`}
+              aria-label="Open inquiries"
+              title="Received inquiries"
+            >
+              <Bell size={16} />
+
+              {unreadInquiryCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white shadow-lg animate-pulse">
+                  {unreadInquiryCount > 9 ? "9+" : unreadInquiryCount}
+                </span>
+              )}
+            </button>
+          </SignedIn>
+
           <button
             type="button"
             onClick={() => setMobileOpen((prev) => !prev)}
@@ -146,30 +226,23 @@ function Navbar() {
           </SignedOut>
 
           <SignedIn>
-            <div
-              onClick={() => navigate(isAdmin ? "/admin/dashboard" : "/profile")}
-              className="cursor-pointer"
-            >
-              <UserButton
-                appearance={{
-                  elements: {
-                    userButtonAvatarBox: "w-9 h-9 ring-2 ring-white/30",
-                    userButtonPopoverCard: "hidden",
-                  },
-                }}
-                afterSignOutUrl="/"
-                showName={false}
-              />
-            </div>
+            <ProfileMenu
+              user={user}
+              isAdmin={isAdmin}
+              theme={theme}
+              onNavigate={(path) => navigate(path)}
+            />
           </SignedIn>
         </div>
 
         {mobileOpen && (
-          <div className={`absolute left-0 right-0 top-[calc(100%+12px)] z-20 rounded-[28px] border p-4 shadow-2xl backdrop-blur-xl lg:hidden ${
-            theme === "dark"
-              ? "border-white/10 bg-slate-950/95"
-              : "border-slate-200 bg-white/95"
-          }`}>
+          <div
+            className={`absolute left-0 right-0 top-[calc(100%+12px)] z-20 rounded-[28px] border p-4 shadow-2xl backdrop-blur-xl lg:hidden ${
+              theme === "dark"
+                ? "border-white/10 bg-slate-950/95"
+                : "border-slate-200 bg-white/95"
+            }`}
+          >
             <div className="flex flex-col gap-2">
               {navItems.map((item) => (
                 <NavLink
@@ -229,18 +302,15 @@ function Navbar() {
                   </SignedOut>
 
                   <SignedIn>
-                    <div className="flex items-center justify-center">
-                      <UserButton
-                        appearance={{
-                          elements: {
-                            userButtonAvatarBox: "w-10 h-10 ring-2 ring-white/20",
-                            userButtonPopoverCard: "hidden",
-                          },
-                        }}
-                        afterSignOutUrl="/"
-                        showName={false}
-                      />
-                    </div>
+                    <ProfileMenu
+                      user={user}
+                      isAdmin={isAdmin}
+                      theme={theme}
+                      onNavigate={(path) => {
+                        setMobileOpen(false);
+                        navigate(path);
+                      }}
+                    />
                   </SignedIn>
                 </div>
               </div>

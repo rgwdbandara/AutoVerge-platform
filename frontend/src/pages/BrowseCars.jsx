@@ -15,16 +15,16 @@ function BrowseCars() {
   const api = useApi();
   const [searchParams] = useSearchParams();
 
-  // search state
-  const [search, setSearch] = useState("");
+  // search state (initialize from URL)
+  const [search, setSearch] = useState(searchParams.get("search") || "");
 
-  // filters state - initialize bodyType from URL query param
+  // filters state - initialize from URL query params
   const [filters, setFilters] = useState({
-    make: "",
+    make: searchParams.get("make") || "",
     bodyType: searchParams.get("bodyType") || "",
-    fuelType: "",
-    transmission: "",
-    maxPrice: "",
+    fuelType: searchParams.get("fuelType") || "",
+    transmission: searchParams.get("transmission") || "",
+    maxPrice: searchParams.get("maxPrice") || "",
   });
 
   // results state
@@ -33,6 +33,9 @@ function BrowseCars() {
 
   // Load all cars on component mount
   useEffect(() => {
+    // If there are query params, let the auto-fetch effect handle filtering.
+    if (searchParams.toString()) return;
+
     const loadAllCars = async () => {
       setLoading(true);
       try {
@@ -44,7 +47,7 @@ function BrowseCars() {
       setLoading(false);
     };
     loadAllCars();
-  }, [api]);
+  }, [api, searchParams]);
 
   // Auto-fetch when filters or search change
   useEffect(() => {

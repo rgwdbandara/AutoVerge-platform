@@ -16,22 +16,31 @@ import AutoVergeChatbot from "../components/chatbot/AutoVergeChatbot";
 function Home() {
   return (
     <>
-      <Hero />
+      <div id="ai-image-search" className="scroll-mt-28">
+        <Hero />
+      </div>
 
-      <FeaturedCars />
+      <div id="featured-cars" className="scroll-mt-28">
+        <FeaturedCars />
+      </div>
 
-      <LatestAutomotiveNews />
+      <div id="latest-news" className="scroll-mt-28">
+        <LatestAutomotiveNews />
+      </div>
 
       <BrowseByMake />
 
-      {/* 🔥 ADD THESE BELOW */}
       <WhyUs />
 
       <BodyType />
 
-      <HowItWorks />
+      <div id="how-it-works" className="scroll-mt-28">
+        <HowItWorks />
+      </div>
 
-      <FAQ />
+      <div id="faq" className="scroll-mt-28">
+        <FAQ />
+      </div>
 
       <AutoVergeChatbot />
 
