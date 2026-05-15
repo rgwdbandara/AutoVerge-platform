@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - dev
+      - production
       - feature/frontend-finalization
 
 jobs:
