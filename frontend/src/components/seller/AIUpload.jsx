@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/clerk-react";
 import { useRef, useState } from "react";
 import { Loader2, UploadCloud } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -16,6 +17,7 @@ const normalizeBodyType = (type) => {
 
 function AIUpload({ onAutoFill }) {
   const { t } = useTranslation();
+  const { getToken } = useAuth();
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -33,8 +35,11 @@ function AIUpload({ onAutoFill }) {
       const formData = new FormData();
       formData.append("image", file);
 
-      const response = await fetch("http://localhost:5003/api/vehicles/search-by-image", {
+      const token = await getToken();
+
+      const response = await fetch("http://localhost:5000/api/vehicles/search-by-image", {
         method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
       });
 

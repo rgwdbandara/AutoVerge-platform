@@ -23,6 +23,7 @@ function Navbar() {
   const api = useApi();
   
   const { user } = useUser();
+  const isSignedIn = Boolean(user);
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "light";
 
@@ -86,20 +87,24 @@ function Navbar() {
 
   
   const navItems = [
-  { to: "/", label: t("navbar.home") },
-  { to: "/browse", label: t("navbar.browseCars") },
-  { to: "/articles", label: t("navbar.articles", { defaultValue: "Articles" }) },
-  { to: "/sell", label: t("navbar.sellVehicle") },
-  {
-    to: isAdmin ? "/admin/dashboard" : "/profile",
-    label: isAdmin ? t("navbar.adminDashboard") : t("navbar.dashboard"),
-  },
-];
+    { to: "/", label: t("navbar.home") },
+    { to: "/browse", label: t("navbar.browseCars") },
+    { to: "/articles", label: t("navbar.articles", { defaultValue: "Articles" }) },
+    { to: "/sell", label: t("navbar.sellVehicle") },
+    ...(isSignedIn
+      ? [
+          {
+            to: isAdmin ? "/admin/dashboard" : "/profile",
+            label: isAdmin ? t("navbar.adminDashboard") : t("navbar.dashboard"),
+          },
+        ]
+      : []),
+  ];
 
   return (
    <header className="fixed inset-x-0 top-0 z-50 pointer-events-none">
      <div className="px-3 pt-3 mx-auto max-w-7xl md:px-5 md:pt-4">
-      <div className={`pointer-events-auto relative flex h-[72px] items-center justify-between gap-4 rounded-full border px-4 shadow-[0_18px_45px_rgba(15,23,42,0.14)] backdrop-blur-xl transition-colors duration-300 md:px-5 ${
+      <div className={`pointer-events-auto relative flex h-[72px] flex-nowrap items-center justify-between gap-3 rounded-full border px-4 shadow-[0_18px_45px_rgba(15,23,42,0.14)] backdrop-blur-xl transition-colors duration-300 md:px-5 ${
         theme === "dark"
           ? "border-white/10 bg-slate-900/70"
           : "border-white/50 bg-white/60"
@@ -108,7 +113,7 @@ function Navbar() {
 
         <Link
           to="/"
-          className={`relative z-10 flex min-w-[180px] items-center gap-3 rounded-full border px-2.5 py-2 pl-2.5 pr-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 md:min-w-[220px] md:gap-3.5 md:pr-6 ${
+          className={`relative z-10 flex min-w-[170px] shrink-0 items-center gap-3 rounded-full border px-2.5 py-2 pl-2.5 pr-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 md:min-w-[200px] md:gap-3 md:pr-6 ${
             theme === "dark"
               ? "border-white/10 bg-white/5 hover:bg-white/10"
               : "border-slate-200/80 bg-white/70 hover:bg-white"
@@ -135,13 +140,13 @@ function Navbar() {
           </span>
         </Link>
 
-        <nav className="relative z-10 items-center hidden gap-6 lg:flex xl:gap-8">
+        <nav className="relative z-10 hidden flex-1 items-center justify-center gap-2 min-w-0 lg:flex xl:gap-3">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `rounded-full px-3 py-2 text-sm font-medium transition-colors duration-300 ${
+                `whitespace-nowrap rounded-full px-2.5 py-2 text-xs font-medium leading-none transition-colors duration-300 xl:text-sm ${
                   isActive
                     ? `${theme === "dark" ? "bg-white/10 text-white" : "bg-slate-900 text-white"}`
                     : `${theme === "dark" ? "text-slate-200 hover:bg-white/10 hover:text-white" : "text-slate-700 hover:bg-slate-900/5 hover:text-slate-900"}`
@@ -153,7 +158,7 @@ function Navbar() {
           ))}
         </nav>
 
-        <div className="relative z-10 flex items-center gap-2 md:gap-3">
+        <div className="relative z-10 flex shrink-0 items-center gap-2 md:gap-3">
           <SignedIn>
             <button
               type="button"

@@ -23,8 +23,8 @@ function ProfileInquiries() {
           setInquiries([]);
         }
 
-        await api("/api/vehicles/my/inquiries/mark-read", {
-          method: "POST",
+        await api("/api/vehicles/my/inquiries/read", {
+          method: "PATCH",
         });
       } catch (err) {
         console.error("FETCH INQUIRIES ERROR:", err);

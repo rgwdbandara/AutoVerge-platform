@@ -58,9 +58,9 @@ const scrapeRiyasewana = async () => {
     console.log(`Found ${listings.length} listings`);
 
     for (const item of listings) {
-      const words = item.title.split(" ");
-      const brand = words[0] || "";
-      const model = words[1] || "";
+     const extractBrandModel = require("../utils/extractBrandModel");
+
+const { brand, model } = extractBrandModel(item.title);
 
       let mileage = null;
       if (item.meta) {

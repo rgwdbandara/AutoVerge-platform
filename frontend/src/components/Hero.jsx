@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ImagePlus, Loader2, Search, Sparkles, X } from "lucide-react";
 import ImageSearchResultCard from "./seller/ImageSearchResultCard";
@@ -148,19 +149,41 @@ function Hero() {
       const formData = new FormData();
       formData.append("image", selectedImage);
 
-      const response = await fetch("http://localhost:5003/api/vehicles/search-by-image", {
+      // vehicle-service exposes this route at the root (not under /api/vehicles)
+      const response = await fetch("http://localhost:5003/search-by-image", {
         method: "POST",
         body: formData,
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || "Image search failed");
+        const text = await response.text();
+        let msg = text || "Image search failed";
+        try {
+          const parsed = JSON.parse(text);
+          msg = parsed.message || JSON.stringify(parsed);
+        } catch (e) {
+          // not JSON, keep text
+        }
+        throw new Error(msg);
       }
+
+      const data = await response.json();
 
       console.log("IMAGE SEARCH RESPONSE:", data);
       setSearchResponse(data);
+
+      // If the top match is a perfect match, navigate directly to its detail page
+      try {
+        const top = data?.results?.[0];
+        const topMatchPct = Number(top?.matchPercentage);
+        const id = top?._id || top?.id || top?._doc?._id;
+        if (id && topMatchPct === 100) {
+          navigate(`/cars/${id}`);
+          return;
+        }
+      } catch (e) {
+        // ignore and continue showing results
+      }
     } catch (err) {
       console.error("IMAGE SEARCH ERROR:", err);
       setError(err.message || "Something went wrong while searching.");
@@ -179,6 +202,13 @@ function Hero() {
   const showNoResultsMessage = Boolean(
     searchResponse && searchResponse.isVehicle !== false && similarCount === 0 && !isSearching
   );
+
+  const navigate = useNavigate();
+
+  const handleCardSelect = (car) => {
+    const id = car._id || car.id || car._doc?._id;
+    if (id) navigate(`/cars/${id}`);
+  };
 
   return (
     <section className="relative w-full min-h-screen overflow-hidden">
@@ -361,6 +391,7 @@ function Hero() {
                         key={car._id || car.id || `${car.title}-${index}`}
                         result={car}
                         rank={index + 1}
+                        onSelect={handleCardSelect}
                       />
                     ))}
                   </div>

@@ -77,7 +77,7 @@ function AdminAIArticles() {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this article permanently?")) return;
     try {
-      await api(`/api/admin/articles/${id}`, { method: "DELETE" });
+      await api(`/api/vehicles/admin/articles/${id}`, { method: "DELETE" });
       setArticles((prev) => prev.filter((a) => a._id !== id));
     } catch (err) {
       console.error("Delete failed", err);
@@ -115,7 +115,7 @@ function AdminAIArticles() {
         featured: !!editing.featured,
       };
 
-      const res = await api(`/api/admin/articles/${editing._id}`, {
+      const res = await api(`/api/vehicles/admin/articles/${editing._id}`, {
         method: "PUT",
         body: JSON.stringify(payload),
       });

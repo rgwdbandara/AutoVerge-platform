@@ -57,6 +57,87 @@ html.dark body {
 	}
 }
 
+/* Scroll animations */
+@keyframes slideInUp {
+	from {
+		opacity: 0;
+		transform: translateY(40px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideInLeft {
+	from {
+		opacity: 0;
+		transform: translateX(-40px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes slideInRight {
+	from {
+		opacity: 0;
+		transform: translateX(40px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes fadeInScale {
+	from {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.scroll-section {
+	opacity: 0;
+	transform: translateY(40px);
+}
+
+.scroll-section.animate-in {
+	animation: slideInUp 0.8s ease-out forwards;
+}
+
+.scroll-section-left {
+	opacity: 0;
+	transform: translateX(-40px);
+}
+
+.scroll-section-left.animate-in {
+	animation: slideInLeft 0.8s ease-out forwards;
+}
+
+.scroll-section-right {
+	opacity: 0;
+	transform: translateX(40px);
+}
+
+.scroll-section-right.animate-in {
+	animation: slideInRight 0.8s ease-out forwards;
+}
+
+.scroll-section-scale {
+	opacity: 0;
+	transform: scale(0.9);
+}
+
+.scroll-section-scale.animate-in {
+	animation: fadeInScale 0.8s ease-out forwards;
+}
+
 /* Modern slider */
 input[type="range"] {
 	appearance: none;

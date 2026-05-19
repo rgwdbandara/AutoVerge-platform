@@ -4,6 +4,7 @@ const router = express.Router();
 const clerkAuth = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
 const { calculateEMI } = require("../controllers/emiController");
+const { getRelatedVehicles } = require("../controllers/relatedVehicleController");
 const {
   createListing,
   getAllListings,
@@ -25,6 +26,8 @@ const {
   searchByImage,
   submitVehicleInquiry,
   getSellerInquiries,
+  getUnreadInquiryCount,
+  markMyInquiriesAsRead,
 } = require("../controllers/vehicleController");
 
 const ADMIN_EMAILS = [
@@ -60,6 +63,9 @@ router.get("/my", clerkAuth, getMyListings);
 
 // seller inquiries
 router.get("/my/inquiries", clerkAuth, getSellerInquiries);
+router.get("/my/inquiries/unread-count", clerkAuth, getUnreadInquiryCount);
+router.patch("/my/inquiries/read", clerkAuth, markMyInquiriesAsRead);
+router.post("/my/inquiries/mark-read", clerkAuth, markMyInquiriesAsRead);
 
 // seller expired listings
 router.get("/my/expired", clerkAuth, getExpiredListings);
@@ -95,6 +101,9 @@ router.patch("/:id/reactivate", clerkAuth, reactivateListing);
 
 // public inquiry submission for a listing
 router.post("/:id/inquiries", submitVehicleInquiry);
+
+// related listings for a vehicle
+router.get("/related/:id", getRelatedVehicles);
 
 // single listing
 router.get("/:id", getSingleListing);

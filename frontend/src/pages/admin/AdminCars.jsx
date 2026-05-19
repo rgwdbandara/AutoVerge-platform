@@ -12,7 +12,7 @@ function AdminCars() {
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const data = await api("/api/admin/all");
+        const data = await api("/api/vehicles/admin/all");
         setCars(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Failed to load admin cars", error);
@@ -43,7 +43,7 @@ function AdminCars() {
     if (!confirmed) return;
 
     try {
-      await api(`/api/admin/delete/${id}`, { method: "DELETE" });
+      await api(`/api/vehicles/admin/delete/${id}`, { method: "DELETE" });
       setCars((prev) => prev.filter((car) => car._id !== id));
       setOpenMenuId(null);
     } catch {

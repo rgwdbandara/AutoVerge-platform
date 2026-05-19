@@ -1,15 +1,33 @@
 const fs = require("fs");
 const path = require("path");
+const { isBrandNewCondition } = require("../utils/vehicleCondition");
 
 const usageCheck = async (vehicleData) => {
   const year = parseInt(vehicleData.year);
   const mileage = parseInt(vehicleData.mileage);
+  const brandNew = isBrandNewCondition(vehicleData.condition);
 
-  if (!year || !mileage) {
+  if (!year) {
     return {
       level: "Weak",
       score: 1,
-      reason: "Year or mileage is missing",
+      reason: "Year is missing",
+    };
+  }
+
+  if (brandNew) {
+    return {
+      level: "Strong",
+      score: 3,
+      reason: "Brand new vehicle does not require used-car mileage comparison",
+    };
+  }
+
+  if (!mileage) {
+    return {
+      level: "Weak",
+      score: 1,
+      reason: "Mileage is required for used vehicles",
     };
   }
 

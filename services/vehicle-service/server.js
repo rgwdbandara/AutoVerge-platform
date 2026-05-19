@@ -40,12 +40,11 @@ const articleRoutes = require("./src/routes/articleRoutes");
 
 app.use("/admin/settings", adminSettingsRoutes);
 app.delete("/admin/delete/:id", clerkAuth, isAdmin, deleteListingByAdmin);
-app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/", vehicleRoutes);
 app.use("/api/articles", articleRoutes);
 
-// Admin article management (used via API Gateway /api/admin/...)
+// Admin article management (used via API Gateway /api/vehicles/admin/...)
 app.put("/admin/articles/:id", clerkAuth, isAdmin, updateArticle);
 app.delete("/admin/articles/:id", clerkAuth, isAdmin, deleteArticle);
 

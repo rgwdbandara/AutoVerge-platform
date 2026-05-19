@@ -92,9 +92,9 @@ const scrapeIkman = async () => {
 
     // 💾 SAVE TO DB
     for (const item of allListings) {
-      const words = item.title.split(" ");
-      const brand = words[0] || "";
-      const model = words[1] || "";
+      const extractBrandModel = require("../utils/extractBrandModel");
+
+const { brand, model } = extractBrandModel(item.title);
 
       const exists = await Listing.findOne({
         source: "ikman",

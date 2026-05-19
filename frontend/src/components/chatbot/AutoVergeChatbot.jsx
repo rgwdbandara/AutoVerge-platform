@@ -20,14 +20,6 @@ function AutoVergeChatbot() {
 
   const [loading, setLoading] = useState(false);
 
-  const quickPrompts = [
-    "Show me SUVs",
-    "Toyota vehicles",
-    "Hybrid cars",
-    "Cars under 10",
-    "Recommend a family car",
-  ];
-
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -175,18 +167,6 @@ function AutoVergeChatbot() {
 
           {/* MESSAGES */}
           <div className="flex-1 px-3 py-4 space-y-4 overflow-y-auto bg-slate-50 sm:px-4 sm:py-5">
-
-            <div className="flex flex-wrap gap-2 mb-4">
-              {quickPrompts.map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => handleQuickPrompt(prompt)}
-                  className="px-3 py-2 text-xs font-semibold transition bg-white border rounded-full shadow-sm border-slate-200 hover:border-blue-200 hover:bg-blue-50 sm:px-4"
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
 
             {messages.map((msg, index) => (
               <div

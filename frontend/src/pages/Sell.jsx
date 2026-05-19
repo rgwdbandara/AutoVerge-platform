@@ -3,10 +3,28 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
+const checklistItems = [
+  ["📝", "Write a clear title with year, make, and model."],
+  ["📸", "Upload bright, well-framed photos from multiple angles."],
+  ["💰", "Set a realistic asking price based on condition and market demand."],
+  ["📊", "Highlight mileage, fuel type, transmission, and key features."],
+  ["⚠️", "Avoid unclear contact details or incomplete information."],
+  ["✅", "Double-check the information before publishing your ad."],
+];
+
+const steps = [
+  ["1", "Create Your Listing", "Choose manual entry or let AI prefill the form from an image."],
+  ["2", "Review Details", "Confirm the vehicle details, pricing, and images before publishing."],
+  ["3", "Reach Buyers", "Your car goes live and becomes visible to the right audience instantly."],
+];
+
 function Sell() {
   const navigate = useNavigate();
   const { isSignedIn } = useUser();
   const [openFaq, setOpenFaq] = useState(null);
+  const [checkedChecklist, setCheckedChecklist] = useState(() =>
+    checklistItems.map(() => false)
+  );
 
   const faqs = [
     { q: "How long does it take to post a car?", a: "Most sellers can create a listing in just a few minutes." },
@@ -16,27 +34,28 @@ function Sell() {
     { q: "How do buyers contact me?", a: "Interested buyers can reach you through the contact details in your listing." },
   ];
 
-  const checklistItems = [
-    ["📝", "Write a clear title with year, make, and model."],
-    ["📸", "Upload bright, well-framed photos from multiple angles."],
-    ["💰", "Set a realistic asking price based on condition and market demand."],
-    ["📊", "Highlight mileage, fuel type, transmission, and key features."],
-    ["⚠️", "Avoid unclear contact details or incomplete information."],
-    ["✅", "Double-check the information before publishing your ad."],
-  ];
-
-  const steps = [
-    ["1", "Create Your Listing", "Choose manual entry or let AI prefill the form from an image."],
-    ["2", "Review Details", "Confirm the vehicle details, pricing, and images before publishing."],
-    ["3", "Reach Buyers", "Your car goes live and becomes visible to the right audience instantly."],
-  ];
-
   const handlePostVehicle = () => {
     if (isSignedIn) {
       navigate("/seller/add-car");
     } else {
       navigate("/sign-up");
     }
+  };
+
+  const completedChecklist = checkedChecklist.filter(Boolean).length;
+  const checklistProgress = Math.round((completedChecklist / checklistItems.length) * 100);
+  const readyToPost = checklistProgress === 100;
+
+  const toggleChecklistItem = (index) => {
+    setCheckedChecklist((current) =>
+      current.map((itemChecked, itemIndex) =>
+        itemIndex === index ? !itemChecked : itemChecked
+      )
+    );
+  };
+
+  const markAllChecklist = (value) => {
+    setCheckedChecklist(checklistItems.map(() => value));
   };
 
   return (
@@ -107,22 +126,97 @@ function Sell() {
           viewport={{ once: true }}
           className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-slate-900 sm:p-8"
         >
-          <h2 className="mb-6 text-2xl font-bold text-slate-900 dark:text-white sm:mb-8 sm:text-3xl">Before You Post</h2>
+          <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">Before You Post</h2>
+              <p className="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
+                Tick through these quick checks to make your listing look sharper and convert better.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => markAllChecklist(true)}
+                className="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 dark:border-blue-500/40 dark:bg-blue-500/10 dark:text-blue-200"
+              >
+                Mark all done
+              </button>
+              <button
+                type="button"
+                onClick={() => markAllChecklist(false)}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-800/70">
+            <div className="mb-3 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Listing readiness
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  {readyToPost ? "Ready to post" : `${completedChecklist} of ${checklistItems.length} steps completed`}
+                </p>
+              </div>
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${readyToPost ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-200"}`}>
+                {checklistProgress}% complete
+              </span>
+            </div>
+
+            <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-blue-600 via-cyan-500 to-emerald-500 transition-all duration-300"
+                style={{ width: `${checklistProgress}%` }}
+              />
+            </div>
+          </div>
 
           <div className="grid gap-5 md:grid-cols-2">
-            {checklistItems.map(([icon, text], index) => (
+            {checklistItems.map(([icon, text], index) => {
+              const isChecked = checkedChecklist[index];
+
+              return (
               <Motion.div
                 key={text}
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
                 viewport={{ once: true }}
-                className="flex items-center gap-4 rounded-2xl bg-slate-50 p-5 transition-colors duration-300 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+                className={`flex cursor-pointer items-start gap-4 rounded-2xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md ${isChecked ? "border border-emerald-200 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10" : "border border-transparent bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700"}`}
+                onClick={() => toggleChecklistItem(index)}
               >
-                <span className="text-2xl">{icon}</span>
-                <p className="font-medium text-slate-800 dark:text-slate-200">{text}</p>
+                <button
+                  type="button"
+                  aria-label={isChecked ? "Mark checklist item as incomplete" : "Mark checklist item as complete"}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    toggleChecklistItem(index);
+                  }}
+                  className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-bold transition ${isChecked ? "border-emerald-500 bg-emerald-500 text-white" : "border-slate-300 bg-white text-slate-400 dark:border-slate-600 dark:bg-slate-900"}`}
+                >
+                  {isChecked ? "✓" : index + 1}
+                </button>
+
+                <div className="flex-1">
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">{icon}</span>
+                    <div>
+                      <p className={`font-medium ${isChecked ? "text-emerald-900 dark:text-emerald-100" : "text-slate-800 dark:text-slate-200"}`}>
+                        {text}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        {isChecked ? "Done" : "Tap to mark as ready"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </Motion.div>
-            ))}
+            );
+            })}
           </div>
         </Motion.div>
       </section>

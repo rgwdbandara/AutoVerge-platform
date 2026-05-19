@@ -1,14 +1,32 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useUser } from "@clerk/clerk-react";
-import { MapPin } from "lucide-react";
+import {
+  Flag,
+  Heart,
+  MapPin,
+  Share2,
+  ShieldCheck,
+  Sparkles,
+  CheckCircle,
+  Phone,
+  MessageSquareText,
+  Gauge,
+  Fuel,
+  CalendarDays,
+  GaugeCircle,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useApi } from "../lib/api";
 import EMIModal from "../components/finance/EMIModal";
 import PriceEstimateCard from "../components/price/PriceEstimateCard";
 import RelatedCars from "../components/cars/RelatedCars";
 import SellerContactCard from "../components/cars/SellerContactCard";
+import { formatConditionLabel, formatMileageValue } from "../lib/carDetails";
 
+// eslint-disable-next-line no-unused-vars
 const getGradeColor = (grade) => {
   if (grade === "A") return "bg-green-100 text-green-700";
   if (grade === "B") return "bg-blue-100 text-blue-700";
@@ -20,6 +38,25 @@ const getTrustColor = (trust) => {
   if (trust === "High") return "bg-green-100 text-green-700";
   if (trust === "Medium") return "bg-yellow-100 text-yellow-700";
   return "bg-red-100 text-red-700";
+};
+
+const getCheckTone = (level) => {
+  if (level === "Strong") return "bg-emerald-100 text-emerald-700 ring-emerald-200";
+  if (level === "Moderate") return "bg-amber-100 text-amber-700 ring-amber-200";
+  return "bg-rose-100 text-rose-700 ring-rose-200";
+};
+
+const getCheckLabel = (level) => {
+  if (level === "Strong") return "Excellent";
+  if (level === "Moderate") return "Good";
+  return "Needs review";
+};
+
+const getGradeGuide = (grade) => {
+  if (grade === "A") return "High Trust";
+  if (grade === "B") return "Good Trust";
+  if (grade === "C") return "Moderate Trust";
+  return "Low Trust";
 };
 
 // eslint-disable-next-line no-unused-vars
@@ -51,6 +88,7 @@ function CarDetails() {
   const [inquirySuccess, setInquirySuccess] = useState("");
   const [isSaved, setIsSaved] = useState(false);
   const [shareSuccess, setShareSuccess] = useState("");
+  const [reportSuccess, setReportSuccess] = useState("");
   const fallbackImage = "https://via.placeholder.com/800x500";
 
   useEffect(() => {
@@ -153,6 +191,11 @@ function CarDetails() {
     });
   };
 
+  const handleReport = () => {
+    setReportSuccess("Report submitted. Our team will review it shortly.");
+    setTimeout(() => setReportSuccess(""), 3000);
+  };
+
   if (!car) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 dark:text-white">
@@ -178,22 +221,111 @@ function CarDetails() {
   const locationLabel = [car?.location?.city, car?.location?.district]
     .filter(Boolean)
     .join(", ") || "Location not available";
+  const galleryImages = Array.isArray(car.images) ? car.images : [];
+  const specCards = [
+    { label: "Mileage", value: formatMileageValue(car.condition, car.mileage), icon: GaugeCircle },
+    { label: "Fuel", value: car.fuelType || "N/A", icon: Fuel },
+    { label: "Transmission", value: car.transmission || "N/A", icon: Gauge },
+    { label: "Year", value: car.year || "N/A", icon: CalendarDays },
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 dark:text-white">
-      <div className="px-4 py-8 mx-auto max-w-7xl md:px-6 lg:py-10">
+      <div className="px-4 py-6 mx-auto max-w-7xl md:px-6 lg:py-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 text-sm text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-blue-600 dark:text-blue-300">Home</span>
+            <span>›</span>
+            <span className="font-medium text-blue-600 dark:text-blue-300">Browse Cars</span>
+            <span>›</span>
+            <span className="truncate text-slate-500 dark:text-slate-300">{car.title || "Car details"}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleShare}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+            >
+              <Share2 size={15} /> Share
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+                isSaved
+                  ? "border border-rose-200 bg-rose-50 text-rose-600 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300"
+                  : "border border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+              }`}
+            >
+              <Heart size={15} className={isSaved ? "fill-current" : ""} /> {isSaved ? "Saved" : "Save"}
+            </button>
+            <button
+              type="button"
+              onClick={handleReport}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+            >
+              <Flag size={15} /> Report
+            </button>
+          </div>
+        </div>
+
+        {reportSuccess && (
+          <div className="px-4 py-3 mb-4 text-sm font-medium border rounded-2xl border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
+            {reportSuccess}
+          </div>
+        )}
+
         <div className="overflow-hidden border shadow-sm bg-white/80 dark:bg-slate-800/60 rounded-3xl border-slate-200 dark:border-white/10">
-          <div className="grid grid-cols-1 gap-8 p-5 lg:grid-cols-12 md:p-7">
-            <section className="lg:col-span-7">
-              <div className="overflow-hidden border shadow-sm rounded-2xl border-slate-200">
-                <img
-                  src={activeImage || fallbackImage}
-                  className="h-[360px] w-full object-cover md:h-[460px]"
-                  alt={car.title || "Car image"}
-                />
+          <div className="grid grid-cols-1 gap-6 p-4 lg:grid-cols-12 md:p-6">
+            <section className="space-y-4 lg:col-span-7">
+              <div className="overflow-hidden border shadow-sm rounded-3xl border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-slate-800">
+                <div className="relative">
+                  <img
+                    src={activeImage || fallbackImage}
+                    className="h-[360px] w-full object-cover md:h-[470px]"
+                    alt={car.title || "Car image"}
+                  />
+
+                  <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white backdrop-blur">
+                    <Sparkles size={12} /> Featured
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const index = galleryImages.findIndex((img) => (img?.url || img) === activeImage);
+                      const next = galleryImages[(index + 1) % galleryImages.length];
+                      const nextUrl = next?.url || next;
+                      if (nextUrl) setActiveImage(nextUrl);
+                    }}
+                    className="absolute p-3 transition -translate-y-1/2 rounded-full shadow-lg right-4 top-1/2 bg-white/90 text-slate-700 hover:bg-white dark:bg-slate-900/90 dark:text-white"
+                    aria-label="Next image"
+                  >
+                    <ArrowRight size={18} />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const index = galleryImages.findIndex((img) => (img?.url || img) === activeImage);
+                      const prev = galleryImages[index - 1] || galleryImages[galleryImages.length - 1];
+                      const prevUrl = prev?.url || prev;
+                      if (prevUrl) setActiveImage(prevUrl);
+                    }}
+                    className="absolute p-3 transition -translate-y-1/2 rounded-full shadow-lg left-4 top-1/2 bg-white/90 text-slate-700 hover:bg-white dark:bg-slate-900/90 dark:text-white"
+                    aria-label="Previous image"
+                  >
+                    <ArrowLeft size={18} />
+                  </button>
+
+                  <div className="absolute px-3 py-1 text-xs font-semibold text-white rounded-full bottom-4 right-4 bg-slate-900/70 backdrop-blur">
+                    {galleryImages.length ? `${galleryImages.findIndex((img) => (img?.url || img) === activeImage) + 1} / ${galleryImages.length}` : "1 / 1"}
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-2 mt-3 sm:grid-cols-6 md:grid-cols-7">
+              <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-7">
                 {car.images?.map((img, index) => {
                   const imageUrl = img?.url || img;
                   const isActive = activeImage === imageUrl;
@@ -219,35 +351,19 @@ function CarDetails() {
                 })}
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mt-4">
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  className={`py-3 font-medium transition border rounded-xl ${
-                    isSaved
-                      ? "border-blue-600 bg-blue-50 text-blue-600 dark:border-blue-400 dark:bg-blue-500/10 dark:text-blue-300"
-                      : "border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-slate-800"
-                  }`}
-                >
-                  {isSaved ? "❤ Saved" : "Save"}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="py-3 font-medium transition border rounded-xl border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-slate-800"
-                >
-                  {shareSuccess ? "✓ Copied" : "Share"}
-                </button>
+              {/* Market Price Estimate - placed below thumbnails */}
+              <div className="mt-4">
+                <div className="max-w-md">
+                  <PriceEstimateCard car={car} />
+                </div>
               </div>
 
-              {shareSuccess && (
-                <p className="mt-2 text-sm text-green-600 dark:text-green-400">{shareSuccess}</p>
-              )}
+              {shareSuccess && <p className="mt-2 text-sm text-green-600 dark:text-green-400">{shareSuccess}</p>}
             </section>
 
             <section className="lg:col-span-5">
               <div className="space-y-4 lg:sticky lg:top-24">
-                <div className="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 dark:bg-slate-800 dark:border-white/10">
+                <div className="p-5 bg-white border shadow-sm rounded-3xl border-slate-200 dark:border-white/10 dark:bg-slate-800 lg:-mt-12">
                   <div className="flex items-center justify-between gap-2">
                     <span className="inline-flex px-3 py-1 text-xs font-semibold tracking-wide uppercase rounded-full bg-slate-900 text-slate-100">
                       {car.brand || "Car"}
@@ -270,39 +386,32 @@ function CarDetails() {
                     <span>{locationLabel}</span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 mt-5 text-center">
-                    <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
-                      <p className="text-xs text-slate-500 dark:text-slate-300">Mileage</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-white">
-                        {car.mileage || "N/A"}
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
-                      <p className="text-xs text-slate-500 dark:text-slate-300">Fuel</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-white">
-                        {car.fuelType || "N/A"}
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
-                      <p className="text-xs text-slate-500 dark:text-slate-300">Gearbox</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-white">
-                        {car.transmission || "N/A"}
-                      </p>
-                    </div>
+                  <div className="grid grid-cols-2 gap-3 mt-5 text-center sm:grid-cols-4">
+                    {specCards.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <div key={item.label} className="p-3 text-left shadow-sm rounded-2xl bg-slate-50 dark:bg-slate-700/40">
+                          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-300">
+                            <Icon size={14} /> {item.label}
+                          </div>
+                          <p className="mt-2 text-sm font-semibold text-slate-800 dark:text-white">{item.value}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
-                <div className="p-5 border rounded-2xl border-emerald-500 bg-emerald-50">
+                <div className="p-5 border shadow-sm rounded-3xl border-emerald-500 bg-emerald-50">
                   <div className="grid items-center grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <h3 className="text-[30px] font-bold leading-tight text-slate-900">Financing options available</h3>
+                      <h3 className="text-[26px] font-bold leading-tight text-slate-900 md:text-[30px]">Financing options available</h3>
                       <p className="mt-3 text-base text-slate-600">
                         Find out what the best financing options available to you are.
                       </p>
                       <button
                         type="button"
                         onClick={() => setShowFinanceInfo(true)}
-                        className="px-6 py-3 mt-5 text-lg font-semibold transition bg-white shadow-sm rounded-2xl text-slate-900 hover:bg-slate-100"
+                        className="px-6 py-3 mt-5 text-base font-semibold transition bg-white shadow-sm rounded-2xl text-slate-900 hover:bg-slate-100"
                       >
                         Show me
                       </button>
@@ -332,7 +441,7 @@ function CarDetails() {
                       setInquirySuccess("");
                       setShowInquiry(true);
                     }}
-                    className="px-5 py-4 text-lg font-semibold text-black transition rounded-2xl bg-emerald-400 hover:bg-emerald-500"
+                    className="px-5 py-4 text-lg font-semibold text-white transition bg-blue-500 rounded-2xl hover:bg-blue-600"
                   >
                     Make an Inquiry
                   </button>
@@ -550,29 +659,42 @@ function CarDetails() {
                     </div>
                   </div>, document.body
                 )}
-
-                <PriceEstimateCard car={car} />
               </div>
             </section>
           </div>
         </div>
 
-        <section className="p-6 mt-8 bg-white border shadow-sm rounded-2xl border-slate-200 dark:bg-slate-800 dark:border-white/10">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Description</h2>
-          <p className="mt-3 leading-7 text-slate-600 dark:text-slate-300">
-            {car.description || "No description available."}
-          </p>
+        <section className="p-6 mt-8">
+          <div className="p-6 bg-white border shadow-sm rounded-2xl border-slate-200">
+            <h2 className="text-lg font-bold text-slate-900">Description</h2>
+            <p className="mt-3 text-lg leading-7 text-slate-600">
+              {car.description || "No description available."}
+            </p>
 
-          <h3 className="mt-8 text-lg font-semibold text-slate-900 dark:text-white">Key Highlights</h3>
-          <ul className="grid grid-cols-1 gap-2 mt-3 text-sm text-slate-700 md:grid-cols-2 dark:text-slate-300">
-            <li className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5">Transmission: {car.transmission || "N/A"}</li>
-            <li className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5">Fuel Type: {car.fuelType || "N/A"}</li>
-            <li className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5">Brand: {car.brand || "N/A"}</li>
-            <li className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5">Model: {car.model || "N/A"}</li>
-          </ul>
+            <h3 className="mt-6 text-sm font-semibold text-slate-900">Key Highlights</h3>
+            <div className="grid grid-cols-1 gap-3 mt-3 sm:grid-cols-3">
+              {(
+                car.highlights && Array.isArray(car.highlights) ? car.highlights : [
+                  "First Owner",
+                  "Well Maintained",
+                  "Lady Driven",
+                  "Negotiable",
+                  "Accident Free",
+                  "Good Condition"
+                ]
+              ).map((h, i) => (
+                <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[#f7f9fc]">
+                  <div className="flex items-center justify-center w-6 h-6 text-blue-600 rounded-full bg-blue-50">
+                    <CheckCircle size={14} />
+                  </div>
+                  <div className="text-sm text-slate-700">{h}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
-        <section className="p-6 mt-6 bg-white border shadow-sm rounded-2xl border-slate-200">
+        <section className="p-6 mt-6 bg-white border shadow-sm rounded-3xl border-slate-200">
           <h2 className="text-xl font-bold text-slate-900">Specifications</h2>
           <div className="grid grid-cols-1 gap-3 mt-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="p-4 rounded-xl bg-slate-100">
@@ -589,7 +711,9 @@ function CarDetails() {
             </div>
             <div className="p-4 rounded-xl bg-slate-100">
               <p className="text-xs text-slate-500">Mileage</p>
-              <p className="mt-1 font-semibold text-slate-900">{car.mileage || "N/A"}</p>
+              <p className="mt-1 font-semibold text-slate-900">
+                {formatMileageValue(car.condition, car.mileage)}
+              </p>
             </div>
             <div className="p-4 rounded-xl bg-slate-100">
               <p className="text-xs text-slate-500">Fuel Type</p>
@@ -601,7 +725,9 @@ function CarDetails() {
             </div>
             <div className="p-4 rounded-xl bg-slate-100">
               <p className="text-xs text-slate-500">Condition</p>
-              <p className="mt-1 font-semibold text-slate-900">{car.condition || "N/A"}</p>
+              <p className="mt-1 font-semibold text-slate-900">
+                {formatConditionLabel(car.condition)}
+              </p>
             </div>
             <div className="p-4 rounded-xl bg-slate-100">
               <p className="text-xs text-slate-500">Service History</p>
@@ -610,74 +736,124 @@ function CarDetails() {
           </div>
         </section>
 
-        <section className="p-6 mt-6 bg-white border shadow-sm rounded-2xl border-slate-200">
-          <h2 className="text-xl font-bold text-slate-900">Trust Evaluation</h2>
-          <p className="mt-1 text-sm text-slate-500">Based on listing quality and vehicle data</p>
-
-          <div className="flex flex-wrap items-center gap-3 mt-4">
-            <div
-              className={`px-4 py-2 rounded-xl font-bold text-sm ${getGradeColor(
-                car.autoTrustGrade
-              )}`}
-            >
-              Grade {car.autoTrustGrade || "N/A"}
+        <section className="p-6 mt-6 bg-white border shadow-sm rounded-3xl border-slate-200">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Trust Evaluation</h2>
+              <p className="mt-1 text-sm text-slate-500">Rule-based score from listing quality and vehicle data</p>
             </div>
-
-            <div
-              className={`px-4 py-2 rounded-xl font-semibold text-sm ${getTrustColor(
-                car.trustLevel
-              )}`}
-            >
-              {car.trustLevel || "N/A"} Trust
+            <div className="text-sm font-medium text-slate-500">
+              Guide: A {" "}(80 - 100) / B {" "}(60 - 79) / C {" "}(40 - 59) / D {" "}(0 - 39)
             </div>
           </div>
 
-          {car.gradeReason && (
-            <div className="p-4 mt-4 border rounded-xl bg-slate-50 border-slate-200">
-              <p className="text-sm text-slate-700">
-                <span className="font-semibold">Why this grade?</span> {car.gradeReason}
-              </p>
+          <div className="grid gap-5 mt-5 lg:grid-cols-[1.15fr_1.35fr]">
+            <div className="p-5 border shadow-sm bg-gradient-to-br from-emerald-50 via-white to-slate-50 rounded-3xl border-emerald-100">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                <div className="flex items-center justify-center text-white rounded-full shadow-lg w-28 h-28 bg-emerald-600 shadow-emerald-200">
+                  <div className="text-center">
+                    <div className="text-sm font-semibold uppercase tracking-[0.18em] opacity-90">Grade</div>
+                    <div className="text-5xl font-black leading-none">{car.autoTrustGrade || "N/A"}</div>
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div
+                      className={`px-4 py-2 rounded-full font-semibold text-sm ${getTrustColor(
+                        car.trustLevel
+                      )}`}
+                    >
+                      {car.trustLevel || "N/A"} Trust
+                    </div>
+                    <div className="px-4 py-2 text-sm font-semibold text-white rounded-full bg-slate-900">
+                      {getGradeGuide(car.autoTrustGrade)}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
+                    <img
+                      src={activeImage || fallbackImage}
+                      alt={car.title || "Vehicle"}
+                      className="object-cover w-full h-44"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {car.gradeReason && (
+                <div className="p-4 mt-5 bg-white border rounded-2xl border-emerald-100">
+                  <p className="text-sm text-slate-700">
+                    <span className="font-semibold text-slate-900">Why this grade?</span> {car.gradeReason}
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3 mt-5 sm:grid-cols-4">
+                <div className="p-3 bg-white border rounded-2xl border-slate-200">
+                  <p className="text-[11px] uppercase tracking-wide text-slate-500">Listing quality</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">Complete score mix</p>
+                </div>
+                <div className="p-3 bg-white border rounded-2xl border-slate-200">
+                  <p className="text-[11px] uppercase tracking-wide text-slate-500">Vehicle data</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">Year, mileage, price</p>
+                </div>
+                <div className="p-3 bg-white border rounded-2xl border-slate-200">
+                  <p className="text-[11px] uppercase tracking-wide text-slate-500">Visual proof</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">Image evidence</p>
+                </div>
+                <div className="p-3 bg-white border rounded-2xl border-slate-200">
+                  <p className="text-[11px] uppercase tracking-wide text-slate-500">Stability</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">Listing consistency</p>
+                </div>
+              </div>
             </div>
-          )}
 
-          {car.autoTrustCheckResults && (
-            <div className="grid grid-cols-1 gap-3 mt-5 md:grid-cols-2 xl:grid-cols-3">
-              <div className="p-4 border rounded-xl border-slate-200">
-                <h3 className="font-semibold text-slate-900">Listing Completeness</h3>
-                <p className="mt-1 text-sm text-slate-600">
-                  {car.autoTrustCheckResults.completeness?.reason || "No data"}
-                </p>
-              </div>
+            {car.autoTrustCheckResults && (
+              <div className="p-5 border rounded-3xl bg-slate-50 border-slate-200">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-lg font-bold text-slate-900">AutoTrust Check Results</h3>
+                  <span className="px-3 py-1 text-xs font-semibold bg-white border rounded-full text-slate-600 border-slate-200">
+                    How the grade was built
+                  </span>
+                </div>
 
-              <div className="p-4 border rounded-xl border-slate-200">
-                <h3 className="font-semibold text-slate-900">Visual Evidence</h3>
-                <p className="mt-1 text-sm text-slate-600">
-                  {car.autoTrustCheckResults.visual?.reason || "No data"}
-                </p>
-              </div>
+                <div className="mt-4 space-y-3">
+                  {[
+                    ["Listing Completeness", car.autoTrustCheckResults.completeness],
+                    ["Visual Evidence (Images)", car.autoTrustCheckResults.visual],
+                    ["Usage Reality (Mileage Check)", car.autoTrustCheckResults.usage],
+                    ["Maintenance Confidence", car.autoTrustCheckResults.maintenance],
+                    ["Listing Stability", car.autoTrustCheckResults.stability],
+                  ].map(([label, result]) => (
+                    <div key={label} className="p-4 bg-white border shadow-sm rounded-2xl border-slate-200">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <p className="font-semibold text-slate-900">{label}</p>
+                          <p className="mt-1 text-sm text-slate-500">{result?.reason || "No data"}</p>
+                        </div>
+                        <span className={`inline-flex items-center justify-center px-3 py-1 text-xs font-bold rounded-full ring-1 ${getCheckTone(result?.level)}`}>
+                          {getCheckLabel(result?.level)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
-              <div className="p-4 border rounded-xl border-slate-200">
-                <h3 className="font-semibold text-slate-900">Usage Reality</h3>
-                <p className="mt-1 text-sm text-slate-600">
-                  {car.autoTrustCheckResults.usage?.reason || "No data"}
-                </p>
+                <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
+                  <div className="px-3 py-2 text-xs font-semibold border text-emerald-700 bg-emerald-50 rounded-xl border-emerald-100">
+                    Strong = fully supported
+                  </div>
+                  <div className="px-3 py-2 text-xs font-semibold border text-amber-700 bg-amber-50 rounded-xl border-amber-100">
+                    Moderate = acceptable but needs caution
+                  </div>
+                  <div className="px-3 py-2 text-xs font-semibold border text-rose-700 bg-rose-50 rounded-xl border-rose-100">
+                    Weak = missing or inconsistent data
+                  </div>
+                </div>
               </div>
-
-              <div className="p-4 border rounded-xl border-slate-200">
-                <h3 className="font-semibold text-slate-900">Maintenance</h3>
-                <p className="mt-1 text-sm text-slate-600">
-                  {car.autoTrustCheckResults.maintenance?.reason || "No data"}
-                </p>
-              </div>
-
-              <div className="p-4 border rounded-xl border-slate-200 md:col-span-2 xl:col-span-2">
-                <h3 className="font-semibold text-slate-900">Listing Stability</h3>
-                <p className="mt-1 text-sm text-slate-600">
-                  {car.autoTrustCheckResults.stability?.reason || "No data"}
-                </p>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </section>
 
         <RelatedCars currentVehicleId={id} />

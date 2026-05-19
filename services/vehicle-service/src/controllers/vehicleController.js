@@ -1,7 +1,8 @@
 const Vehicle = require("../models/Vehicle");
 const VehicleInquiry = require("../models/VehicleInquiry");
 const evaluateAutoTrust = require("../../autotrust");
-const searchVehiclesByImage = require("../imageSearch/searchByImage");
+const { isBrandNewCondition } = require("../../autotrust/utils/vehicleCondition");
+const searchVehiclesByImage = require("../imageSearch/searchByImageHybrid");
 const generateImageEmbeddings = require("../imageSearch/generateImageEmbeddings");
 const analyzeImageWithGPT = require("../services/openaiVisionService");
 const extractFeaturesFromFile = require("../imageSearch/extractFeaturesFromFile");
@@ -573,7 +574,7 @@ exports.createListing = async (req, res) => {
       interestRate: req.body.interestRate,
       loanTerm: req.body.loanTerm,
       downPayment: req.body.downPayment,
-      mileage: req.body.mileage,
+      mileage: isBrandNewCondition(req.body.condition) ? 0 : req.body.mileage,
       color: req.body.color,
       bodyType: req.body.bodyType,
       seats: req.body.seats,
@@ -644,19 +645,17 @@ exports.searchByImage = async (req, res) => {
     console.log("🧠 VECTOR:", featureVector.length);
 
     // 3. Search
-    const results = await searchVehiclesByImage(
-      featureVector,
-      "unknown",
-      true,
-      detected
-    );
+    const searchResult = await searchVehiclesByImage(featureVector, detected);
 
     res.json({
       success: true,
       isVehicle: true,
       detected,
-      totalMatches: results.length,
-      results,
+      totalMatches: Array.isArray(searchResult?.results) ? searchResult.results.length : 0,
+      results: searchResult?.results || [],
+      matchType: searchResult?.matchType || "Hybrid Match",
+      confidence: searchResult?.confidence || 0,
+      reason: searchResult?.reason || "No reason provided",
     });
   } catch (err) {
     console.error(err);

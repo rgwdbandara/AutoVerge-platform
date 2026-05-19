@@ -14,7 +14,7 @@ const scrapeRoutes = require("./routes/scrapeRoutes");
 app.use("/api/scrape", scrapeRoutes);
 
 const priceRoutes = require("./routes/priceRoutes");
-app.use("/api/price", priceRoutes);
+app.use("/", priceRoutes);
 
 // DB connect
 connectDB();

@@ -135,15 +135,33 @@ const calculateModelMatch = (detectedModel, vehicleModel, detectedBrand, vehicle
   }
 
   const sameBrand = normalizeBrand(detectedBrand) && normalizeBrand(vehicleBrand) && normalizeBrand(detectedBrand) === normalizeBrand(vehicleBrand);
-  const hatchbackHints = ["aqua", "vitz", "priusc", "fit", "demio", "alto", "dayz"];
+  const familyRules = [
+    ["corolla", ["corolla", "axio", "premio", "allion", "corollahybrid"]],
+    ["civic", ["civic", "civictype", "civichybrid"]],
+    ["vezel", ["vezel", "hrv", "hr-v"]],
+    ["prius", ["prius", "priusc", "priusalpha", "aqua"]],
+    ["yaris", ["yaris", "vitz"]],
+    ["fit", ["fit", "jazz"]],
+    ["demio", ["demio", "mazda2"]],
+  ];
+  const hatchbackHints = ["aqua", "vitz", "priusc", "fit", "demio", "alto", "dayz", "yaris"];
   const hybridHints = ["hybrid", "hev", "ehev", "phev"];
+
+  for (const [, familyKeywords] of familyRules) {
+    const detectedInFamily = familyKeywords.some((hint) => detected.includes(hint));
+    const vehicleInFamily = familyKeywords.some((hint) => vehicle.includes(hint));
+
+    if (sameBrand && detectedInFamily && vehicleInFamily) {
+      return 0.95;
+    }
+  }
 
   if (
     sameBrand &&
     (hatchbackHints.some((hint) => detected.includes(hint) || vehicle.includes(hint)) ||
       hybridHints.some((hint) => detected.includes(hint) || vehicle.includes(hint)))
   ) {
-    return 0.55;
+    return 0.75;
   }
 
   return 0;
@@ -185,29 +203,24 @@ const calculateWeightedScore = (
  * Below → Proportional
  */
 const normalizeScoreToPercentage = (score) => {
-  if (score >= 0.95) {
-    // Exact matches: 97-98%
-    return Math.round((0.97 + (score - 0.95) * 0.33) * 100);
-  } else if (score >= 0.85) {
-    // Similar matches: 88-96%
-    return Math.round((0.88 + (score - 0.85) * 1.6) * 100);
-  } else if (score >= 0.75) {
-    // Related matches: 81-87%
-    return Math.round((0.81 + (score - 0.75) * 1.2) * 100);
-  } else {
-    // Lower matches: proportional
-    return Math.round(score * 100);
-  }
+  const capped = Math.max(0, Math.min(100, score));
+
+  if (capped >= 95) return 95;
+  if (capped >= 85) return Math.round(85 + (capped - 85) * 0.8);
+  if (capped >= 70) return Math.round(70 + (capped - 70) * 0.7);
+  if (capped >= 40) return Math.round(capped);
+
+  return Math.round(Math.min(30, Math.max(5, capped)));
 };
 
 /**
  * Determine match category based on final score
  */
 const getMatchCategory = (score) => {
-  if (score >= 0.92) return "Exact Match";
-  if (score >= 0.82) return "Similar Match";
-  if (score >= 0.7) return "Related Match";
-  if (score >= 0.6) return "Partial Match";
+  if (score >= 90) return "Exact Match";
+  if (score >= 80) return "Similar Match";
+  if (score >= 65) return "Related Match";
+  if (score >= 40) return "Partial Match";
   return "Low Match";
 };
 

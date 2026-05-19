@@ -27,8 +27,8 @@ function AdminDashboard() {
     const loadDashboard = async () => {
       try {
         const [statsData, pendingData] = await Promise.all([
-          api("/api/admin/stats"),
-          api("/api/admin/pending"),
+          api("/api/vehicles/admin/stats"),
+          api("/api/vehicles/admin/pending"),
         ]);
 
         setStats({

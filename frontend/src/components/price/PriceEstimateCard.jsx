@@ -54,6 +54,7 @@ function PriceEstimateCard({ car }) {
     };
 
     fetchPriceEstimate();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [car?._id]); // ✅ ONLY run once per car (fix repeat issue)
 
   return (

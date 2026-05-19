@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 // Layout
 import Navbar from "./components/Navbar";
@@ -30,12 +31,23 @@ import Sell from "./pages/Sell";
 import Articles from "./pages/Articles";
 import ArticleDetails from "./pages/ArticleDetails";
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Navbar />
 
-      <div className="pt-20">
+      <div className="pt-16 sm:pt-18">
         <Routes>
 
           {/* Public Routes */}

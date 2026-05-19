@@ -3,11 +3,19 @@ const visualCheck = require("./checks/visualCheck");
 const usageCheck = require("./checks/usageCheck");
 const maintenanceCheck = require("./checks/maintenanceCheck");
 const stabilityCheck = require("./checks/stabilityCheck");
+const { isBrandNewCondition } = require("./utils/vehicleCondition");
 
 const evaluateAutoTrust = async (vehicleData, oldVehicle = null) => {
   const completeness = completenessCheck(vehicleData);
   const visual = visualCheck(vehicleData);
-  const usage = await usageCheck(vehicleData);
+  const brandNewCondition = isBrandNewCondition(vehicleData.condition);
+  const usage = brandNewCondition
+    ? {
+        level: "Strong",
+        score: 3,
+        reason: "Brand new vehicle is exempt from used-car mileage comparison",
+      }
+    : await usageCheck(vehicleData);
   const maintenance = maintenanceCheck(vehicleData);
   const stability = stabilityCheck(vehicleData, oldVehicle);
 
@@ -46,10 +54,14 @@ const evaluateAutoTrust = async (vehicleData, oldVehicle = null) => {
   }
 
   // grade cap rules
-  if (!vehicleData.year || !vehicleData.mileage || !vehicleData.price) {
+  const hasMileage = vehicleData.mileage !== undefined && vehicleData.mileage !== null && String(vehicleData.mileage).trim() !== "";
+
+  if (!vehicleData.year || (!brandNewCondition && !hasMileage) || !vehicleData.price) {
     grade = "D";
     trustLevel = "Low";
-    gradeReason = "Essential vehicle information is missing (year, mileage, or price).";
+    gradeReason = brandNewCondition
+      ? "Essential vehicle information is missing (year or price)."
+      : "Essential vehicle information is missing (year, mileage, or price).";
   }
 
   if (!vehicleData.brand || !vehicleData.model) {

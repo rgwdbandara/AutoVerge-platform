@@ -1,4 +1,5 @@
 const Listing = require("../models/Listing");
+const normalizeText = require("./normalizeVehicle");
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const listingsCache = new Map();
@@ -38,32 +39,49 @@ const cacheAndReturn = (key, listings) => {
 };
 
 async function findSimilarListings(brand, model, year, mileage) {
+  const normalizedBrand = normalizeText(brand);
+  const normalizedModel = normalizeText(model);
 
+  // STEP 1 — exact brand + model + close year
   let listings = await Listing.find({
-    brand: brand,
-    model: { $regex: model, $options: "i" }, // ✅ FIXED
-    year: { $gte: year - 3, $lte: year + 3 }, // tighter range
+    year: { $gte: year - 2, $lte: year + 2 },
   });
 
-  console.log("STEP 1 👉", listings.length);
+  listings = listings.filter((item) => {
+    const itemBrand = normalizeText(item.brand);
+    const itemModel = normalizeText(item.model);
 
-  if (listings.length >= 5) return listings;
-
-  // fallback 1
-  listings = await Listing.find({
-    model: { $regex: model, $options: "i" },
+    return (
+      itemBrand.includes(normalizedBrand) &&
+      itemModel.includes(normalizedModel)
+    );
   });
 
-  console.log("STEP 2 👉", listings.length);
+  console.log("✅ STEP 1:", listings.length);
 
-  if (listings.length >= 5) return listings;
+  if (listings.length >= 3) {
+    return listings;
+  }
 
-  // final fallback
-  listings = await Listing.find({}).limit(20);
+  // STEP 2 — same brand only
+  let brandListings = await Listing.find({});
 
-  console.log("FINAL 👉", listings.length);
+  brandListings = brandListings.filter((item) => {
+    const itemBrand = normalizeText(item.brand);
 
-  return listings;
+    return itemBrand.includes(normalizedBrand);
+  });
+
+  console.log("✅ STEP 2:", brandListings.length);
+
+  if (brandListings.length >= 3) {
+    return brandListings;
+  }
+
+  // STEP 3 — no data
+  console.log("❌ No similar listings");
+
+  return [];
 }
 
 function calculateMarketRange(listings) {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useApi } from "../../lib/api";
+import { formatConditionLabel, formatMileageValue } from "../../lib/carDetails";
 
 function AdminCarDetails() {
   const { id } = useParams();
@@ -30,10 +31,11 @@ function AdminCarDetails() {
   const handleApprove = async () => {
     setSubmitting(true);
     try {
-      await api(`/api/admin/approve/${id}`, { method: "PUT" });
+      await api(`/api/vehicles/admin/approve/${id}`, { method: "PUT" });
       alert("Approved!");
       navigate("/admin/pending");
-    } catch {
+    } catch (error) {
+      console.error("Failed to approve listing", error);
       alert("Failed to approve listing");
     } finally {
       setSubmitting(false);
@@ -43,10 +45,11 @@ function AdminCarDetails() {
   const handleReject = async () => {
     setSubmitting(true);
     try {
-      await api(`/api/admin/reject/${id}`, { method: "PUT" });
+      await api(`/api/vehicles/admin/reject/${id}`, { method: "PUT" });
       alert("Rejected!");
       navigate("/admin/pending");
-    } catch {
+    } catch (error) {
+      console.error("Failed to reject listing", error);
       alert("Failed to reject listing");
     } finally {
       setSubmitting(false);
@@ -90,7 +93,8 @@ function AdminCarDetails() {
       <div className="space-y-2">
         <p><b>Price:</b> LKR {car.price?.toLocaleString?.() || car.price}</p>
         <p><b>Year:</b> {car.year}</p>
-        <p><b>Mileage:</b> {car.mileage}</p>
+        <p><b>Mileage:</b> {formatMileageValue(car.condition, car.mileage)}</p>
+        <p><b>Condition:</b> {formatConditionLabel(car.condition)}</p>
         <p><b>Fuel:</b> {car.fuelType}</p>
         <p><b>Transmission:</b> {car.transmission}</p>
         <p><b>Location:</b> {location || "N/A"}</p>

@@ -10,10 +10,10 @@ function PendingAds() {
 
   const fetchAds = async () => {
     try {
-      const res = await api("/api/admin/pending-ads");
+      const res = await api("/api/vehicles/admin/pending");
       setAds(Array.isArray(res) ? res : []);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load pending ads", err);
     } finally {
       setLoading(false);
     }
@@ -24,13 +24,23 @@ function PendingAds() {
   }, []);
 
   const handleApprove = async (id) => {
-    await api(`/api/admin/approve/${id}`, { method: "PUT" });
-    setAds((prev) => prev.filter((ad) => ad._id !== id));
+    try {
+      await api(`/api/vehicles/admin/approve/${id}`, { method: "PUT" });
+      setAds((prev) => prev.filter((ad) => ad._id !== id));
+    } catch (error) {
+      console.error("Failed to approve ad", error);
+      alert("Failed to approve listing");
+    }
   };
 
   const handleReject = async (id) => {
-    await api(`/api/admin/reject/${id}`, { method: "PUT" });
-    setAds((prev) => prev.filter((ad) => ad._id !== id));
+    try {
+      await api(`/api/vehicles/admin/reject/${id}`, { method: "PUT" });
+      setAds((prev) => prev.filter((ad) => ad._id !== id));
+    } catch (error) {
+      console.error("Failed to reject ad", error);
+      alert("Failed to reject listing");
+    }
   };
 
   const getImage = (ad) => ad?.images?.[0]?.url || ad?.images?.[0] || "/no-car.png";

@@ -28,13 +28,8 @@ app.use("/api/users", createProxyMiddleware({
 app.use("/api/vehicles", createProxyMiddleware({
   target: "http://localhost:5003",
   changeOrigin: true,
-}));
-
-app.use("/api/admin", createProxyMiddleware({
-  target: "http://localhost:5003",
-  changeOrigin: true,
   pathRewrite: {
-    "^/api/admin": "/admin",
+    "^/api/vehicles": "",
   },
 }));
 
