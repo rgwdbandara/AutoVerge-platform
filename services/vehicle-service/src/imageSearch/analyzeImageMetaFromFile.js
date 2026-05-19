@@ -13,7 +13,7 @@ const analyzeImageMetaFromFile = async (file) => {
   });
 
   const response = await axios.post(
-    "http://127.0.0.1:5004/analyze-image-meta",
+      "http://image-search-service:5004/analyze-image-meta",
     formData,
     {
       headers: formData.getHeaders(),

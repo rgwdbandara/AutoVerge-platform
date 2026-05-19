@@ -15,7 +15,7 @@ const extractFeaturesFromFile = async (file) => {
 
   try {
     const response = await axios.post(
-      "http://127.0.0.1:5004/extract-features",
+      "http://image-search-service:5004/extract-features",
       formData,
       {
         headers: formData.getHeaders(),

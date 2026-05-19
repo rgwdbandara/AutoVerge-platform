@@ -42,7 +42,7 @@ function AdminAIArticles() {
         imageUrl = await uploadToCloudinary(imageFile);
       }
 
-      const res = await axios.post("http://localhost:5003/api/articles/generate", {
+      const res = await axios.post("http://localhost:5103/api/articles/generate", {
         topic: topic.trim(),
         category,
         image: imageUrl,
@@ -63,7 +63,7 @@ function AdminAIArticles() {
 
   const fetchArticles = async () => {
     try {
-      const res = await axios.get("http://localhost:5003/api/articles");
+      const res = await axios.get("http://localhost:5103/api/articles");
       setArticles(Array.isArray(res.data.articles) ? res.data.articles : []);
     } catch (err) {
       console.error("Failed to load articles", err);

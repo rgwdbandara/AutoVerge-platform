@@ -13,7 +13,7 @@ const detectViewTypeFromFile = async (file) => {
   });
 
   const response = await axios.post(
-    "http://127.0.0.1:5004/detect-view-type",
+      "http://image-search-service:5004/detect-view-type",
     formData,
     {
       headers: formData.getHeaders(),

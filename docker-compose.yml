@@ -1,0 +1,53 @@
+services:
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api-gateway
+
+  api-gateway:
+    build: ./services/api-gateway
+    ports:
+      - "5100:5000"
+
+  auth-service:
+    build: ./services/auth-service
+    ports:
+      - "5101:5001"
+    environment:
+      MONGO_URI: mongodb+srv://bwathsala24_db_user:gf77def2AaGCIzjj@cluster0.g4flntm.mongodb.net/?appName=Cluster0
+
+  user-service:
+    build: ./services/user-service
+    ports:
+      - "5102:5002"
+    environment:
+      MONGO_URI: mongodb+srv://bwathsala24_db_user:gf77def2AaGCIzjj@cluster0.g4flntm.mongodb.net/?appName=Cluster0
+
+  vehicle-service:
+    build: ./services/vehicle-service
+    ports:
+      - "5103:5003"
+    environment:
+      MONGO_URI: mongodb+srv://bwathsala24_db_user:gf77def2AaGCIzjj@cluster0.g4flntm.mongodb.net/?appName=Cluster0
+
+  chatbot-service:
+    build: ./services/chatbot-service
+    ports:
+      - "5050:5050"
+    environment:
+      MONGODB_URI: mongodb+srv://bwathsala24_db_user:gf77def2AaGCIzjj@cluster0.g4flntm.mongodb.net/?appName=Cluster0
+
+  image-search-service:
+    build: ./services/image-search-service
+    ports:
+      - "5104:5004"
+
+  scraper-service:
+    build: ./services/scraper-service
+    ports:
+      - "5105:5005"
+    environment:
+      MONGO_URI: mongodb+srv://bwathsala24_db_user:gf77def2AaGCIzjj@cluster0.g4flntm.mongodb.net/?appName=Cluster0

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useRef, useState } from "react";
 import {
   Bot,
@@ -41,7 +42,7 @@ function AutoVergeChatbot() {
 
     try {
       const response = await fetch(
-        "http://localhost:5003/api/chatbot",
+        "http://localhost:5103/api/chatbot",
         {
           method: "POST",
           headers: {
@@ -93,7 +94,7 @@ function AutoVergeChatbot() {
 
     try {
       const response = await fetch(
-        "http://localhost:5003/api/chatbot",
+        "http://localhost:5103/api/chatbot",
         {
           method: "POST",
           headers: {

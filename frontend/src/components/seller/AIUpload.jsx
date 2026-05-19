@@ -37,7 +37,7 @@ function AIUpload({ onAutoFill }) {
 
       const token = await getToken();
 
-      const response = await fetch("http://localhost:5000/api/vehicles/search-by-image", {
+      const response = await fetch("http://localhost:5100/api/vehicles/search-by-image", {
         method: "POST",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,

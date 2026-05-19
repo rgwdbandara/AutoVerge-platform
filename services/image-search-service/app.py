@@ -361,4 +361,7 @@ def analyze_image_meta():
         }), 500
 
 if __name__ == "__main__":
-    app.run(port=5004, debug=True)
+    # In containers, disable the Flask reloader and debug mode so the
+    # server binds reliably to 0.0.0.0 and doesn't spawn a child process
+    # that may bind to loopback. Use a single, unbuffered process here.
+    app.run(host="0.0.0.0", port=5004, debug=False, use_reloader=False)

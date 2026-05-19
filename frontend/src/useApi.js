@@ -6,7 +6,7 @@ const useApi = () => {
   const fetchWithAuth = async (url, options = {}) => {
     const token = await getToken();
 
-    return fetch(`http://localhost:5000${url}`, {
+    return fetch(`http://localhost:5100${url}`, {
       ...options,
       headers: {
         "Content-Type": "application/json",

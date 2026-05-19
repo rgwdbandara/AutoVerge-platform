@@ -16,25 +16,22 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", createProxyMiddleware({
-  target: "http://localhost:5001",
+  target: "http://auth-service:5001",
   changeOrigin: true,
 }));
 
 app.use("/api/users", createProxyMiddleware({
-  target: "http://localhost:5002",
+  target: "http://user-service:5002",
   changeOrigin: true,
 }));
 
 app.use("/api/vehicles", createProxyMiddleware({
-  target: "http://localhost:5003",
+  target: "http://vehicle-service:5003",
   changeOrigin: true,
-  pathRewrite: {
-    "^/api/vehicles": "",
-  },
 }));
 
 app.use("/api/price", createProxyMiddleware({
-  target: "http://localhost:5005",
+  target: "http://scraper-service:5005",
   changeOrigin: true,
 }));
 

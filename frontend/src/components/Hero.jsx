@@ -82,7 +82,7 @@ function Hero() {
   useEffect(() => {
     const fetchLatestArticles = async () => {
       try {
-        const response = await axios.get("http://localhost:5003/api/articles");
+        const response = await axios.get("http://localhost:5103/api/articles");
         setLatestArticles((response.data.articles || []).slice(0, 3));
       } catch (err) {
         console.error("Failed to fetch latest articles:", err);
@@ -150,7 +150,7 @@ function Hero() {
       formData.append("image", selectedImage);
 
       // vehicle-service exposes this route at the root (not under /api/vehicles)
-      const response = await fetch("http://localhost:5003/search-by-image", {
+      const response = await fetch("http://localhost:5103/search-by-image", {
         method: "POST",
         body: formData,
       });

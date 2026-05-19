@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json({limit: '1mb'}));
 
-const MONGO = process.env.MONGODB_URI || 'mongodb://localhost:27017/autoverge';
+const MONGO = process.env.MONGODB_URI || 'mongodb://mongodb:27017/autoverge';
 mongoose.connect(MONGO, {useNewUrlParser:true, useUnifiedTopology:true})
   .then(()=> console.log('Chatbot service connected to MongoDB'))
   .catch(err=> console.error('MongoDB connect error', err));

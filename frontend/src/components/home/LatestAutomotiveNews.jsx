@@ -13,7 +13,7 @@ function LatestAutomotiveNews() {
   useEffect(() => {
     const fetchLatestArticles = async () => {
       try {
-        const res = await axios.get("http://localhost:5003/api/articles");
+        const res = await axios.get("http://localhost:5103/api/articles");
         setArticles((res.data.articles || []).slice(0, 4));
       } catch (error) {
         console.error("Failed to fetch latest articles:", error);

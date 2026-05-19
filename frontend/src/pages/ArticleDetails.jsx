@@ -27,13 +27,13 @@ function ArticleDetails() {
     try {
 
       const res = await axios.get(
-        `http://localhost:5003/api/articles/${slug}`
+        `http://localhost:5103/api/articles/${slug}`
       );
 
       setArticle(res.data.article);
 
       const relatedRes = await axios.get(
-        "http://localhost:5003/api/articles"
+        "http://localhost:5103/api/articles"
       );
 
       setRelatedArticles(

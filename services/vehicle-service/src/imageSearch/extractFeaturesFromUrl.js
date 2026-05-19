@@ -5,7 +5,7 @@ const extractFeaturesFromImageUrl = async (imageUrl) => {
     throw new Error("Image URL is required");
   }
 
-  const response = await axios.post("http://127.0.0.1:5004/extract-features", {
+  const response = await axios.post("http://image-search-service:5004/extract-features", {
     imageUrl,
   });
 
